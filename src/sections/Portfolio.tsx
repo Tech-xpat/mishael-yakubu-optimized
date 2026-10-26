@@ -14,7 +14,7 @@ export default function Portfolio() {
   }, []);
 
   return (
-    <section id="portfolio" className="py-28 bg-white">
+    <section id="work" className="py-28 bg-white">
       <div className="max-w-6xl mx-auto px-6">
         <div className="text-center mb-14">
           <p className="text-xs uppercase tracking-[0.25em] text-gray-400 mb-3">Portfolio</p>

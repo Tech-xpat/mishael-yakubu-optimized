@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import Nav from "./components/Nav";
 import Hero from "./sections/Hero";
+import Highlight from "./sections/Highlight";
 import Portfolio from "./sections/Portfolio";
 import Expertise from "./sections/Expertise";
 import Contact from "./sections/Contact";
@@ -25,6 +26,7 @@ export default function App() {
     <div className="min-h-screen bg-white overflow-x-hidden">
       <Nav />
       <Hero />
+      <Highlight />
       <Portfolio />
       <Expertise />
       <Contact />
