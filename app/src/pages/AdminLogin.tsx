@@ -28,7 +28,7 @@ const AdminLogin = () => {
         if (user && ADMIN_EMAILS.includes(user.email || '')) {
           console.log('[Admin Login] User authorized, redirecting to dashboard');
           setDebugInfo(`Logged in as: ${user.email}`);
-          navigate('/admin/dashboard');
+          navigate('/greatness/dashboard');
         } else if (user) {
           console.log('[Admin Login] User not in admin list:', user.email);
           setDebugInfo(`Not authorized: ${user.email}`);
@@ -68,7 +68,7 @@ const AdminLogin = () => {
       }
 
       toast.success('Login successful');
-      navigate('/admin/dashboard');
+      navigate('/greatness/dashboard');
     } catch (error: any) {
       console.error('Google Sign-In error:', error);
       

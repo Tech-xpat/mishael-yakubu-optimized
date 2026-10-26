@@ -27,7 +27,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
           <p className="text-red-400 mb-4">Authentication Error</p>
           <p className="text-white/60 mb-6">{error}</p>
           <button
-            onClick={() => window.location.href = '/admin'}
+            onClick={() => window.location.href = '/greatness'}
             className="px-6 py-2 bg-white text-black rounded-lg hover:bg-white/90 transition-all"
           >
             Return to Login
@@ -39,7 +39,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
 
   // Redirect if not authenticated or not admin
   if (!currentUser) {
-    return <Navigate to="/admin" replace />;
+    return <Navigate to="/greatness" replace />;
   }
 
   if (!isAdmin) {

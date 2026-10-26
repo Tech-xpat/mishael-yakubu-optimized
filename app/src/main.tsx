@@ -15,9 +15,9 @@ createRoot(document.getElementById('root')!).render(
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<App />} />
-          <Route path="/admin" element={<AdminLogin />} />
+          <Route path="/greatness" element={<AdminLogin />} />
           <Route
-            path="/admin/dashboard"
+            path="/greatness/dashboard"
             element={
               <ProtectedRoute>
                 <AdminDashboard />
