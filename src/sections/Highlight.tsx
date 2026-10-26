@@ -9,7 +9,7 @@ const highlights = [
 
 export default function Highlight() {
   return (
-    <section className="py-20 bg-white">
+    <section className="relative z-10 py-20 bg-white">
       <div className="max-w-6xl mx-auto px-6">
         <div className="flex items-end justify-between mb-10">
           <div>
