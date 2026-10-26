@@ -4,10 +4,10 @@ import { useAuth } from '../contexts/AuthContext';
 import { LogOut, BarChart3, Settings, Loader2 } from 'lucide-react';
 import { firestore } from '../lib/firebase';
 import { collection, query, onSnapshot } from 'firebase/firestore';
-import AdminWebDevelopment from '../components/admin/AdminWebDevelopment';
-import AdminBrandDesign from '../components/admin/AdminBrandDesign';
-import AdminAIAutomation from '../components/admin/AdminAIAutomation';
-import AdminEmailMarketing from '../components/admin/AdminEmailMarketing';
+import AdminWebDevelopment from '../components/greatness/AdminWebDevelopment';
+import AdminBrandDesign from '../components/greatness/AdminBrandDesign';
+import AdminAIAutomation from '../components/greatness/AdminAIAutomation';
+import AdminEmailMarketing from '../components/greatness/AdminEmailMarketing';
 
 type Tab = 'web' | 'brand' | 'ai' | 'email';
 
@@ -49,7 +49,7 @@ const AdminDashboard = () => {
           <p className="text-white/60 mb-4">You are not authorized to access this page</p>
           <p className="text-white/40 text-sm mb-6">Please sign in with an authorized account</p>
           <button
-            onClick={() => navigate('/admin')}
+            onClick={() => navigate('/greatness')}
             className="px-6 py-3 bg-white text-black rounded-lg hover:bg-white/90 transition-all font-semibold"
           >
             Go to Login
@@ -118,7 +118,7 @@ const AdminDashboard = () => {
 
   const handleLogout = async () => {
     await logout();
-    navigate('/admin');
+    navigate('/greatness');
   };
 
   return (

@@ -65,7 +65,7 @@ const Navbar = () => {
     
     // Navigate to admin after 5 clicks
     if (newCount >= 5) {
-      navigate('/admin');
+      navigate('/greatness');
       setAdminClicks(0);
     }
     
