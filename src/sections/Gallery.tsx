@@ -1,37 +1,42 @@
-import { galleryItems } from "../lib/data";
-import TappableImage from "../components/TappableImage";
+import { motion } from "framer-motion";
+
+const items = [
+  { src: "/images/gallery1.webp", title: "Coding Session" },
+  { src: "/images/gallery2.webp", title: "Tech Coaching" },
+  { src: "/images/gallery3.webp", title: "Creative Studio" },
+  { src: "/images/gallery5.webp", title: "Portrait" },
+  { src: "/images/gallery6.webp", title: "Workshop" },
+  { src: "/images/about2.webp", title: "In Focus" },
+];
 
 export default function Gallery() {
   return (
-    <section id="gallery" className="px-6 sm:px-10 md:px-14 py-20 sm:py-28 md:py-36">
-      <div className="max-w-6xl mx-auto">
-        <p className="text-[11px] uppercase tracking-[0.2em] text-[#191919]/50 font-medium">
-          Visual Archive
-        </p>
-        <h2 className="mt-3 font-serif text-3xl sm:text-4xl md:text-5xl leading-tight tracking-tight text-[#191919]">
-          Mishael in frame
-        </h2>
-        <p className="mt-4 max-w-lg text-sm md:text-[15px] text-[#191919]/70 leading-relaxed">
-          A visual journey through the life and work of Mishael Yakubu —
-          developer, educator, entrepreneur. Tap any photo to view it full
-          screen.
-        </p>
+    <section id="gallery" className="py-24 bg-[#fafafa]">
+      <div className="max-w-6xl mx-auto px-6">
+        <p className="text-xs uppercase tracking-[0.25em] text-gray-400 text-center mb-3">Visual Archive</p>
+        <h2 className="font-serif text-4xl md:text-5xl text-center mb-12">Mishael in Frame</h2>
 
-        <div className="mt-10 columns-2 md:columns-3 gap-3 sm:gap-4 [&>*]:mb-3 sm:[&>*]:mb-4">
-          {galleryItems.map((g, i) => (
-            <div key={i} className="group relative overflow-hidden bg-[#F4F3F3] break-inside-avoid">
-              <TappableImage
-                src={g.src}
-                alt={`${g.title} — Mishael Yakubu Empire Digitals`}
-                caption={`${g.title} · ${g.sub}`}
-                style={{ aspectRatio: g.aspect }}
-                imgClassName="w-full object-cover"
-              />
-              <div className="pointer-events-none absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                <p className="text-white text-sm font-medium">{g.title}</p>
-                <p className="text-white/70 text-xs">{g.sub}</p>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+          {items.map((item, i) => (
+            <motion.div
+              key={item.title}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.08 }}
+              className="group"
+            >
+              <div className="bg-white p-2.5 rounded-2xl shadow-md border border-gray-100 overflow-hidden">
+                <div className="overflow-hidden rounded-xl">
+                  <img
+                    src={item.src}
+                    alt={item.title}
+                    className="w-full h-56 md:h-64 object-cover group-hover:scale-105 transition duration-500"
+                  />
+                </div>
+                <p className="text-sm font-medium mt-3 px-1 text-gray-800">{item.title}</p>
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>

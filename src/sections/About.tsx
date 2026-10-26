@@ -1,84 +1,41 @@
-import { images, siteConfig } from "../lib/data";
-import TappableImage from "../components/TappableImage";
-import { useScrollProgress } from "../hooks/useScrollProgress";
+import { motion } from "framer-motion";
 
 export default function About() {
-  const { ref, progress } = useScrollProgress<HTMLDivElement>(0.95, 0.55);
-
   return (
-    <section id="about" className="px-6 sm:px-10 md:px-14 py-20 sm:py-28 md:py-36">
-      <div
-        ref={ref}
-        className="max-w-6xl mx-auto"
-        style={{
-          opacity: 0.3 + progress * 0.7,
-          transform: `translateY(${(1 - progress) * 28}px)`,
-        }}
-      >
-        <p className="text-[11px] uppercase tracking-[0.2em] text-[#191919]/50 font-medium">
-          Who He Is
-        </p>
+    <section id="about" className="py-24 bg-white">
+      <div className="max-w-6xl mx-auto px-6 grid md:grid-cols-2 gap-16 items-center">
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true }}
+          className="order-2 md:order-1"
+        >
+          <p className="text-xs uppercase tracking-[0.25em] text-gray-400 mb-3">About</p>
+          <h2 className="font-serif text-4xl md:text-5xl leading-tight text-[#111]">
+            The Visionary
+          </h2>
+          <p className="mt-5 text-gray-600 leading-relaxed">
+            Mishael Yakubu is a web developer, tech coach and founder of Empire Digitals Worldwide, based in Delta State. He builds modern digital products and mentors the next generation of African developers.
+          </p>
+          <p className="mt-4 text-gray-600 leading-relaxed">
+            From high-performance websites to AI automation and brand design, every project is built for clarity, speed and lasting impact.
+          </p>
+        </motion.div>
 
-        <div className="mt-8 grid gap-10 md:grid-cols-2 md:gap-16 items-start">
-          <div className="grid grid-cols-2 gap-3 sm:gap-4">
-            <div className="col-span-2 overflow-hidden bg-[#F4F3F3]" style={{ aspectRatio: images.about1.aspect }}>
-              <TappableImage
-                src={images.about1.src}
-                alt="Mishael Yakubu working at Empire Digitals Worldwide studio"
-                caption="Mishael Yakubu — Empire Digitals Worldwide studio"
-              />
-            </div>
-            <div className="overflow-hidden bg-[#F4F3F3]" style={{ aspectRatio: images.about2.aspect }}>
-              <TappableImage
-                src={images.about2.src}
-                alt="Mishael Yakubu coding session"
-                caption="Coding session"
-              />
-            </div>
-            <div className="overflow-hidden bg-[#F4F3F3]" style={{ aspectRatio: images.about3.aspect }}>
-              <TappableImage
-                src={images.about3.src}
-                alt="Mishael Yakubu tech coaching"
-                caption="Tech coaching"
-              />
-            </div>
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true }}
+          className="order-1 md:order-2 flex justify-center"
+        >
+          <div className="bg-gray-50 p-4 rounded-[2rem] shadow-lg border border-gray-100">
+            <img
+              src="/images/about1.webp"
+              alt="Mishael Yakubu in studio"
+              className="w-full max-w-sm h-[420px] object-cover rounded-[1.5rem]"
+            />
           </div>
-
-          <div>
-            <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl leading-tight tracking-tight text-[#191919]">
-              The visionary
-            </h2>
-            <div className="mt-6 space-y-4 text-sm md:text-[15px] text-[#191919]/70 leading-relaxed">
-              <p>
-                Mishael Yakubu is a visionary web developer and entrepreneur
-                based in {siteConfig.location}. Born in {siteConfig.birthPlace},
-                he carries the spirit of the north and the drive of the
-                south. As the founder of {siteConfig.agency}, he combines
-                creativity, code, and cutting-edge technology to craft
-                digital solutions that truly matter.
-              </p>
-              <div className="border-l-2 border-lime pl-4 py-1 font-serif text-lg sm:text-xl text-[#191919]">
-                "The future belongs to those who code it."
-              </div>
-              <p>
-                Beyond building sleek interfaces and robust backends,
-                Mishael is equally committed to education and community
-                empowerment — mentoring aspiring programmers and creating
-                accessible learning resources.
-              </p>
-              <p>
-                Under his leadership, {siteConfig.agency} has grown from a
-                solo studio into a dynamic agency tackling pan-African
-                projects that bridge real-world challenges with elegant
-                digital experiences.
-              </p>
-            </div>
-            <div className="mt-6 inline-flex items-center gap-2 text-xs uppercase tracking-[0.15em] text-[#191919]/50">
-              <span>🎂</span>
-              <span>Born June 18, 2000 · Minna, Niger State</span>
-            </div>
-          </div>
-        </div>
+        </motion.div>
       </div>
     </section>
   );
