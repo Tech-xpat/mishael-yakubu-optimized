@@ -3,7 +3,7 @@ export const siteConfig = {
   agency: "Empire Digitals Worldwide",
   location: "Delta State, Nigeria",
   birthPlace: "Minna, Niger State, Nigeria",
-  phones: ["+2348142656848", "+2347086757575"],
+  phones: ["+2348142656848", "+7086757575"],
   social: {
     whatsapp1: "https://wa.me/2348142656848",
     whatsapp2: "https://wa.me/2347086757575",
@@ -15,25 +15,23 @@ export const siteConfig = {
 };
 
 export const images = {
-  hero: "https://i.ibb.co/W4WyGtbB/file-0000000085b471f49275559d4e540410.png",
-  about1: { src: "https://i.ibb.co/1tCWVZBD/file-00000000de5871f4b9c2d8a8ec427d6a.jpg", aspect: "16/9" },
-  about2: { src: "https://i.ibb.co/PZD2XKKZ/file-00000000dc8471f4ab8ba88000020e8b.png", aspect: "4/3" },
-  about3: { src: "https://i.ibb.co/LdCms5wd/file-00000000c41c71f4897c3088110d0346.png", aspect: "4/3" },
-  gallery1: { src: "https://i.ibb.co/hxtd9Yqj/file-0000000076287243b4c985c6e3edf707.png", aspect: "4/3" },
-  gallery2: { src: "https://i.ibb.co/rGhR30LR/file-00000000885c7243a144b16b851079a0.png", aspect: "3/4" },
-  gallery3: { src: "https://i.ibb.co/kg07QT5B/file-00000000dd5c71f4a94c9d60e66cbf2e.png", aspect: "1/1" },
-  gallery4: { src: "https://i.ibb.co/W4WyGtbB/file-0000000085b471f49275559d4e540410.png", aspect: "16/9" },
-  gallery5: { src: "https://i.ibb.co/B2qn2jwn/file-00000000e13871f498e2ea54d2a3f0a2.png", aspect: "3/4" },
-  gallery6: { src: "https://i.ibb.co/VW6tkKhs/file-000000009d4471f4a2b9e87f7168cf7e.png", aspect: "4/3" },
-  empireMain: "https://i.ibb.co/jZLgxm0q/FB-IMG-1781588939035.jpg",
-  empireAccent: "https://i.ibb.co/Zpj3xzxr/IMG-20260616-WA0038.jpg",
-  strip1: { src: "https://i.ibb.co/Csmq2bTY/IMG-20260616-WA0039.jpg" },
-  strip2: { src: "https://i.ibb.co/qMfrLwzV/FB-IMG-1781588948636.jpg" },
-  strip3: { src: "https://i.ibb.co/ch1YSJCh/FB-IMG-1781588930787.jpg" },
+  hero: "/images/hero.webp",
+  about1: { src: "/images/about1.webp", aspect: "16/9" },
+  about2: { src: "/images/about2.webp", aspect: "4/3" },
+  about3: { src: "/images/about3.webp", aspect: "4/3" },
+  gallery1: { src: "/images/gallery1.webp", aspect: "4/3" },
+  gallery2: { src: "/images/gallery2.webp", aspect: "3/4" },
+  gallery3: { src: "/images/gallery3.webp", aspect: "1/1" },
+  gallery4: { src: "/images/gallery4.webp", aspect: "16/9" },
+  gallery5: { src: "/images/gallery5.webp", aspect: "3/4" },
+  gallery6: { src: "/images/gallery6.webp", aspect: "4/3" },
+  empireMain: "/images/empire-main.webp",
+  empireAccent: "/images/empire-accent.webp",
+  strip1: { src: "/images/strip1.webp" },
+  strip2: { src: "/images/strip2.webp" },
+  strip3: { src: "/images/strip3.webp" },
 };
 
-// Bottom hero panel — three interactive rows (numbered because they are
-// literally Mishael's first three service tracks, in the order he leads with)
 export const heroRows = [
   { num: "01", label: "Web Development" },
   { num: "02", label: "Tech Coaching" },
