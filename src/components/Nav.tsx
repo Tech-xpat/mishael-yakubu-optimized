@@ -1,45 +1,13 @@
-import Logo from "./Logo";
-import { siteConfig } from "../lib/data";
-
-const links = [
-  { label: "About", href: "#about" },
-  { label: "Career", href: "#career" },
-  { label: "Gallery", href: "#gallery" },
-  { label: "Contact", href: "#contact" },
-];
-
 export default function Nav() {
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 px-6 sm:px-10 md:px-14 py-4 sm:py-5">
-      <div className="flex items-center justify-between">
-        <a href="#" className="flex items-center gap-2.5">
-          <Logo />
-          <span className="font-semibold text-base tracking-tight text-[#191919]">
-            {siteConfig.name}
-          </span>
-        </a>
-
-        <ul className="hidden md:flex items-center gap-8">
-          {links.map((l) => (
-            <li key={l.href}>
-              <a
-                href={l.href}
-                className="text-sm text-[#191919]/70 hover:text-[#191919] transition-colors duration-200"
-              >
-                {l.label}
-              </a>
-            </li>
-          ))}
-        </ul>
-
-        <a
-          href={siteConfig.social.whatsapp1}
-          target="_blank"
-          rel="noopener"
-          className="px-5 py-2.5 bg-[#191919] text-white text-sm font-medium rounded-lg hover:bg-[#191919]/90 transition-colors duration-200"
-        >
-          Get In Touch
-        </a>
+    <nav className="fixed top-0 left-0 right-0 z-40 bg-white/80 backdrop-blur border-b border-gray-100">
+      <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+        <a href="#/" className="font-serif text-lg tracking-tight">Empire Digitals</a>
+        <div className="flex items-center gap-6 text-sm">
+          <a href="#portfolio" className="text-gray-600 hover:text-black">Work</a>
+          <a href="#contact" className="text-gray-600 hover:text-black">Contact</a>
+          <a href="#/about" className="text-gray-400 hover:text-black text-xs">About</a>
+        </div>
       </div>
     </nav>
   );
