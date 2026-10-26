@@ -4,10 +4,10 @@ import { useAuth } from '../contexts/AuthContext';
 import { LogOut, BarChart3, Settings, Loader2 } from 'lucide-react';
 import { firestore } from '../lib/firebase';
 import { collection, query, onSnapshot } from 'firebase/firestore';
-import AdminWebDevelopment from '../components/greatness/AdminWebDevelopment';
-import AdminBrandDesign from '../components/greatness/AdminBrandDesign';
-import AdminAIAutomation from '../components/greatness/AdminAIAutomation';
-import AdminEmailMarketing from '../components/greatness/AdminEmailMarketing';
+import AdminWebDevelopment from '../components/admin/AdminWebDevelopment';
+import AdminBrandDesign from '../components/admin/AdminBrandDesign';
+import AdminAIAutomation from '../components/admin/AdminAIAutomation';
+import AdminEmailMarketing from '../components/admin/AdminEmailMarketing';
 
 type Tab = 'web' | 'brand' | 'ai' | 'email';
 
