@@ -1,68 +1,78 @@
-import { ArrowRight } from "lucide-react";
-import HeroBackdrop from "../components/HeroBackdrop";
-import SocialLinks from "../components/SocialLinks";
-import { heroRows, siteConfig } from "../lib/data";
+import { motion } from "framer-motion";
+import { ArrowRight, Play } from "lucide-react";
 
 export default function Hero() {
   return (
-    <section className="relative flex flex-col items-center overflow-hidden min-h-screen">
-      <HeroBackdrop />
-
-      <div className="relative z-10 flex flex-col items-center pt-28 sm:pt-32 md:pt-40 px-4 sm:px-6 text-center">
-        <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-lime/40 bg-lime/10 text-lime text-[11px] uppercase tracking-[0.2em] font-medium">
-          Web Dev · AI · Automation
-        </span>
-
-        <h1 className="mt-6 font-serif text-4xl sm:text-5xl md:text-7xl lg:text-8xl leading-[1.05] tracking-tighter text-white font-normal">
-          Gone Digital.
-          <br />
-          <span className="text-lime">The future is now.</span>
-        </h1>
-
-        <p className="max-w-sm sm:max-w-lg mt-6 sm:mt-8 text-sm md:text-base text-white/60 leading-relaxed">
-          {siteConfig.name} — web developer, tech coach, and founder of{" "}
-          {siteConfig.agency}. Building modern digital experiences and
-          mentoring the next generation of African developers.
-        </p>
-
-        <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row items-center gap-4">
-          <a
-            href="#contact"
-            className="group inline-flex items-center gap-2 px-7 py-3.5 bg-lime text-[#0d0d0d] text-sm font-semibold rounded-full hover:bg-lime/90 transition-colors duration-200"
+    <section className="relative min-h-screen flex items-center pt-20 overflow-hidden bg-[#fafafa]">
+      <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-12 items-center relative z-10">
+        <div>
+          <motion.p 
+            initial={{ opacity: 0, y: 20 }} 
+            animate={{ opacity: 1, y: 0 }} 
+            className="text-sm uppercase tracking-[0.25em] text-gray-500 mb-4"
           >
-            Get In Touch
-            <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform duration-200" />
-          </a>
-          <a
-            href="#career"
-            className="px-7 py-3.5 border border-white/20 text-white text-sm font-medium rounded-full hover:border-lime/60 hover:text-lime transition-colors duration-200"
+            Empire Digitals Worldwide
+          </motion.p>
+          <motion.h1 
+            initial={{ opacity: 0, y: 30 }} 
+            animate={{ opacity: 1, y: 0 }} 
+            transition={{ delay: 0.1 }}
+            className="font-serif text-5xl md:text-6xl lg:text-7xl leading-[0.95] tracking-tight text-[#111]"
           >
-            See What I Do
-          </a>
+            Gone Digital.<br />
+            <span className="italic text-lime-600">The future is now.</span>
+          </motion.h1>
+          <motion.p 
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }} 
+            transition={{ delay: 0.2 }}
+            className="mt-6 text-lg text-gray-600 max-w-md"
+          >
+            Mishael Yakubu — web developer, tech coach and founder building high-performance digital experiences for brands across Delta State and beyond.
+          </motion.p>
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }} 
+            animate={{ opacity: 1, y: 0 }} 
+            transition={{ delay: 0.3 }}
+            className="mt-8 flex flex-wrap gap-4"
+          >
+            <a href="#contact" className="inline-flex items-center gap-2 bg-black text-white px-6 py-3 rounded-full text-sm font-medium hover:bg-gray-800 transition">
+              Start a Project <ArrowRight className="w-4 h-4" />
+            </a>
+            <a href="#gallery" className="inline-flex items-center gap-2 border border-gray-300 px-6 py-3 rounded-full text-sm font-medium hover:bg-gray-50 transition">
+              <Play className="w-4 h-4" /> View Work
+            </a>
+          </motion.div>
         </div>
 
-        <SocialLinks
-          className="mt-8 sm:mt-10 [&>a]:border-white/15 [&>a]:text-white/60 [&>a:hover]:text-lime [&>a:hover]:border-lime/50 [&>a:hover]:bg-lime/10"
-        />
-      </div>
-
-      {/* bottom stat / quick-nav strip */}
-      <div className="relative z-10 mt-auto w-full max-w-5xl px-4 sm:px-6 pb-8 sm:pb-10">
-        <div className="grid sm:grid-cols-3 gap-2 sm:gap-3">
-          {heroRows.map((row) => (
-            <a
-              key={row.num}
-              href="#career"
-              className="group bg-white/5 hover:bg-lime/10 border border-white/10 hover:border-lime/40 backdrop-blur-sm transition-all duration-200 cursor-pointer px-4 sm:px-6 py-3.5 sm:py-4 flex items-center justify-between"
-            >
-              <span>
-                <span className="text-lime/70">{row.num}</span>
-                <span className="mx-2 text-white/20">/</span>
-                <span className="font-medium text-white/90">{row.label}</span>
-              </span>
-              <ArrowRight className="w-4 h-4 text-white/30 group-hover:text-lime group-hover:translate-x-0.5 transition-all duration-200" />
-            </a>
-          ))}
+        <div className="relative">
+          <motion.div 
+            animate={{ y: [0, -12, 0] }} 
+            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+            className="relative z-10"
+          >
+            <img src="/images/hero.webp" alt="Mishael Yakubu" className="w-full max-w-md mx-auto rounded-3xl shadow-2xl" />
+          </motion.div>
+          
+          {/* Floating cards */}
+          <motion.div 
+            initial={{ opacity: 0, x: -40 }} 
+            animate={{ opacity: 1, x: 0 }} 
+            transition={{ delay: 0.5 }}
+            className="absolute -left-8 top-20 bg-white p-4 rounded-2xl shadow-xl border border-gray-100 w-48"
+          >
+            <p className="text-xs text-gray-500">Web Development</p>
+            <p className="font-medium text-sm mt-1">Next.js · React · TypeScript</p>
+          </motion.div>
+          <motion.div 
+            initial={{ opacity: 0, x: 40 }} 
+            animate={{ opacity: 1, x: 0 }} 
+            transition={{ delay: 0.7 }}
+            className="absolute -right-4 bottom-16 bg-white p-4 rounded-2xl shadow-xl border border-gray-100 w-44"
+          >
+            <p className="text-xs text-gray-500">AI Automation</p>
+            <p className="font-medium text-sm mt-1">Agents · Workflows</p>
+          </motion.div>
         </div>
       </div>
     </section>
