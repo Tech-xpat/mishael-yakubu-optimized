@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
 import { supabase } from "../lib/supabase";
 
 type Item = { id: string; title: string; image_url: string; description?: string };
@@ -8,41 +7,34 @@ export default function Portfolio() {
   const [items, setItems] = useState<Item[]>([]);
 
   useEffect(() => {
-    supabase.from("portfolio_items").select("*").order("created_at", { ascending: false }).then(({ data }) => {
-      if (data) setItems(data);
-    });
+    supabase
+      .from("portfolio_items")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .then(({ data }) => {
+        if (data) setItems(data);
+      });
   }, []);
 
   return (
-    <section id="work" className="relative z-20 py-28 bg-white">
+    <section id="portfolio" className="py-24 bg-black text-white">
       <div className="max-w-6xl mx-auto px-6">
-        <div className="text-center mb-14">
-          <p className="text-xs uppercase tracking-[0.25em] text-gray-400 mb-3">Portfolio</p>
-          <h2 className="font-serif text-4xl md:text-5xl text-[#111]">Selected Work</h2>
-          <p className="mt-3 text-gray-500">Websites, brand systems, and digital products</p>
-        </div>
+        <p className="text-xs uppercase tracking-[0.3em] text-white/50 mb-4">Selected Work</p>
+        <h2 className="text-4xl md:text-5xl font-bold mb-12">Portfolio</h2>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {items.map((item) => (
-            <motion.div
-              key={item.id}
-              whileHover={{ y: -6 }}
-              className="group relative h-80"
-            >
-              <div className="relative w-full h-full rounded-2xl overflow-hidden bg-gray-100 shadow-md border border-gray-100">
-                <img src={item.image_url} alt={item.title} className="w-full h-full object-cover" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <div className="absolute bottom-0 left-0 right-0 p-5 text-white translate-y-2 group-hover:translate-y-0 transition-transform">
-                  <p className="font-medium">{item.title}</p>
-                  {item.description && <p className="text-xs text-white/80 mt-1 line-clamp-2">{item.description}</p>}
-                </div>
+            <div key={item.id} className="group relative overflow-hidden rounded-lg bg-zinc-900">
+              <img src={item.image_url} alt={item.title} className="w-full h-64 object-cover group-hover:scale-105 transition duration-500" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition" />
+              <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-2 group-hover:translate-y-0 transition">
+                <p className="font-medium">{item.title}</p>
+                {item.description && <p className="text-xs text-white/70 mt-1 line-clamp-2">{item.description}</p>}
               </div>
-            </motion.div>
+            </div>
           ))}
           {items.length === 0 && (
-            <div className="col-span-full text-center py-20 text-gray-400">
-              Portfolio items will appear here once uploaded from the admin panel.
-            </div>
+            <p className="col-span-full text-center text-white/40 py-16">Upload work from the admin panel to populate this section.</p>
           )}
         </div>
       </div>

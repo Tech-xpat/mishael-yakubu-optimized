@@ -1,13 +1,16 @@
 import { useEffect, useState } from "react";
-import Nav from "./components/Nav";
+import Navbar from "./sections/Navbar";
 import Hero from "./sections/Hero";
+import About from "./sections/About";
 import Portfolio from "./sections/Portfolio";
-import Expertise from "./sections/Expertise";
+import WebDevelopment from "./sections/WebDevelopment";
+import BrandDesign from "./sections/BrandDesign";
+import AIAutomation from "./sections/AIAutomation";
+import Services from "./sections/Services";
 import Contact from "./sections/Contact";
 import Footer from "./sections/Footer";
-import ChatBot from "./components/ChatBot";
-import AboutPage from "./pages/AboutPage";
 import Admin from "./pages/Admin";
+import ChatBot from "./components/ChatBot";
 
 export default function App() {
   const [page, setPage] = useState(window.location.hash || "#/");
@@ -18,19 +21,22 @@ export default function App() {
     return () => window.removeEventListener("hashchange", onHash);
   }, []);
 
-  if (page === "#/about") return <AboutPage />;
   if (page === "#/admin") return <Admin />;
 
   return (
-    <div className="min-h-screen bg-black overflow-x-hidden">
-      <Nav />
-      <Hero />
-      <div className="relative z-20 bg-white">
+    <div className="relative bg-black min-h-screen">
+      <Navbar />
+      <main>
+        <Hero />
+        <About />
         <Portfolio />
-        <Expertise />
+        <WebDevelopment />
+        <BrandDesign />
+        <AIAutomation />
+        <Services />
         <Contact />
         <Footer />
-      </div>
+      </main>
       <ChatBot />
     </div>
   );

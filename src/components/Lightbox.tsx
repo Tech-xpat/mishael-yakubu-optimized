@@ -1,51 +1,90 @@
-import { useEffect } from "react";
-import { X } from "lucide-react";
+import { useState } from 'react';
+import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 
 interface LightboxProps {
-  src: string;
-  alt: string;
-  caption?: string;
-  onClose: () => void;
+  images: string[];
+  initialIndex?: number;
+  onClose?: () => void;
 }
 
-export default function Lightbox({ src, alt, caption, onClose }: LightboxProps) {
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", onKey);
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = "";
-    };
-  }, [onClose]);
+const Lightbox = ({ images, initialIndex = 0, onClose }: LightboxProps) => {
+  const [currentIndex, setCurrentIndex] = useState(initialIndex);
+
+  const handlePrevious = () => {
+    setCurrentIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+  };
+
+  const handleNext = () => {
+    setCurrentIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'ArrowLeft') handlePrevious();
+    if (e.key === 'ArrowRight') handleNext();
+    if (e.key === 'Escape') onClose?.();
+  };
 
   return (
     <div
-      className="fixed inset-0 z-[100] bg-[#191919]/95 backdrop-blur-sm flex items-center justify-center p-4 sm:p-8 animate-[fadeIn_0.2s_ease-out]"
+      className="fixed inset-0 z-50 bg-black/95 backdrop-blur-sm flex items-center justify-center"
       onClick={onClose}
-      role="dialog"
-      aria-modal="true"
-      aria-label={alt}
+      onKeyDown={handleKeyDown}
+      tabIndex={0}
     >
-      <button
-        onClick={onClose}
-        aria-label="Close image"
-        className="absolute top-4 right-4 sm:top-6 sm:right-6 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors duration-200"
-      >
-        <X className="w-5 h-5" />
-      </button>
-      <div className="max-w-4xl w-full flex flex-col items-center" onClick={(e) => e.stopPropagation()}>
+      {/* Main Image */}
+      <div className="relative w-full h-full max-w-4xl max-h-[90vh] flex items-center justify-center">
         <img
-          src={src}
-          alt={alt}
-          className="max-h-[80vh] w-auto max-w-full object-contain rounded-sm"
+          src={images[currentIndex]}
+          alt={`Image ${currentIndex + 1}`}
+          className="max-w-full max-h-full object-contain"
+          onClick={(e) => e.stopPropagation()}
         />
-        {caption && (
-          <p className="mt-4 text-white/70 text-sm text-center">{caption}</p>
+
+        {/* Close Button */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onClose?.();
+          }}
+          className="absolute top-4 right-4 p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors"
+          aria-label="Close"
+        >
+          <X size={24} className="text-white" />
+        </button>
+
+        {/* Navigation Buttons */}
+        {images.length > 1 && (
+          <>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handlePrevious();
+              }}
+              className="absolute left-4 p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors"
+              aria-label="Previous"
+            >
+              <ChevronLeft size={24} className="text-white" />
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleNext();
+              }}
+              className="absolute right-4 p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors"
+              aria-label="Next"
+            >
+              <ChevronRight size={24} className="text-white" />
+            </button>
+          </>
         )}
+
+        {/* Counter */}
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-white/10 px-4 py-2 rounded-full text-white/70 text-sm">
+          {currentIndex + 1} / {images.length}
+        </div>
       </div>
     </div>
   );
-}
+};
+
+export default Lightbox;

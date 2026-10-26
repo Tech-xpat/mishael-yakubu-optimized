@@ -1,42 +1,214 @@
-import { motion } from "framer-motion";
+import { useEffect, useRef } from 'react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
-export default function About() {
+gsap.registerPlugin(ScrollTrigger);
+
+const About = () => {
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const imageRef = useRef<HTMLDivElement>(null);
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const statsRef = useRef<HTMLDivElement>(null);
+
+  const stats = [
+    { value: '5+', label: 'Years Experience' },
+    { value: '50+', label: 'Projects Completed' },
+    { value: '30+', label: 'Happy Clients' },
+  ];
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      // Image scale and grayscale effect on scroll
+      gsap.fromTo(
+        imageRef.current,
+        { scale: 1, filter: 'grayscale(100%)' },
+        {
+          scale: 1.1,
+          filter: 'grayscale(0%)',
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: 'top bottom',
+            end: 'bottom top',
+            scrub: 1,
+          },
+        }
+      );
+
+      // Heading character reveal
+      if (headingRef.current) {
+        const chars = headingRef.current.querySelectorAll('.char');
+        gsap.fromTo(
+          chars,
+          { y: '100%', opacity: 0 },
+          {
+            y: '0%',
+            opacity: 1,
+            duration: 0.8,
+            ease: 'expo.out',
+            stagger: 0.03,
+            scrollTrigger: {
+              trigger: headingRef.current,
+              start: 'top 80%',
+              toggleActions: 'play none none reverse',
+            },
+          }
+        );
+      }
+
+      // Content fade up
+      gsap.fromTo(
+        contentRef.current?.querySelectorAll('.content-item') || [],
+        { y: 30, opacity: 0 },
+        {
+          y: 0,
+          opacity: 1,
+          duration: 0.8,
+          ease: 'expo.out',
+          stagger: 0.15,
+          scrollTrigger: {
+            trigger: contentRef.current,
+            start: 'top 75%',
+            toggleActions: 'play none none reverse',
+          },
+        }
+      );
+
+      // Stats counter animation
+      if (statsRef.current) {
+        const statItems = statsRef.current.querySelectorAll('.stat-item');
+        gsap.fromTo(
+          statItems,
+          { y: 40, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 0.8,
+            ease: 'expo.out',
+            stagger: 0.1,
+            scrollTrigger: {
+              trigger: statsRef.current,
+              start: 'top 80%',
+              toggleActions: 'play none none reverse',
+            },
+          }
+        );
+      }
+    }, sectionRef);
+
+    return () => ctx.revert();
+  }, []);
+
+  const heading = 'ABOUT ME';
+
   return (
-    <section id="about" className="py-24 bg-white">
-      <div className="max-w-6xl mx-auto px-6 grid md:grid-cols-2 gap-16 items-center">
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true }}
-          className="order-2 md:order-1"
-        >
-          <p className="text-xs uppercase tracking-[0.25em] text-gray-400 mb-3">About</p>
-          <h2 className="font-serif text-4xl md:text-5xl leading-tight text-[#111]">
-            The Visionary
-          </h2>
-          <p className="mt-5 text-gray-600 leading-relaxed">
-            Mishael Yakubu is a web developer, tech coach and founder of Empire Digitals Worldwide, based in Delta State. He builds modern digital products and mentors the next generation of African developers.
-          </p>
-          <p className="mt-4 text-gray-600 leading-relaxed">
-            From high-performance websites to AI automation and brand design, every project is built for clarity, speed and lasting impact.
-          </p>
-        </motion.div>
+    <section
+      ref={sectionRef}
+      id="about"
+      className="relative w-full min-h-screen bg-black py-20 md:py-32"
+    >
+      <div className="w-full px-6 md:px-12 lg:px-20">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-start">
+          {/* Left Column - Sticky Image */}
+          <div className="relative lg:sticky lg:top-32">
+            <div
+              ref={imageRef}
+              className="relative aspect-[4/5] overflow-hidden"
+            >
+              <img
+                src="/about-portrait.jpg"
+                alt="Mishael Yakubu"
+                className="w-full h-full object-cover"
+              />
+              {/* Overlay gradient */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+            </div>
 
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true }}
-          className="order-1 md:order-2 flex justify-center"
-        >
-          <div className="bg-gray-50 p-4 rounded-[2rem] shadow-lg border border-gray-100">
-            <img
-              src="/images/about1.webp"
-              alt="Mishael Yakubu in studio"
-              className="w-full max-w-sm h-[420px] object-cover rounded-[1.5rem]"
-            />
+            {/* Decorative elements */}
+            <div className="absolute -bottom-4 -right-4 w-32 h-32 border border-white/10" />
+            <div className="absolute -top-4 -left-4 w-20 h-20 border border-white/10" />
           </div>
-        </motion.div>
+
+          {/* Right Column - Content */}
+          <div className="lg:pt-20">
+            {/* Heading */}
+            <h2
+              ref={headingRef}
+              className="font-display text-responsive-lg font-bold text-white mb-8 overflow-hidden"
+            >
+              {heading.split('').map((char, index) => (
+                <span key={index} className="char inline-block">
+                  {char === ' ' ? '\u00A0' : char}
+                </span>
+              ))}
+            </h2>
+
+            {/* Content */}
+            <div ref={contentRef} className="space-y-6">
+              <p className="content-item text-lg md:text-xl text-white/80 font-body leading-relaxed">
+                I specialize in building digital experiences that merge creativity
+                with technical precision. From brand identity to full-stack
+                development, I craft solutions that leave a lasting impact.
+              </p>
+
+              <p className="content-item text-base text-white/60 font-body leading-relaxed">
+                With over 5 years of experience in the digital space, I've had the
+                privilege of working with startups, agencies, and established brands
+                across various industries. My approach combines strategic thinking
+                with meticulous attention to detail, ensuring every project exceeds
+                expectations.
+              </p>
+
+              <p className="content-item text-base text-white/60 font-body leading-relaxed">
+                Whether it's creating a stunning brand identity, developing a
+                high-performance web application, or implementing AI-driven
+                automation solutions, I bring the same level of dedication and
+                expertise to every project.
+              </p>
+
+              {/* Skills Tags */}
+              <div className="content-item flex flex-wrap gap-3 pt-4">
+                {[
+                  'React',
+                  'TypeScript',
+                  'Node.js',
+                  'Python',
+                  'Figma',
+                  'AI/ML',
+                  'Brand Strategy',
+                  'UI/UX',
+                ].map((skill) => (
+                  <span
+                    key={skill}
+                    className="px-4 py-2 border border-white/20 text-sm text-white/70 font-body tracking-wider uppercase hover:border-white/40 hover:text-white transition-all duration-300"
+                  >
+                    {skill}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Stats */}
+            <div
+              ref={statsRef}
+              className="grid grid-cols-3 gap-8 mt-16 pt-16 border-t border-white/10"
+            >
+              {stats.map((stat, index) => (
+                <div key={index} className="stat-item text-center md:text-left">
+                  <span className="block font-display text-4xl md:text-5xl font-bold text-white mb-2">
+                    {stat.value}
+                  </span>
+                  <span className="text-xs text-white/50 font-body tracking-wider uppercase">
+                    {stat.label}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );
-}
+};
+
+export default About;
