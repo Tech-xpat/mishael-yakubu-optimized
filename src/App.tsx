@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import Nav from "./components/Nav";
 import Hero from "./sections/Hero";
-import Highlight from "./sections/Highlight";
 import Portfolio from "./sections/Portfolio";
 import Expertise from "./sections/Expertise";
 import Contact from "./sections/Contact";
@@ -23,14 +22,15 @@ export default function App() {
   if (page === "#/admin") return <Admin />;
 
   return (
-    <div className="min-h-screen bg-white overflow-x-hidden">
+    <div className="min-h-screen bg-black overflow-x-hidden">
       <Nav />
       <Hero />
-      <Highlight />
-      <Portfolio />
-      <Expertise />
-      <Contact />
-      <Footer />
+      <div className="relative z-20 bg-white">
+        <Portfolio />
+        <Expertise />
+        <Contact />
+        <Footer />
+      </div>
       <ChatBot />
     </div>
   );

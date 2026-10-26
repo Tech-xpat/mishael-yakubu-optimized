@@ -1,83 +1,134 @@
-import { motion } from "framer-motion";
-import { ArrowRight } from "lucide-react";
+import { useEffect, useRef, useState } from 'react';
+import gsap from 'gsap';
 
-export default function Hero() {
+const Hero = () => {
+  const heroRef = useRef<HTMLDivElement>(null);
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  const subheadingRef = useRef<HTMLParagraphElement>(null);
+  const bgRef = useRef<HTMLDivElement>(null);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        bgRef.current,
+        { scale: 1.2, filter: 'blur(10px)' },
+        { scale: 1, filter: 'blur(0px)', duration: 1.8, ease: 'expo.out' }
+      );
+
+      if (headingRef.current) {
+        const chars = headingRef.current.querySelectorAll('.char');
+        gsap.fromTo(
+          chars,
+          { opacity: 0, rotateX: 90, y: -50 },
+          {
+            opacity: 1,
+            rotateX: 0,
+            y: 0,
+            duration: 1.2,
+            ease: 'expo.out',
+            stagger: 0.05,
+            delay: 0.2,
+          }
+        );
+      }
+
+      if (subheadingRef.current) {
+        gsap.fromTo(
+          subheadingRef.current,
+          { opacity: 0, y: 20 },
+          { opacity: 1, y: 0, duration: 1, ease: 'expo.out', delay: 1.5 }
+        );
+      }
+
+      gsap.fromTo('.corner-tl', { opacity: 0, x: -50 }, { opacity: 1, x: 0, duration: 1, ease: 'expo.out', delay: 1.8 });
+      gsap.fromTo('.corner-tr', { opacity: 0, x: 50 }, { opacity: 1, x: 0, duration: 1, ease: 'expo.out', delay: 1.9 });
+      gsap.fromTo('.corner-bl', { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 1, ease: 'expo.out', delay: 2 });
+      gsap.fromTo('.corner-br', { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 1, ease: 'expo.out', delay: 2.1 });
+    }, heroRef);
+
+    return () => ctx.revert();
+  }, []);
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      const x = (e.clientX / window.innerWidth - 0.5) * 20;
+      const y = (e.clientY / window.innerHeight - 0.5) * 20;
+      setMousePos({ x, y });
+    };
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
+  const name = 'MISHAEL YAKUBU';
+
   return (
-    <section className="relative h-screen bg-[#faf9f7]">
-      <div className="sticky top-0 h-screen flex items-center overflow-hidden">
-        <div className="w-full max-w-6xl mx-auto px-5 grid lg:grid-cols-2 gap-6 items-center">
-          {/* Text */}
-          <div className="text-center lg:text-left z-10">
-            <p className="text-[11px] uppercase tracking-[0.35em] text-gray-500 mb-4">
-              Empire Digitals Worldwide
-            </p>
-            <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl leading-[0.92] tracking-tight text-[#111]">
-              Digital<br />experiences<br />
-              <span className="italic text-lime-700">that perform.</span>
-            </h1>
-            <p className="mt-4 text-sm sm:text-base text-gray-600 max-w-xs mx-auto lg:mx-0">
-              Websites, brand systems and AI automation for businesses across Delta State.
-            </p>
-            <div className="mt-6 flex flex-wrap justify-center lg:justify-start gap-3">
-              <a href="#work" className="inline-flex items-center gap-2 bg-black text-white px-5 py-3 rounded-full text-sm font-medium">
-                View Work <ArrowRight className="w-4 h-4" />
-              </a>
-              <a href="#/about" className="inline-flex items-center gap-2 border border-gray-300 bg-white px-5 py-3 rounded-full text-sm font-medium">
-                About Mishael
-              </a>
-            </div>
-          </div>
+    <section ref={heroRef} id="home" className="relative w-full h-screen overflow-hidden bg-black">
+      <div
+        ref={bgRef}
+        className="absolute inset-0 w-full h-full"
+        style={{
+          transform: `translate(${mousePos.x * 0.5}px, ${mousePos.y * 0.5}px)`,
+          transition: 'transform 0.3s ease-out',
+        }}
+      >
+        <img
+          src="/hero-bg.jpeg"
+          alt="Mishael Yakubu"
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/80" />
+      </div>
 
-          {/* Pure image — no background, no frame */}
-          <div className="relative h-[380px] sm:h-[440px] flex items-center justify-center">
-            <img
-              src="/images/hero.webp"
-              alt="Mishael Yakubu"
-              className="relative z-10 w-56 sm:w-64 lg:w-72 h-auto object-contain grayscale contrast-110"
-            />
-
-            {/* Floating cards */}
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3 }}
-              className="absolute left-0 top-10 bg-white/95 backdrop-blur px-3 py-2.5 rounded-xl shadow-md border border-gray-100 w-32"
-            >
-              <p className="text-base font-semibold">6+</p>
-              <p className="text-[10px] text-gray-500">Years Experience</p>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.45 }}
-              className="absolute right-0 top-16 bg-white/95 backdrop-blur px-3 py-2.5 rounded-xl shadow-md border border-gray-100 w-36"
-            >
-              <p className="text-xs font-medium">Web Development</p>
-              <p className="text-[10px] text-gray-500">Next.js · React</p>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6 }}
-              className="absolute left-2 bottom-8 bg-white/95 backdrop-blur px-3 py-2.5 rounded-xl shadow-md border border-gray-100 w-32"
-            >
-              <p className="text-xs font-medium">AI Automation</p>
-              <p className="text-[10px] text-gray-500">Agents</p>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.75 }}
-              className="absolute right-2 bottom-16 bg-black text-white px-3 py-2.5 rounded-xl shadow-md w-28"
-            >
-              <p className="text-xs font-medium">Tech Coaching</p>
-            </motion.div>
-          </div>
+      <div className="corner-tl absolute top-8 left-8 z-20 opacity-0">
+        <p className="text-xs tracking-[0.3em] text-white/60 uppercase">Based In Delta State, NG</p>
+      </div>
+      <div className="corner-tr absolute top-8 right-8 z-20 opacity-0">
+        <p className="text-xs tracking-[0.3em] text-white/60 uppercase">Portfolio 2026</p>
+      </div>
+      <div className="corner-bl absolute bottom-8 left-8 z-20 opacity-0">
+        <div className="flex items-center gap-2">
+          <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+          <p className="text-xs tracking-[0.2em] text-white/60 uppercase">Available for freelance</p>
         </div>
       </div>
+      <div className="corner-br absolute bottom-8 right-8 z-20 opacity-0">
+        <p className="text-xs tracking-[0.2em] text-white/60 uppercase">Scroll to explore</p>
+      </div>
+
+      <div className="relative z-10 flex flex-col items-center justify-center h-full px-4">
+        <h1
+          ref={headingRef}
+          className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold text-white text-center leading-none tracking-tight"
+          style={{ perspective: '1000px' }}
+        >
+          {name.split('').map((char, index) => (
+            <span key={index} className="char inline-block" style={{ transformStyle: 'preserve-3d' }}>
+              {char === ' ' ? '\u00A0' : char}
+            </span>
+          ))}
+        </h1>
+
+        <p
+          ref={subheadingRef}
+          className="mt-8 text-sm md:text-base tracking-[0.4em] text-white/70 uppercase text-center max-w-3xl opacity-0"
+        >
+          Web Developer / Brand Designer / AI Automator / Software Developer
+        </p>
+
+        <div className="mt-12 flex flex-col sm:flex-row gap-4">
+          <a href="#work" className="px-8 py-4 bg-white text-black text-sm tracking-wider uppercase hover:bg-white/90 transition">
+            View My Work
+          </a>
+          <a href="#contact" className="px-8 py-4 border border-white/30 text-white text-sm tracking-wider uppercase hover:bg-white/10 transition">
+            Get In Touch
+          </a>
+        </div>
+      </div>
+
+      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black to-transparent z-10" />
     </section>
   );
-}
+};
+
+export default Hero;
