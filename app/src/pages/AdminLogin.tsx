@@ -1,19 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  signInWithPopup,
-  GoogleAuthProvider,
-  signInWithEmailAndPassword,
-} from 'firebase/auth';
-import { auth } from '../lib/firebase';
+import { supabase } from '../lib/supabase';
 import { toast } from 'sonner';
 import { Loader2, Chrome, Mail, Lock } from 'lucide-react';
-
-// Keep this list server-side only — never render on the page
-const ADMIN_EMAILS = [
-  'empiredigitalsworldwide@gmail.com',
-  'letstalk2mishael@gmail.com',
-];
 
 const AdminLogin = () => {
   const navigate = useNavigate();
@@ -21,59 +10,16 @@ const AdminLogin = () => {
   const [isInitializing, setIsInitializing] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [mode, setMode] = useState<'google' | 'email'>('google');
+  const [mode, setMode] = useState<'email' | 'google'>('email');
 
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const user = auth.currentUser;
-        if (user && ADMIN_EMAILS.includes(user.email || '')) {
-          navigate('/greatness/dashboard');
-        } else if (user) {
-          await auth.signOut();
-        }
-      } catch (error) {
-        console.error('[Admin Login] Auth check error:', error);
-      } finally {
-        setIsInitializing(false);
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        navigate('/greatness/dashboard');
       }
-    };
-
-    const timer = setTimeout(checkAuth, 800);
-    return () => clearTimeout(timer);
+      setIsInitializing(false);
+    });
   }, [navigate]);
-
-  const handleGoogleSignIn = async () => {
-    setLoading(true);
-    try {
-      const provider = new GoogleAuthProvider();
-      provider.setCustomParameters({ prompt: 'select_account' });
-
-      const result = await signInWithPopup(auth, provider);
-      const userEmail = result.user.email || '';
-
-      if (!ADMIN_EMAILS.includes(userEmail)) {
-        await auth.signOut();
-        toast.error('Access denied. This account is not authorized.');
-        setLoading(false);
-        return;
-      }
-
-      toast.success('Login successful');
-      navigate('/greatness/dashboard');
-    } catch (error: any) {
-      console.error('Google Sign-In error:', error);
-      if (error.code === 'auth/popup-closed-by-user') {
-        toast.error('Sign-in was cancelled');
-      } else if (error.code === 'auth/popup-blocked') {
-        toast.error('Popup blocked. Allow popups for this site.');
-      } else {
-        toast.error('Sign-in failed. Please try again.');
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleEmailSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -84,28 +30,44 @@ const AdminLogin = () => {
 
     setLoading(true);
     try {
-      const result = await signInWithEmailAndPassword(auth, email.trim(), password);
-      const userEmail = result.user.email || '';
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      });
 
-      if (!ADMIN_EMAILS.includes(userEmail)) {
-        await auth.signOut();
-        toast.error('Access denied. This account is not authorized.');
+      if (error) {
+        toast.error(error.message || 'Invalid email or password');
         setLoading(false);
         return;
       }
 
-      toast.success('Login successful');
-      navigate('/greatness/dashboard');
-    } catch (error: any) {
-      console.error('Email Sign-In error:', error);
-      if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
-        toast.error('Invalid email or password');
-      } else if (error.code === 'auth/too-many-requests') {
-        toast.error('Too many attempts. Try again later.');
-      } else {
-        toast.error('Sign-in failed. Please try again.');
+      if (data.session) {
+        toast.success('Login successful');
+        navigate('/greatness/dashboard');
       }
+    } catch (err: any) {
+      toast.error(err.message || 'Sign-in failed');
     } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/greatness/dashboard`,
+        },
+      });
+      if (error) {
+        toast.error(error.message || 'Google sign-in failed');
+        setLoading(false);
+      }
+      // Redirect happens automatically on success
+    } catch (err: any) {
+      toast.error(err.message || 'Google sign-in failed');
       setLoading(false);
     }
   };
@@ -133,42 +95,7 @@ const AdminLogin = () => {
         </div>
 
         <div className="space-y-6">
-          {mode === 'google' ? (
-            <>
-              <button
-                onClick={handleGoogleSignIn}
-                disabled={loading}
-                className="w-full py-4 px-6 bg-white text-black rounded-xl font-bold text-base hover:bg-white/95 disabled:opacity-50 transition flex items-center justify-center gap-3"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 size={22} className="animate-spin" />
-                    <span>Signing in...</span>
-                  </>
-                ) : (
-                  <>
-                    <Chrome size={22} />
-                    <span>Sign in with Google</span>
-                  </>
-                )}
-              </button>
-
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-white/10" />
-                </div>
-                <div className="relative flex justify-center text-sm">
-                  <button
-                    type="button"
-                    onClick={() => setMode('email')}
-                    className="px-3 bg-black text-white/50 hover:text-white transition"
-                  >
-                    Use email & password
-                  </button>
-                </div>
-              </div>
-            </>
-          ) : (
+          {mode === 'email' ? (
             <form onSubmit={handleEmailSignIn} className="space-y-4">
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40" />
@@ -211,14 +138,41 @@ const AdminLogin = () => {
                 onClick={() => setMode('google')}
                 className="w-full text-sm text-white/50 hover:text-white transition"
               >
-                ← Back to Google sign-in
+                Or sign in with Google
               </button>
             </form>
+          ) : (
+            <>
+              <button
+                onClick={handleGoogleSignIn}
+                disabled={loading}
+                className="w-full py-4 px-6 bg-white text-black rounded-xl font-bold text-base hover:bg-white/95 disabled:opacity-50 transition flex items-center justify-center gap-3"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 size={22} className="animate-spin" />
+                    <span>Redirecting...</span>
+                  </>
+                ) : (
+                  <>
+                    <Chrome size={22} />
+                    <span>Sign in with Google</span>
+                  </>
+                )}
+              </button>
+              <button
+                type="button"
+                onClick={() => setMode('email')}
+                className="w-full text-sm text-white/50 hover:text-white transition"
+              >
+                ← Back to email & password
+              </button>
+            </>
           )}
 
           <div className="p-4 rounded-xl bg-white/5 border border-white/10 text-center">
             <p className="text-xs text-white/50 leading-relaxed">
-              Secure access. Unauthorized accounts are blocked automatically.
+              Secure access via Supabase Auth. Create admin users in your Supabase dashboard only.
             </p>
           </div>
         </div>
