@@ -1,4 +1,4 @@
--- Fixed SQL — handles existing tables that are missing columns
+-- Safe SQL — does not re-insert categories that already exist
 
 -- 1) Portfolio items
 create table if not exists public.portfolio_items (
@@ -18,7 +18,7 @@ alter table public.portfolio_items
 create index if not exists portfolio_items_category_idx on public.portfolio_items (category);
 create index if not exists portfolio_items_created_at_idx on public.portfolio_items (created_at desc);
 
--- 2) Categories (create if missing, then add sort_order if the table already existed without it)
+-- 2) Categories — only add missing column. Do NOT insert (names already exist).
 create table if not exists public.categories (
   id uuid primary key default gen_random_uuid(),
   slug text unique not null,
@@ -29,13 +29,12 @@ create table if not exists public.categories (
 alter table public.categories
   add column if not exists sort_order int default 0;
 
-insert into public.categories (slug, name, sort_order) values
-  ('web', 'Web Development', 1),
-  ('website', 'Live Websites', 2),
-  ('flyer', 'Flyers & Graphics', 3),
-  ('brand', 'Brand Design', 4),
-  ('ai', 'AI Automation', 5)
-on conflict (slug) do update set name = excluded.name, sort_order = excluded.sort_order;
+-- Optional: ensure sort_order values if null
+update public.categories set sort_order = 1 where slug = 'web' and (sort_order is null or sort_order = 0);
+update public.categories set sort_order = 2 where slug = 'website' and (sort_order is null or sort_order = 0);
+update public.categories set sort_order = 3 where slug = 'flyer' and (sort_order is null or sort_order = 0);
+update public.categories set sort_order = 4 where slug = 'brand' and (sort_order is null or sort_order = 0);
+update public.categories set sort_order = 5 where slug = 'ai' and (sort_order is null or sort_order = 0);
 
 -- 3) RLS on portfolio_items
 alter table public.portfolio_items enable row level security;
