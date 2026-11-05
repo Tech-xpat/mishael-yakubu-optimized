@@ -8,6 +8,7 @@ import AdminDashboard from './pages/AdminDashboard'
 import NotFound from './pages/NotFound'
 import ProtectedRoute from './components/ProtectedRoute'
 import { AuthProvider } from './contexts/AuthContext'
+import CategoryPage from './pages/CategoryPage'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -15,6 +16,8 @@ createRoot(document.getElementById('root')!).render(
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<App />} />
+          <Route path="/portfolio/:type" element={<CategoryPage />} />
+          <Route path="/portfolio/:type/:subcategory" element={<CategoryPage />} />
           <Route path="/greatness" element={<AdminLogin />} />
           <Route
             path="/greatness/dashboard"
