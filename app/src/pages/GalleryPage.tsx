@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { ArrowLeft, ExternalLink, Play, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -14,6 +14,7 @@ interface Item {
   subcategory?: string | null;
   website_url?: string | null;
   media_type?: string | null;
+  priority?: number | null;
   created_at?: string;
 }
 
@@ -27,6 +28,19 @@ const CATEGORY_NAMES: Record<string, string> = {
   motion: 'Motion Graphics',
 };
 
+function Skeleton() {
+  return (
+    <div className="relative max-w-5xl mx-auto px-4 animate-pulse">
+      <div className="aspect-[16/10] md:aspect-video bg-white/10 rounded-2xl" />
+      <div className="mt-6 h-8 bg-white/10 rounded w-2/3 mx-auto" />
+      <div className="mt-3 h-4 bg-white/10 rounded w-1/2 mx-auto" />
+      <div className="mt-8 flex gap-3 justify-center">
+        {[1,2,3,4,5].map(i => <div key={i} className="w-20 h-20 bg-white/10 rounded-lg" />)}
+      </div>
+    </div>
+  );
+}
+
 export default function GalleryPage() {
   const { category } = useParams<{ category: string }>();
   const navigate = useNavigate();
@@ -34,6 +48,7 @@ export default function GalleryPage() {
   const [loading, setLoading] = useState(true);
   const [active, setActive] = useState(0);
   const [subFilter, setSubFilter] = useState<string>('all');
+  const touchStartX = useRef<number | null>(null);
 
   const title = category ? CATEGORY_NAMES[category] || category : 'Gallery';
 
@@ -44,9 +59,14 @@ export default function GalleryPage() {
       .from('portfolio_items')
       .select('*')
       .eq('category', category)
-      .order('created_at', { ascending: false })
       .then(({ data }) => {
-        setItems(data || []);
+        const sorted = (data || []).sort((a, b) => {
+          const pa = a.priority || 0;
+          const pb = b.priority || 0;
+          if (pb !== pa) return pb - pa;
+          return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
+        });
+        setItems(sorted);
         setLoading(false);
         setActive(0);
         setSubFilter('all');
@@ -79,6 +99,19 @@ export default function GalleryPage() {
     });
   };
 
+  const onTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+
+  const onTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null) return;
+    const diff = touchStartX.current - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 50) {
+      go(diff > 0 ? 1 : -1);
+    }
+    touchStartX.current = null;
+  };
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'ArrowRight') go(1);
@@ -90,8 +123,14 @@ export default function GalleryPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
-        Loading gallery...
+      <div className="relative bg-black min-h-screen text-white">
+        <Navbar />
+        <main className="pt-20 pb-16">
+          <div className="px-6 md:px-12 mb-6">
+            <div className="h-6 w-24 bg-white/10 rounded animate-pulse" />
+          </div>
+          <Skeleton />
+        </main>
       </div>
     );
   }
@@ -139,7 +178,11 @@ export default function GalleryPage() {
           <div className="text-center py-32 text-white/40">No items in this filter yet.</div>
         ) : (
           <div className="relative max-w-5xl mx-auto px-4">
-            <div className="relative aspect-[16/10] md:aspect-video bg-zinc-900 rounded-2xl overflow-hidden border border-white/10">
+            <div
+              className="relative aspect-[16/10] md:aspect-video bg-zinc-900 rounded-2xl overflow-hidden border border-white/10 touch-pan-y"
+              onTouchStart={onTouchStart}
+              onTouchEnd={onTouchEnd}
+            >
               {filtered[active] && (
                 filtered[active].media_type === 'video' || filtered[active].image_url?.match(/\.(mp4|webm|mov)$/i) ? (
                   <video
@@ -150,6 +193,7 @@ export default function GalleryPage() {
                     autoPlay
                     muted
                     loop
+                    playsInline
                   />
                 ) : (
                   <img
@@ -163,13 +207,13 @@ export default function GalleryPage() {
 
               <button
                 onClick={() => go(-1)}
-                className="absolute left-3 top-1/2 -translate-y-1/2 p-3 rounded-full bg-black/50 hover:bg-black/70 text-white"
+                className="absolute left-3 top-1/2 -translate-y-1/2 p-3 rounded-full bg-black/50 hover:bg-black/70 text-white hidden md:flex"
               >
                 <ChevronLeft size={24} />
               </button>
               <button
                 onClick={() => go(1)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-3 rounded-full bg-black/50 hover:bg-black/70 text-white"
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-3 rounded-full bg-black/50 hover:bg-black/70 text-white hidden md:flex"
               >
                 <ChevronRight size={24} />
               </button>
