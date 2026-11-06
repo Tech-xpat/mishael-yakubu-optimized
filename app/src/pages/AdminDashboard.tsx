@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { LogOut, BarChart3, Loader2, Upload, ExternalLink, Trash2 } from 'lucide-react';
+import { LogOut, BarChart3, Loader2, Upload, ExternalLink, Trash2, Play } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 const CATEGORIES = [
@@ -10,6 +10,8 @@ const CATEGORIES = [
   { slug: 'flyer', name: 'Flyers & Graphics' },
   { slug: 'brand', name: 'Brand Design' },
   { slug: 'ai', name: 'AI Automation' },
+  { slug: 'video', name: 'Videos' },
+  { slug: 'motion', name: 'Motion Graphics' },
 ] as const;
 
 type CategorySlug = (typeof CATEGORIES)[number]['slug'];
@@ -89,7 +91,7 @@ const AdminDashboard = () => {
       return;
     }
     if (files.length === 0) {
-      setStatus('Select at least one image');
+      setStatus('Select at least one file');
       return;
     }
     if (category === 'website' && !websiteUrl.trim()) {
@@ -129,7 +131,7 @@ const AdminDashboard = () => {
         });
 
         if (dbErr) {
-          setStatus(`Saved image but DB failed: ${dbErr.message}`);
+          setStatus(`Saved file but DB failed: ${dbErr.message}`);
           continue;
         }
         success++;
@@ -238,7 +240,7 @@ const AdminDashboard = () => {
             {category === 'website' && (
               <div>
                 <label className="text-xs text-white/50 uppercase tracking-wider block mb-2">
-                  Website URL (opens when visitors click the card)
+                  Website URL
                 </label>
                 <input
                   value={websiteUrl}
@@ -252,11 +254,11 @@ const AdminDashboard = () => {
 
             <div>
               <label className="text-xs text-white/50 uppercase tracking-wider block mb-2">
-                Images (select multiple)
+                Files (images or videos)
               </label>
               <input
                 type="file"
-                accept="image/*"
+                accept="image/*,video/*"
                 multiple
                 onChange={(e) => setFiles(Array.from(e.target.files || []))}
                 className="w-full text-sm text-white/70"
@@ -312,44 +314,53 @@ const AdminDashboard = () => {
             <p className="text-white/40">No items in this category yet.</p>
           ) : (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filtered.map((item) => (
-                <div
-                  key={item.id}
-                  className="bg-white/5 border border-white/10 rounded-xl overflow-hidden group"
-                >
-                  <div className="relative">
-                    <img
-                      src={item.image_url}
-                      alt={item.title}
-                      className="w-full h-40 object-cover"
-                    />
-                    <button
-                      onClick={() => handleDelete(item.id)}
-                      className="absolute top-2 right-2 p-2 rounded-lg bg-black/60 text-red-400 opacity-0 group-hover:opacity-100 transition"
-                      title="Delete"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-                  <div className="p-3">
-                    <p className="text-[10px] uppercase tracking-wider text-white/40">
-                      {CATEGORIES.find((c) => c.slug === item.category)?.name || item.category || 'web'}
-                    </p>
-                    <p className="font-medium text-sm mt-0.5">{item.title}</p>
-                    {item.website_url && (
-                      <a
-                        href={item.website_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-xs text-white/50 hover:text-white mt-1"
+              {filtered.map((item) => {
+                const isVideo = item.image_url?.match(/\.(mp4|webm|mov)$/i);
+                return (
+                  <div
+                    key={item.id}
+                    className="bg-white/5 border border-white/10 rounded-xl overflow-hidden group"
+                  >
+                    <div className="relative">
+                      {isVideo ? (
+                        <div className="w-full h-40 bg-zinc-900 flex items-center justify-center">
+                          <Play size={32} className="text-white/60" />
+                        </div>
+                      ) : (
+                        <img
+                          src={item.image_url}
+                          alt={item.title}
+                          className="w-full h-40 object-cover"
+                        />
+                      )}
+                      <button
+                        onClick={() => handleDelete(item.id)}
+                        className="absolute top-2 right-2 p-2 rounded-lg bg-black/60 text-red-400 opacity-0 group-hover:opacity-100 transition"
+                        title="Delete"
                       >
-                        <ExternalLink size={12} />
-                        Preview site
-                      </a>
-                    )}
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                    <div className="p-3">
+                      <p className="text-[10px] uppercase tracking-wider text-white/40">
+                        {CATEGORIES.find((c) => c.slug === item.category)?.name || item.category || 'web'}
+                      </p>
+                      <p className="font-medium text-sm mt-0.5">{item.title}</p>
+                      {item.website_url && (
+                        <a
+                          href={item.website_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-xs text-white/50 hover:text-white mt-1"
+                        >
+                          <ExternalLink size={12} />
+                          Preview site
+                        </a>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </section>
