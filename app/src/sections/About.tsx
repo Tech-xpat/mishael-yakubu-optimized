@@ -116,7 +116,7 @@ const About = () => {
               className="relative aspect-[4/5] overflow-hidden"
             >
               <img
-                src="/about-portrait.jpg"
+                src="/about-portrait.webp"
                 alt="Mishael Yakubu"
                 className="w-full h-full object-cover"
               />
