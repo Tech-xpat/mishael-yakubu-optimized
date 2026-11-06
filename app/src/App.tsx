@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import Lenis from '@studio-freight/lenis';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -18,6 +19,7 @@ gsap.registerPlugin(ScrollTrigger);
 
 function App() {
   const lenisRef = useRef<Lenis | null>(null);
+  const location = useLocation();
 
   useEffect(() => {
     // Always start homepage at the top on load/refresh
@@ -72,6 +74,16 @@ function App() {
       delete (window as any).__lenis;
     };
   }, []);
+
+  // Scroll to a section requested from another page (no "#" in the URL)
+  useEffect(() => {
+    const target = (location.state as { scrollTo?: string } | null)?.scrollTo;
+    if (!target || target === '#home') return;
+    const t = setTimeout(() => {
+      document.querySelector(target)?.scrollIntoView({ behavior: 'smooth' });
+    }, 400);
+    return () => clearTimeout(t);
+  }, [location.state]);
 
   return (
     <div className="relative bg-black min-h-screen">
