@@ -20,64 +20,55 @@ function App() {
   const lenisRef = useRef<Lenis | null>(null);
 
   useEffect(() => {
-    // Initialize Lenis smooth scroll
-    lenisRef.current = new Lenis({
-      duration: 1.2,
+    const lenis = new Lenis({
+      duration: 0.9,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       orientation: 'vertical',
       gestureOrientation: 'vertical',
       smoothWheel: true,
-      wheelMultiplier: 1,
-      touchMultiplier: 2,
+      wheelMultiplier: 1.15,
+      touchMultiplier: 1.6,
+      infinite: false,
     });
 
-    // Connect Lenis to GSAP ScrollTrigger
-    lenisRef.current.on('scroll', ScrollTrigger.update);
+    lenisRef.current = lenis;
+    (window as any).__lenis = lenis;
 
-    gsap.ticker.add((time) => {
-      lenisRef.current?.raf(time * 1000);
-    });
+    lenis.on('scroll', ScrollTrigger.update);
 
+    const tick = (time: number) => {
+      lenis.raf(time * 1000);
+    };
+    gsap.ticker.add(tick);
     gsap.ticker.lagSmoothing(0);
 
-    // Back to top button visibility
     const backToTopBtn = document.getElementById('back-to-top');
-    if (backToTopBtn) {
-      const handleScroll = () => {
-        if (window.scrollY > 500) {
-          backToTopBtn.classList.remove('opacity-0', 'pointer-events-none');
-          backToTopBtn.classList.add('opacity-100', 'pointer-events-auto');
-        } else {
-          backToTopBtn.classList.add('opacity-0', 'pointer-events-none');
-          backToTopBtn.classList.remove('opacity-100', 'pointer-events-auto');
-        }
-      };
+    const handleScroll = () => {
+      if (!backToTopBtn) return;
+      if (window.scrollY > 500) {
+        backToTopBtn.classList.remove('opacity-0', 'pointer-events-none');
+        backToTopBtn.classList.add('opacity-100', 'pointer-events-auto');
+      } else {
+        backToTopBtn.classList.add('opacity-0', 'pointer-events-none');
+        backToTopBtn.classList.remove('opacity-100', 'pointer-events-auto');
+      }
+    };
 
-      window.addEventListener('scroll', handleScroll, { passive: true });
-
-      return () => {
-        window.removeEventListener('scroll', handleScroll);
-        lenisRef.current?.destroy();
-        gsap.ticker.remove((time) => {
-          lenisRef.current?.raf(time * 1000);
-        });
-      };
-    }
+    window.addEventListener('scroll', handleScroll, { passive: true });
 
     return () => {
-      lenisRef.current?.destroy();
+      window.removeEventListener('scroll', handleScroll);
+      gsap.ticker.remove(tick);
+      lenis.destroy();
+      lenisRef.current = null;
+      delete (window as any).__lenis;
     };
   }, []);
 
   return (
     <div className="relative bg-black min-h-screen">
-      {/* Grain Overlay */}
       <div className="grain-overlay" aria-hidden="true" />
-
-      {/* Navigation */}
       <Navbar />
-
-      {/* Main Content */}
       <main>
         <Hero />
         <About />
