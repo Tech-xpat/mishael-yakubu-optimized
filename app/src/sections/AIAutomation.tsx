@@ -31,7 +31,9 @@ const AIAutomation = () => {
           const project = { id: doc.id, ...doc.data() } as AIProject;
           data.push(project);
         });
-        data.sort((a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0));
+        data.sort(
+          (a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0)
+        );
         setProjects(data);
         setLoading(false);
       },
@@ -69,7 +71,6 @@ const AIAutomation = () => {
   return (
     <section
       ref={sectionRef}
-      id="ai-automation"
       className="relative w-full py-20 md:py-32 bg-black px-6 md:px-12 lg:px-20"
     >
       <div ref={headingRef} className="mb-16">
