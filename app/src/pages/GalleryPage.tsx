@@ -35,7 +35,7 @@ function Skeleton() {
       <div className="mt-6 h-8 bg-white/15 rounded-lg w-2/3 mx-auto" />
       <div className="mt-3 h-4 bg-white/10 rounded w-1/2 mx-auto" />
       <div className="mt-8 flex gap-3 justify-center overflow-hidden">
-        {[1,2,3,4,5].map(i => (
+        {[1, 2, 3, 4, 5].map((i) => (
           <div key={i} className="w-20 h-20 bg-white/10 rounded-lg flex-shrink-0" />
         ))}
       </div>
@@ -52,9 +52,17 @@ export default function GalleryPage() {
   const [active, setActive] = useState(0);
   const [subFilter, setSubFilter] = useState<string>('all');
   const [fullscreen, setFullscreen] = useState(false);
+  const [arrowsVisible, setArrowsVisible] = useState(true);
   const touchStartX = useRef<number | null>(null);
+  const idleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const title = category ? CATEGORY_NAMES[category] || category : 'Gallery';
+
+  const showArrows = () => {
+    setArrowsVisible(true);
+    if (idleTimer.current) clearTimeout(idleTimer.current);
+    idleTimer.current = setTimeout(() => setArrowsVisible(false), 4000);
+  };
 
   useEffect(() => {
     if (!category) {
@@ -105,6 +113,13 @@ export default function GalleryPage() {
     setActive(0);
   }, [subFilter]);
 
+  useEffect(() => {
+    showArrows();
+    return () => {
+      if (idleTimer.current) clearTimeout(idleTimer.current);
+    };
+  }, [active, fullscreen]);
+
   const go = (dir: number) => {
     setActive((i) => {
       const next = i + dir;
@@ -112,10 +127,12 @@ export default function GalleryPage() {
       if (next >= filtered.length) return 0;
       return next;
     });
+    showArrows();
   };
 
   const onTouchStart = (e: React.TouchEvent) => {
     touchStartX.current = e.touches[0].clientX;
+    showArrows();
   };
 
   const onTouchEnd = (e: React.TouchEvent) => {
@@ -205,10 +222,14 @@ export default function GalleryPage() {
                 className={`relative ${fullscreen ? 'flex-1' : 'aspect-[16/10] md:aspect-video'} bg-black overflow-hidden ${fullscreen ? '' : 'rounded-2xl border border-white/10'} touch-pan-y`}
                 onTouchStart={onTouchStart}
                 onTouchEnd={onTouchEnd}
-                onClick={() => !fullscreen && setFullscreen(true)}
+                onMouseMove={showArrows}
+                onClick={() => {
+                  showArrows();
+                  if (!fullscreen) setFullscreen(true);
+                }}
               >
-                {current && (
-                  current.media_type === 'video' || current.image_url?.match(/\.(mp4|webm|mov)$/i) ? (
+                {current &&
+                  (current.media_type === 'video' || current.image_url?.match(/\.(mp4|webm|mov)$/i) ? (
                     <video
                       key={current.id}
                       src={current.image_url}
@@ -226,12 +247,14 @@ export default function GalleryPage() {
                       alt={current.title}
                       className="w-full h-full object-contain"
                     />
-                  )
-                )}
+                  ))}
 
                 {fullscreen && (
                   <button
-                    onClick={(e) => { e.stopPropagation(); setFullscreen(false); }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setFullscreen(false);
+                    }}
                     className="absolute top-4 right-4 z-10 p-3 rounded-full bg-black/60 text-white"
                   >
                     <X size={22} />
@@ -239,14 +262,26 @@ export default function GalleryPage() {
                 )}
 
                 <button
-                  onClick={(e) => { e.stopPropagation(); go(-1); }}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 p-3 rounded-full bg-black/50 hover:bg-black/70 text-white"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    go(-1);
+                  }}
+                  className={`absolute left-3 top-1/2 -translate-y-1/2 p-3 rounded-full bg-black/50 hover:bg-black/70 text-white transition-opacity duration-500 ${
+                    arrowsVisible ? 'opacity-[0.35] hover:opacity-100' : 'opacity-0 pointer-events-none'
+                  }`}
+                  aria-label="Previous"
                 >
                   <ChevronLeft size={24} />
                 </button>
                 <button
-                  onClick={(e) => { e.stopPropagation(); go(1); }}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 p-3 rounded-full bg-black/50 hover:bg-black/70 text-white"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    go(1);
+                  }}
+                  className={`absolute right-3 top-1/2 -translate-y-1/2 p-3 rounded-full bg-black/50 hover:bg-black/70 text-white transition-opacity duration-500 ${
+                    arrowsVisible ? 'opacity-[0.35] hover:opacity-100' : 'opacity-0 pointer-events-none'
+                  }`}
+                  aria-label="Next"
                 >
                   <ChevronRight size={24} />
                 </button>
@@ -289,7 +324,10 @@ export default function GalleryPage() {
                   {filtered.map((item, idx) => (
                     <button
                       key={item.id}
-                      onClick={() => setActive(idx)}
+                      onClick={() => {
+                        setActive(idx);
+                        showArrows();
+                      }}
                       className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition ${
                         idx === active ? 'border-white' : 'border-transparent opacity-60 hover:opacity-100'
                       }`}
