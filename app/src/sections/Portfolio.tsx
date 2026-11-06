@@ -13,6 +13,20 @@ const CATEGORIES = [
   { slug: 'motion', name: 'Motion Graphics', icon: Play },
 ];
 
+function FolderSkeleton() {
+  return (
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 animate-pulse">
+      {CATEGORIES.map((c) => (
+        <div key={c.slug} className="aspect-square rounded-3xl bg-white/5 border border-white/10 flex flex-col items-center justify-center p-8">
+          <div className="w-16 h-16 rounded-2xl bg-white/10 mb-4" />
+          <div className="h-4 bg-white/10 rounded w-3/4" />
+          <div className="h-3 bg-white/10 rounded w-1/2 mt-2" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function Portfolio() {
   const [counts, setCounts] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
@@ -21,7 +35,10 @@ export default function Portfolio() {
     supabase
       .from('portfolio_items')
       .select('category')
-      .then(({ data }) => {
+      .then(({ data, error }) => {
+        if (error) {
+          console.error(error);
+        }
         const c: Record<string, number> = {};
         (data || []).forEach((row: any) => {
           const cat = row.category || 'web';
@@ -42,7 +59,7 @@ export default function Portfolio() {
         </p>
 
         {loading ? (
-          <div className="text-white/40">Loading folders...</div>
+          <FolderSkeleton />
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {CATEGORIES.map((cat) => {
