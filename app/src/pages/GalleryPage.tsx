@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { ArrowLeft, ExternalLink, Play, ChevronLeft, ChevronRight, AlertCircle } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Play, ChevronLeft, ChevronRight, AlertCircle, X, Maximize2 } from 'lucide-react';
 import Navbar from '../sections/Navbar';
 import Footer from '../sections/Footer';
 
@@ -31,11 +31,13 @@ const CATEGORY_NAMES: Record<string, string> = {
 function Skeleton() {
   return (
     <div className="relative max-w-5xl mx-auto px-4 animate-pulse">
-      <div className="aspect-[16/10] md:aspect-video bg-white/10 rounded-2xl" />
-      <div className="mt-6 h-8 bg-white/10 rounded w-2/3 mx-auto" />
+      <div className="aspect-[16/10] md:aspect-video bg-gradient-to-br from-white/15 to-white/5 rounded-2xl" />
+      <div className="mt-6 h-8 bg-white/15 rounded-lg w-2/3 mx-auto" />
       <div className="mt-3 h-4 bg-white/10 rounded w-1/2 mx-auto" />
       <div className="mt-8 flex gap-3 justify-center overflow-hidden">
-        {[1,2,3,4,5].map(i => <div key={i} className="w-20 h-20 bg-white/10 rounded-lg flex-shrink-0" />)}
+        {[1,2,3,4,5].map(i => (
+          <div key={i} className="w-20 h-20 bg-white/10 rounded-lg flex-shrink-0" />
+        ))}
       </div>
     </div>
   );
@@ -49,6 +51,7 @@ export default function GalleryPage() {
   const [error, setError] = useState<string | null>(null);
   const [active, setActive] = useState(0);
   const [subFilter, setSubFilter] = useState<string>('all');
+  const [fullscreen, setFullscreen] = useState(false);
   const touchStartX = useRef<number | null>(null);
 
   const title = category ? CATEGORY_NAMES[category] || category : 'Gallery';
@@ -118,7 +121,7 @@ export default function GalleryPage() {
   const onTouchEnd = (e: React.TouchEvent) => {
     if (touchStartX.current === null) return;
     const diff = touchStartX.current - e.changedTouches[0].clientX;
-    if (Math.abs(diff) > 50) {
+    if (Math.abs(diff) > 40) {
       go(diff > 0 ? 1 : -1);
     }
     touchStartX.current = null;
@@ -128,25 +131,30 @@ export default function GalleryPage() {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'ArrowRight') go(1);
       if (e.key === 'ArrowLeft') go(-1);
+      if (e.key === 'Escape') setFullscreen(false);
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [filtered.length]);
 
+  const current = filtered[active];
+
   return (
     <div className="relative bg-black min-h-screen text-white">
-      <Navbar />
+      {!fullscreen && <Navbar />}
 
-      <main className="pt-20 pb-16">
-        <div className="px-6 md:px-12 mb-6 flex items-center justify-between">
-          <button
-            onClick={() => navigate(-1)}
-            className="inline-flex items-center gap-2 text-white/60 hover:text-white"
-          >
-            <ArrowLeft size={18} /> Back
-          </button>
-          <p className="text-xs uppercase tracking-[0.3em] text-white/40">{title}</p>
-        </div>
+      <main className={fullscreen ? '' : 'pt-20 pb-16'}>
+        {!fullscreen && (
+          <div className="px-6 md:px-12 mb-6 flex items-center justify-between">
+            <button
+              onClick={() => navigate(-1)}
+              className="inline-flex items-center gap-2 text-white/60 hover:text-white"
+            >
+              <ArrowLeft size={18} /> Back
+            </button>
+            <p className="text-xs uppercase tracking-[0.3em] text-white/40">{title}</p>
+          </div>
+        )}
 
         {loading ? (
           <Skeleton />
@@ -168,7 +176,7 @@ export default function GalleryPage() {
           </div>
         ) : (
           <>
-            {subcategories.length > 0 && (
+            {!fullscreen && subcategories.length > 0 && (
               <div className="px-6 md:px-12 mb-6 flex flex-wrap gap-2">
                 <button
                   onClick={() => setSubFilter('all')}
@@ -192,19 +200,20 @@ export default function GalleryPage() {
               </div>
             )}
 
-            <div className="relative max-w-5xl mx-auto px-4">
+            <div className={fullscreen ? 'fixed inset-0 z-50 bg-black flex flex-col' : 'relative max-w-5xl mx-auto px-4'}>
               <div
-                className="relative aspect-[16/10] md:aspect-video bg-zinc-900 rounded-2xl overflow-hidden border border-white/10 touch-pan-y"
+                className={`relative ${fullscreen ? 'flex-1' : 'aspect-[16/10] md:aspect-video'} bg-black overflow-hidden ${fullscreen ? '' : 'rounded-2xl border border-white/10'} touch-pan-y`}
                 onTouchStart={onTouchStart}
                 onTouchEnd={onTouchEnd}
+                onClick={() => !fullscreen && setFullscreen(true)}
               >
-                {filtered[active] && (
-                  filtered[active].media_type === 'video' || filtered[active].image_url?.match(/\.(mp4|webm|mov)$/i) ? (
+                {current && (
+                  current.media_type === 'video' || current.image_url?.match(/\.(mp4|webm|mov)$/i) ? (
                     <video
-                      key={filtered[active].id}
-                      src={filtered[active].image_url}
+                      key={current.id}
+                      src={current.image_url}
                       controls
-                      className="w-full h-full object-contain bg-black"
+                      className="w-full h-full object-contain"
                       autoPlay
                       muted
                       loop
@@ -212,23 +221,32 @@ export default function GalleryPage() {
                     />
                   ) : (
                     <img
-                      key={filtered[active].id}
-                      src={filtered[active].image_url}
-                      alt={filtered[active].title}
+                      key={current.id}
+                      src={current.image_url}
+                      alt={current.title}
                       className="w-full h-full object-contain"
                     />
                   )
                 )}
 
+                {fullscreen && (
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setFullscreen(false); }}
+                    className="absolute top-4 right-4 z-10 p-3 rounded-full bg-black/60 text-white"
+                  >
+                    <X size={22} />
+                  </button>
+                )}
+
                 <button
-                  onClick={() => go(-1)}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 p-3 rounded-full bg-black/50 hover:bg-black/70 text-white hidden md:flex"
+                  onClick={(e) => { e.stopPropagation(); go(-1); }}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 p-3 rounded-full bg-black/50 hover:bg-black/70 text-white"
                 >
                   <ChevronLeft size={24} />
                 </button>
                 <button
-                  onClick={() => go(1)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 p-3 rounded-full bg-black/50 hover:bg-black/70 text-white hidden md:flex"
+                  onClick={(e) => { e.stopPropagation(); go(1); }}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-3 rounded-full bg-black/50 hover:bg-black/70 text-white"
                 >
                   <ChevronRight size={24} />
                 </button>
@@ -236,20 +254,26 @@ export default function GalleryPage() {
                 <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-black/60 text-xs">
                   {active + 1} / {filtered.length}
                 </div>
+
+                {!fullscreen && (
+                  <div className="absolute top-3 right-3 p-2 rounded-full bg-black/50 text-white/70">
+                    <Maximize2 size={18} />
+                  </div>
+                )}
               </div>
 
-              {filtered[active] && (
+              {current && !fullscreen && (
                 <div className="mt-6 text-center">
-                  <h2 className="text-2xl md:text-3xl font-bold">{filtered[active].title}</h2>
-                  {filtered[active].subcategory && (
-                    <p className="text-xs uppercase tracking-wider text-white/50 mt-1">{filtered[active].subcategory}</p>
+                  <h2 className="text-2xl md:text-3xl font-bold">{current.title}</h2>
+                  {current.subcategory && (
+                    <p className="text-xs uppercase tracking-wider text-white/50 mt-1">{current.subcategory}</p>
                   )}
-                  {filtered[active].description && (
-                    <p className="mt-2 text-white/60 max-w-2xl mx-auto">{filtered[active].description}</p>
+                  {current.description && (
+                    <p className="mt-2 text-white/60 max-w-2xl mx-auto">{current.description}</p>
                   )}
-                  {filtered[active].website_url && (
+                  {current.website_url && (
                     <a
-                      href={filtered[active].website_url}
+                      href={current.website_url}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-2 mt-4 px-5 py-2.5 bg-white text-black rounded-full text-sm font-medium"
@@ -260,31 +284,42 @@ export default function GalleryPage() {
                 </div>
               )}
 
-              <div className="mt-8 flex gap-3 overflow-x-auto pb-4 scrollbar-hide">
-                {filtered.map((item, idx) => (
-                  <button
-                    key={item.id}
-                    onClick={() => setActive(idx)}
-                    className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition ${
-                      idx === active ? 'border-white' : 'border-transparent opacity-60 hover:opacity-100'
-                    }`}
-                  >
-                    {item.media_type === 'video' || item.image_url?.match(/\.(mp4|webm|mov)$/i) ? (
-                      <div className="w-full h-full bg-zinc-800 flex items-center justify-center">
-                        <Play size={20} />
-                      </div>
-                    ) : (
-                      <img src={item.image_url} alt="" className="w-full h-full object-cover" />
-                    )}
-                  </button>
-                ))}
-              </div>
+              {!fullscreen && (
+                <div className="mt-8 flex gap-3 overflow-x-auto pb-4 scrollbar-hide">
+                  {filtered.map((item, idx) => (
+                    <button
+                      key={item.id}
+                      onClick={() => setActive(idx)}
+                      className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition ${
+                        idx === active ? 'border-white' : 'border-transparent opacity-60 hover:opacity-100'
+                      }`}
+                    >
+                      {item.media_type === 'video' || item.image_url?.match(/\.(mp4|webm|mov)$/i) ? (
+                        <div className="w-full h-full bg-zinc-800 flex items-center justify-center">
+                          <Play size={20} />
+                        </div>
+                      ) : (
+                        <img src={item.image_url} alt="" className="w-full h-full object-cover" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {fullscreen && current && (
+                <div className="p-4 text-center bg-black/80">
+                  <h2 className="text-lg font-semibold">{current.title}</h2>
+                  {current.description && (
+                    <p className="text-sm text-white/60 mt-1 line-clamp-2">{current.description}</p>
+                  )}
+                </div>
+              )}
             </div>
           </>
         )}
       </main>
 
-      <Footer />
+      {!fullscreen && <Footer />}
     </div>
   );
 }
