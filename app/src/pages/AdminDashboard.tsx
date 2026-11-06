@@ -31,6 +31,7 @@ interface PortfolioItem {
   category?: string;
   subcategory?: string | null;
   website_url?: string | null;
+  priority?: number | null;
   created_at?: string;
 }
 
@@ -44,6 +45,7 @@ const AdminDashboard = () => {
   const [category, setCategory] = useState<CategorySlug>('web');
   const [subcategory, setSubcategory] = useState('');
   const [websiteUrl, setWebsiteUrl] = useState('');
+  const [priority, setPriority] = useState(0);
   const [files, setFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
   const [status, setStatus] = useState('');
@@ -144,6 +146,7 @@ const AdminDashboard = () => {
           category,
           subcategory: subcategory || null,
           website_url: category === 'website' ? websiteUrl.trim() : null,
+          priority: priority || 0,
         });
 
         if (dbErr) {
@@ -162,6 +165,7 @@ const AdminDashboard = () => {
       setDescription('');
       setWebsiteUrl('');
       setSubcategory('');
+      setPriority(0);
       setFiles([]);
       await loadItems();
     } catch (err: any) {
@@ -258,6 +262,19 @@ const AdminDashboard = () => {
                 </select>
               </div>
             )}
+
+            <div>
+              <label className="text-xs text-white/50 uppercase tracking-wider block mb-2">
+                Priority (higher number shows first)
+              </label>
+              <input
+                type="number"
+                value={priority}
+                onChange={(e) => setPriority(Number(e.target.value) || 0)}
+                className="w-full px-4 py-3 bg-black/40 border border-white/15 rounded-xl outline-none focus:border-white/40"
+                min="0"
+              />
+            </div>
 
             <input
               value={title}
@@ -382,6 +399,7 @@ const AdminDashboard = () => {
                       <p className="text-[10px] uppercase tracking-wider text-white/40">
                         {CATEGORIES.find((c) => c.slug === item.category)?.name || item.category || 'web'}
                         {item.subcategory ? ` · ${item.subcategory}` : ''}
+                        {item.priority ? ` · P${item.priority}` : ''}
                       </p>
                       <p className="font-medium text-sm mt-0.5">{item.title}</p>
                       {item.website_url && (
