@@ -20,6 +20,11 @@ function App() {
   const lenisRef = useRef<Lenis | null>(null);
 
   useEffect(() => {
+    // Always start homepage at the top on load/refresh
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+
     const lenis = new Lenis({
       duration: 0.9,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
@@ -33,6 +38,9 @@ function App() {
 
     lenisRef.current = lenis;
     (window as any).__lenis = lenis;
+
+    // Snap to top immediately after Lenis boots
+    lenis.scrollTo(0, { immediate: true });
 
     lenis.on('scroll', ScrollTrigger.update);
 
