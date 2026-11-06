@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { LogOut, BarChart3, Loader2, Upload, ExternalLink, Trash2, Play } from 'lucide-react';
+import { LogOut, BarChart3, Loader2, Upload, ExternalLink, Trash2, Play, Edit2, ChevronUp, ChevronDown, X } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 const CATEGORIES = [
@@ -51,7 +51,17 @@ const AdminDashboard = () => {
   const [status, setStatus] = useState('');
   const [filter, setFilter] = useState<string>('all');
 
+  const [editing, setEditing] = useState<PortfolioItem | null>(null);
+  const [editTitle, setEditTitle] = useState('');
+  const [editDescription, setEditDescription] = useState('');
+  const [editCategory, setEditCategory] = useState<CategorySlug>('web');
+  const [editSubcategory, setEditSubcategory] = useState('');
+  const [editWebsite, setEditWebsite] = useState('');
+  const [editPriority, setEditPriority] = useState(0);
+  const [savingEdit, setSavingEdit] = useState(false);
+
   const availableSubs = SUBCATEGORIES[category] || [];
+  const editAvailableSubs = SUBCATEGORIES[editCategory] || [];
 
   const loadItems = async () => {
     setLoadingItems(true);
@@ -71,6 +81,49 @@ const AdminDashboard = () => {
   useEffect(() => {
     setSubcategory('');
   }, [category]);
+
+  const openEdit = (item: PortfolioItem) => {
+    setEditing(item);
+    setEditTitle(item.title);
+    setEditDescription(item.description || '');
+    setEditCategory((item.category as CategorySlug) || 'web');
+    setEditSubcategory(item.subcategory || '');
+    setEditWebsite(item.website_url || '');
+    setEditPriority(item.priority || 0);
+  };
+
+  const saveEdit = async () => {
+    if (!editing) return;
+    setSavingEdit(true);
+    const { error } = await supabase
+      .from('portfolio_items')
+      .update({
+        title: editTitle.trim(),
+        description: editDescription.trim() || null,
+        category: editCategory,
+        subcategory: editSubcategory || null,
+        website_url: editWebsite.trim() || null,
+        priority: editPriority || 0,
+      })
+      .eq('id', editing.id);
+
+    setSavingEdit(false);
+    if (error) {
+      setStatus('Update failed: ' + error.message);
+    } else {
+      setStatus('Item updated');
+      setEditing(null);
+      await loadItems();
+    }
+  };
+
+  const changePriority = async (id: string, delta: number) => {
+    const item = items.find((i) => i.id === id);
+    if (!item) return;
+    const newPriority = Math.max(0, (item.priority || 0) + delta);
+    await supabase.from('portfolio_items').update({ priority: newPriority }).eq('id', id);
+    await loadItems();
+  };
 
   if (authLoading) {
     return (
@@ -227,27 +280,21 @@ const AdminDashboard = () => {
           </h2>
           <form onSubmit={handleUpload} className="space-y-4 max-w-xl">
             <div>
-              <label className="text-xs text-white/50 uppercase tracking-wider block mb-2">
-                Category
-              </label>
+              <label className="text-xs text-white/50 uppercase tracking-wider block mb-2">Category</label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value as CategorySlug)}
                 className="w-full px-4 py-3 bg-black/40 border border-white/15 rounded-xl outline-none focus:border-white/40 text-white"
               >
                 {CATEGORIES.map((c) => (
-                  <option key={c.slug} value={c.slug}>
-                    {c.name}
-                  </option>
+                  <option key={c.slug} value={c.slug}>{c.name}</option>
                 ))}
               </select>
             </div>
 
             {availableSubs.length > 0 && (
               <div>
-                <label className="text-xs text-white/50 uppercase tracking-wider block mb-2">
-                  Subcategory (optional)
-                </label>
+                <label className="text-xs text-white/50 uppercase tracking-wider block mb-2">Subcategory (optional)</label>
                 <select
                   value={subcategory}
                   onChange={(e) => setSubcategory(e.target.value)}
@@ -255,18 +302,14 @@ const AdminDashboard = () => {
                 >
                   <option value="">None</option>
                   {availableSubs.map((s) => (
-                    <option key={s} value={s}>
-                      {s}
-                    </option>
+                    <option key={s} value={s}>{s}</option>
                   ))}
                 </select>
               </div>
             )}
 
             <div>
-              <label className="text-xs text-white/50 uppercase tracking-wider block mb-2">
-                Priority (higher number shows first)
-              </label>
+              <label className="text-xs text-white/50 uppercase tracking-wider block mb-2">Priority (higher number shows first)</label>
               <input
                 type="number"
                 value={priority}
@@ -293,9 +336,7 @@ const AdminDashboard = () => {
 
             {category === 'website' && (
               <div>
-                <label className="text-xs text-white/50 uppercase tracking-wider block mb-2">
-                  Website URL
-                </label>
+                <label className="text-xs text-white/50 uppercase tracking-wider block mb-2">Website URL</label>
                 <input
                   value={websiteUrl}
                   onChange={(e) => setWebsiteUrl(e.target.value)}
@@ -307,9 +348,7 @@ const AdminDashboard = () => {
             )}
 
             <div>
-              <label className="text-xs text-white/50 uppercase tracking-wider block mb-2">
-                Files (images or videos)
-              </label>
+              <label className="text-xs text-white/50 uppercase tracking-wider block mb-2">Files (images or videos)</label>
               <input
                 type="file"
                 accept="image/*,video/*"
@@ -317,9 +356,7 @@ const AdminDashboard = () => {
                 onChange={(e) => setFiles(Array.from(e.target.files || []))}
                 className="w-full text-sm text-white/70"
               />
-              {files.length > 0 && (
-                <p className="text-xs text-white/40 mt-2">{files.length} file(s) selected</p>
-              )}
+              {files.length > 0 && <p className="text-xs text-white/40 mt-2">{files.length} file(s) selected</p>}
             </div>
 
             <button
@@ -387,13 +424,36 @@ const AdminDashboard = () => {
                           className="w-full h-40 object-cover"
                         />
                       )}
-                      <button
-                        onClick={() => handleDelete(item.id)}
-                        className="absolute top-2 right-2 p-2 rounded-lg bg-black/60 text-red-400 opacity-0 group-hover:opacity-100 transition"
-                        title="Delete"
-                      >
-                        <Trash2 size={16} />
-                      </button>
+                      <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition">
+                        <button
+                          onClick={() => changePriority(item.id, 1)}
+                          className="p-1.5 rounded-lg bg-black/70 text-white"
+                          title="Increase priority"
+                        >
+                          <ChevronUp size={14} />
+                        </button>
+                        <button
+                          onClick={() => changePriority(item.id, -1)}
+                          className="p-1.5 rounded-lg bg-black/70 text-white"
+                          title="Decrease priority"
+                        >
+                          <ChevronDown size={14} />
+                        </button>
+                        <button
+                          onClick={() => openEdit(item)}
+                          className="p-1.5 rounded-lg bg-black/70 text-blue-400"
+                          title="Edit"
+                        >
+                          <Edit2 size={14} />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(item.id)}
+                          className="p-1.5 rounded-lg bg-black/70 text-red-400"
+                          title="Delete"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
                     </div>
                     <div className="p-3">
                       <p className="text-[10px] uppercase tracking-wider text-white/40">
@@ -421,6 +481,109 @@ const AdminDashboard = () => {
           )}
         </section>
       </div>
+
+      {editing && (
+        <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
+          <div className="bg-zinc-900 border border-white/10 rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Edit Item</h3>
+              <button onClick={() => setEditing(null)} className="text-white/50 hover:text-white">
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="text-xs text-white/50 uppercase tracking-wider block mb-1">Category</label>
+                <select
+                  value={editCategory}
+                  onChange={(e) => {
+                    setEditCategory(e.target.value as CategorySlug);
+                    setEditSubcategory('');
+                  }}
+                  className="w-full px-3 py-2 bg-black/40 border border-white/15 rounded-lg text-white"
+                >
+                  {CATEGORIES.map((c) => (
+                    <option key={c.slug} value={c.slug}>{c.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              {editAvailableSubs.length > 0 && (
+                <div>
+                  <label className="text-xs text-white/50 uppercase tracking-wider block mb-1">Subcategory</label>
+                  <select
+                    value={editSubcategory}
+                    onChange={(e) => setEditSubcategory(e.target.value)}
+                    className="w-full px-3 py-2 bg-black/40 border border-white/15 rounded-lg text-white"
+                  >
+                    <option value="">None</option>
+                    {editAvailableSubs.map((s) => (
+                      <option key={s} value={s}>{s}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              <div>
+                <label className="text-xs text-white/50 uppercase tracking-wider block mb-1">Title</label>
+                <input
+                  value={editTitle}
+                  onChange={(e) => setEditTitle(e.target.value)}
+                  className="w-full px-3 py-2 bg-black/40 border border-white/15 rounded-lg"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs text-white/50 uppercase tracking-wider block mb-1">Description</label>
+                <textarea
+                  value={editDescription}
+                  onChange={(e) => setEditDescription(e.target.value)}
+                  rows={3}
+                  className="w-full px-3 py-2 bg-black/40 border border-white/15 rounded-lg"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs text-white/50 uppercase tracking-wider block mb-1">Website URL</label>
+                <input
+                  value={editWebsite}
+                  onChange={(e) => setEditWebsite(e.target.value)}
+                  className="w-full px-3 py-2 bg-black/40 border border-white/15 rounded-lg"
+                  placeholder="https://..."
+                />
+              </div>
+
+              <div>
+                <label className="text-xs text-white/50 uppercase tracking-wider block mb-1">Priority</label>
+                <input
+                  type="number"
+                  value={editPriority}
+                  onChange={(e) => setEditPriority(Number(e.target.value) || 0)}
+                  className="w-full px-3 py-2 bg-black/40 border border-white/15 rounded-lg"
+                  min="0"
+                />
+              </div>
+
+              <div className="flex gap-2 pt-2">
+                <button
+                  onClick={saveEdit}
+                  disabled={savingEdit}
+                  className="flex-1 py-2.5 bg-white text-black rounded-lg font-medium disabled:opacity-50"
+                >
+                  {savingEdit ? 'Saving...' : 'Save Changes'}
+                </button>
+                <button
+                  onClick={() => setEditing(null)}
+                  className="flex-1 py-2.5 border border-white/20 rounded-lg"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
