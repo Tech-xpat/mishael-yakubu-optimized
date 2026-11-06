@@ -29,7 +29,6 @@ const Footer = () => {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      // CTA text fill animation on scroll
       gsap.fromTo(
         fillRef.current,
         { height: '0%' },
@@ -45,7 +44,6 @@ const Footer = () => {
         }
       );
 
-      // Social links animation
       gsap.fromTo(
         '.social-link',
         { y: 30, opacity: 0 },
@@ -67,22 +65,27 @@ const Footer = () => {
     return () => ctx.revert();
   }, []);
 
+  const scrollToTarget = (href: string) => {
+    if (!href.startsWith('#')) return;
+    const target = document.querySelector(href);
+    if (!target) return;
+    const lenis = (window as any).__lenis;
+    if (lenis?.scrollTo) {
+      lenis.scrollTo(target, { offset: 0, duration: 1.1 });
+    } else {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
   const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     if (href.startsWith('#')) {
       e.preventDefault();
-      const target = document.querySelector(href);
-      if (target) {
-        target.scrollIntoView({ behavior: 'smooth' });
-      }
+      scrollToTarget(href);
     }
   };
 
   return (
-    <footer
-      ref={sectionRef}
-      className="relative w-full bg-black pt-20 md:pt-32 pb-8"
-    >
-      {/* Newsletter Signup */}
+    <footer ref={sectionRef} className="relative w-full bg-black pt-20 md:pt-32 pb-8">
       <div className="w-full px-6 md:px-12 lg:px-20 mb-20">
         <div className="mb-6">
           <p className="text-xs tracking-[0.3em] text-white/50 uppercase font-body mb-4">
@@ -92,10 +95,8 @@ const Footer = () => {
         <NewsletterSignup />
       </div>
 
-      {/* Top Section */}
       <div className="w-full px-6 md:px-12 lg:px-20">
         <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-12 mb-20">
-          {/* Left - Contact */}
           <div>
             <p className="text-xs tracking-[0.3em] text-white/50 uppercase font-body mb-4">
               Start a Project
@@ -108,7 +109,6 @@ const Footer = () => {
             </a>
           </div>
 
-          {/* Right - Socials */}
           <div className="flex flex-wrap gap-4">
             {socialLinks.map((social) => {
               const Icon = social.icon;
@@ -128,19 +128,16 @@ const Footer = () => {
           </div>
         </div>
 
-        {/* Main CTA - Let's Talk */}
         <div ref={ctaRef} className="relative py-16 md:py-24 border-t border-b border-white/10">
           <a
             href="#contact"
             onClick={(e) => handleLinkClick(e, '#contact')}
             className="group block relative overflow-hidden"
           >
-            {/* Outline Text */}
             <h2 className="font-display text-[15vw] md:text-[12vw] font-bold text-stroke leading-none text-center">
               LET'S TALK
             </h2>
 
-            {/* Filled Text (Clipped) */}
             <div
               ref={fillRef}
               className="absolute inset-0 overflow-hidden"
@@ -151,16 +148,13 @@ const Footer = () => {
               </h2>
             </div>
 
-            {/* Arrow */}
             <div className="absolute right-8 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
               <ArrowUpRight size={48} className="text-white" />
             </div>
           </a>
         </div>
 
-        {/* Bottom Section */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-8 pt-8">
-          {/* Logo */}
           <a
             href="#home"
             onClick={(e) => handleLinkClick(e, '#home')}
@@ -169,7 +163,6 @@ const Footer = () => {
             Mishael
           </a>
 
-          {/* Navigation */}
           <nav className="flex flex-wrap gap-6">
             {navLinks.map((link) => (
               <a
@@ -183,16 +176,18 @@ const Footer = () => {
             ))}
           </nav>
 
-          {/* Copyright */}
           <p className="text-xs text-white/40 font-body">
             © {new Date().getFullYear()} Mishael Yakubu. All rights reserved.
           </p>
         </div>
       </div>
 
-      {/* Back to Top Button */}
       <button
-        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+        onClick={() => {
+          const lenis = (window as any).__lenis;
+          if (lenis?.scrollTo) lenis.scrollTo(0, { duration: 1.1 });
+          else window.scrollTo({ top: 0, behavior: 'smooth' });
+        }}
         className="fixed bottom-8 right-8 w-12 h-12 bg-white text-black flex items-center justify-center hover:bg-white/90 transition-all duration-300 z-50 opacity-0 pointer-events-none"
         id="back-to-top"
         aria-label="Back to top"
