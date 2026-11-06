@@ -1,8 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { firestore } from '../lib/firebase';
 import { collection, query, onSnapshot, where } from 'firebase/firestore';
-import GalleryGrid from '../components/GalleryGrid';
 import { ArrowLeft, ExternalLink } from 'lucide-react';
 import Navbar from '../sections/Navbar';
 import Footer from '../sections/Footer';
@@ -66,6 +65,7 @@ const CategoryPage = () => {
   const navigate = useNavigate();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   const config = type ? categoryConfig[type] : null;
   const displayTitle = subcategory ? slugToTitle(subcategory) : config?.title || 'Portfolio';
@@ -103,6 +103,46 @@ const CategoryPage = () => {
     return unsubscribe;
   }, [type, subcategory, config]);
 
+  // Smooth auto-scroll for the carousel (pauses on touch/hover)
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el || projects.length === 0) return;
+
+    let raf: number;
+    let speed = 0.6;
+    let paused = false;
+
+    const step = () => {
+      if (!paused && el.scrollWidth > el.clientWidth) {
+        el.scrollLeft += speed;
+        if (el.scrollLeft >= el.scrollWidth - el.clientWidth - 1) {
+          el.scrollLeft = 0;
+        }
+      }
+      raf = requestAnimationFrame(step);
+    };
+
+    const pause = () => { paused = true; };
+    const resume = () => { paused = false; };
+
+    el.addEventListener('pointerdown', pause);
+    el.addEventListener('pointerup', resume);
+    el.addEventListener('pointerleave', resume);
+    el.addEventListener('touchstart', pause, { passive: true });
+    el.addEventListener('touchend', resume);
+
+    raf = requestAnimationFrame(step);
+
+    return () => {
+      cancelAnimationFrame(raf);
+      el.removeEventListener('pointerdown', pause);
+      el.removeEventListener('pointerup', resume);
+      el.removeEventListener('pointerleave', resume);
+      el.removeEventListener('touchstart', pause);
+      el.removeEventListener('touchend', resume);
+    };
+  }, [projects]);
+
   if (!config) {
     return (
       <div className="min-h-screen bg-black text-white flex items-center justify-center">
@@ -116,14 +156,12 @@ const CategoryPage = () => {
     );
   }
 
-  const images = projects.map((p) => ({ id: p.id, url: p.imageUrl, title: p.title }));
-
   return (
     <div className="relative bg-black min-h-screen text-white">
       <Navbar />
 
-      <main className="pt-24 pb-20 px-6 md:px-12 lg:px-20">
-        <div className="mb-10">
+      <main className="pt-24 pb-20">
+        <div className="px-6 md:px-12 lg:px-20 mb-10">
           <button
             onClick={() => navigate(-1)}
             className="inline-flex items-center gap-2 text-white/60 hover:text-white mb-6 transition"
@@ -135,23 +173,59 @@ const CategoryPage = () => {
           <p className="text-xs tracking-[0.3em] text-white/50 uppercase mb-3">Portfolio</p>
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-3">{displayTitle}</h1>
           <p className="text-lg text-white/60 max-w-2xl">
-            Complete collection of {displayTitle.toLowerCase()} projects
+            Complete collection of {displayTitle.toLowerCase()} projects. Swipe or drag the cards.
           </p>
         </div>
 
         {loading ? (
           <div className="py-20 text-center text-white/50">Loading projects...</div>
         ) : projects.length === 0 ? (
-          <div className="py-20 text-center text-white/50">No projects in this category yet.</div>
+          <div className="py-20 text-center text-white/50 px-6">No projects in this category yet.</div>
         ) : (
           <>
-            <GalleryGrid items={images} columns={3} />
-
-            <div className="mt-16 grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Stylish horizontal moving cards — touch interactive */}
+            <div
+              ref={scrollRef}
+              className="flex gap-6 overflow-x-auto pb-8 px-6 md:px-12 lg:px-20 scrollbar-hide snap-x snap-mandatory"
+              style={{ scrollBehavior: 'smooth', WebkitOverflowScrolling: 'touch' }}
+            >
               {projects.map((project) => (
                 <div
                   key={project.id}
-                  className="p-6 rounded-lg bg-white/5 border border-white/10 hover:border-white/30 transition-all"
+                  className="flex-shrink-0 w-[280px] md:w-[340px] snap-center group"
+                >
+                  <div className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-white/5 border border-white/10 group-hover:border-white/40 transition-all shadow-2xl">
+                    <img
+                      src={project.imageUrl}
+                      alt={project.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                    <div className="absolute bottom-0 left-0 right-0 p-5">
+                      <h3 className="font-bold text-white text-lg mb-1 line-clamp-2">{project.title}</h3>
+                      {project.link && (
+                        <a
+                          href={project.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-sm text-white/80 hover:text-white mt-2"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          View <ExternalLink size={14} />
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Detailed list below */}
+            <div className="mt-12 px-6 md:px-12 lg:px-20 grid grid-cols-1 md:grid-cols-2 gap-6">
+              {projects.map((project) => (
+                <div
+                  key={project.id}
+                  className="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-white/30 transition-all"
                 >
                   <h3 className="font-bold text-white text-lg mb-2">{project.title}</h3>
                   <p className="text-sm text-white/60 mb-4">{project.description}</p>
