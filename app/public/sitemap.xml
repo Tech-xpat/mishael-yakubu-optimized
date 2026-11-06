@@ -1,19 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://ceo.empiredigitals.space/</loc>
-    <lastmod>2026-10-26</lastmod>
+    <loc>https://mishael-yakubu.com/</loc>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://ceo.empiredigitals.space/#portfolio</loc>
+    <loc>https://mishael-yakubu.com/gallery/web</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://ceo.empiredigitals.space/#contact</loc>
-    <changefreq>monthly</changefreq>
+    <loc>https://mishael-yakubu.com/gallery/website</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://mishael-yakubu.com/gallery/flyer</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://mishael-yakubu.com/gallery/brand</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://mishael-yakubu.com/gallery/ai</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://mishael-yakubu.com/gallery/video</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://mishael-yakubu.com/gallery/motion</loc>
+    <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
 </urlset>
