@@ -28,15 +28,27 @@ const CATEGORY_NAMES: Record<string, string> = {
   motion: 'Motion Graphics',
 };
 
-function Skeleton() {
+/** Animated skeleton frame loader — shown while data is fetching */
+function PageSkeleton() {
   return (
-    <div className="relative max-w-5xl mx-auto px-4 animate-pulse">
-      <div className="aspect-[16/10] md:aspect-video bg-gradient-to-br from-white/15 to-white/5 rounded-2xl" />
-      <div className="mt-6 h-8 bg-white/15 rounded-lg w-2/3 mx-auto" />
-      <div className="mt-3 h-4 bg-white/10 rounded w-1/2 mx-auto" />
+    <div className="relative max-w-5xl mx-auto px-4" aria-busy="true" aria-label="Loading gallery">
+      <div className="aspect-[16/10] md:aspect-video rounded-2xl overflow-hidden border border-white/10 relative">
+        <div className="absolute inset-0 skeleton" />
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="w-12 h-12 rounded-full border-2 border-white/20 border-t-white/60 animate-spin" />
+        </div>
+      </div>
+      <div className="mt-6 flex flex-col items-center gap-3">
+        <div className="h-8 skeleton rounded-lg w-2/3 max-w-md" />
+        <div className="h-4 skeleton rounded w-1/2 max-w-xs" />
+      </div>
       <div className="mt-8 flex gap-3 justify-center overflow-hidden">
         {[1, 2, 3, 4, 5].map((i) => (
-          <div key={i} className="w-20 h-20 bg-white/10 rounded-lg flex-shrink-0" />
+          <div
+            key={i}
+            className="w-20 h-20 skeleton rounded-lg flex-shrink-0"
+            style={{ animationDelay: `${i * 0.1}s` }}
+          />
         ))}
       </div>
     </div>
@@ -65,6 +77,14 @@ export default function GalleryPage() {
   };
 
   useEffect(() => {
+    const lenis = (window as any).__lenis;
+    if (lenis?.scrollTo) lenis.scrollTo(0, { immediate: true });
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  }, [category]);
+
+  useEffect(() => {
     if (!category) {
       setLoading(false);
       setError('Invalid category');
@@ -72,6 +92,10 @@ export default function GalleryPage() {
     }
     setLoading(true);
     setError(null);
+    setItems([]);
+    setActive(0);
+    setSubFilter('all');
+
     supabase
       .from('portfolio_items')
       .select('*')
@@ -91,8 +115,6 @@ export default function GalleryPage() {
           setItems(sorted);
         }
         setLoading(false);
-        setActive(0);
-        setSubFilter('all');
       });
   }, [category]);
 
@@ -174,7 +196,7 @@ export default function GalleryPage() {
         )}
 
         {loading ? (
-          <Skeleton />
+          <PageSkeleton />
         ) : error ? (
           <div className="text-center py-32 px-6">
             <AlertCircle size={40} className="mx-auto text-red-400 mb-4" />
