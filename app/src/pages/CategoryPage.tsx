@@ -16,7 +16,10 @@ interface Project {
   createdAt: any;
 }
 
-const categoryConfig: Record<string, { collection: string; title: string; subcategories?: string[] }> = {
+const categoryConfig: Record<
+  string,
+  { collection: string; title: string; subcategories?: string[] }
+> = {
   'web-development': {
     collection: 'webDevelopment',
     title: 'Web Development',
@@ -35,13 +38,7 @@ const categoryConfig: Record<string, { collection: string; title: string; subcat
   'brand-design': {
     collection: 'brandDesign',
     title: 'Brand Design',
-    subcategories: [
-      'Church Branding',
-      'Flyers',
-      'Birthday Flyers',
-      'Logo',
-      'Other Visuals',
-    ],
+    subcategories: ['Church Branding', 'Flyers', 'Birthday Flyers', 'Logo', 'Other Visuals'],
   },
   'ai-automation': {
     collection: 'aiAutomation',
@@ -57,7 +54,50 @@ function slugToTitle(slug: string): string {
 }
 
 function titleToSlug(title: string): string {
-  return title.toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+  return title
+    .toLowerCase()
+    .replace(/&/g, 'and')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '');
+}
+
+/** Animated card skeleton frames while projects load */
+function CategorySkeleton() {
+  return (
+    <div aria-busy="true" aria-label="Loading projects">
+      <div className="flex gap-6 overflow-hidden px-6 md:px-12 lg:px-20 pb-8">
+        {[1, 2, 3, 4].map((i) => (
+          <div
+            key={i}
+            className="flex-shrink-0 w-[280px] md:w-[340px]"
+            style={{ animationDelay: `${i * 0.08}s` }}
+          >
+            <div className="relative aspect-[3/4] rounded-2xl overflow-hidden border border-white/10">
+              <div className="absolute inset-0 skeleton" />
+              <div className="absolute bottom-0 left-0 right-0 p-5 space-y-2">
+                <div className="h-5 skeleton rounded w-3/4" />
+                <div className="h-3 skeleton rounded w-1/2" />
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="mt-12 px-6 md:px-12 lg:px-20 grid grid-cols-1 md:grid-cols-2 gap-6">
+        {[1, 2, 3, 4].map((i) => (
+          <div
+            key={i}
+            className="p-6 rounded-2xl border border-white/10 space-y-3"
+            style={{ animationDelay: `${i * 0.1}s` }}
+          >
+            <div className="h-6 skeleton rounded w-2/3" />
+            <div className="h-4 skeleton rounded w-full" />
+            <div className="h-4 skeleton rounded w-5/6" />
+            <div className="h-3 skeleton rounded w-1/3 mt-2" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 }
 
 const CategoryPage = () => {
@@ -70,16 +110,30 @@ const CategoryPage = () => {
   const config = type ? categoryConfig[type] : null;
   const displayTitle = subcategory ? slugToTitle(subcategory) : config?.title || 'Portfolio';
 
+  // Always open at the top of the page
+  useEffect(() => {
+    const lenis = (window as any).__lenis;
+    if (lenis?.scrollTo) lenis.scrollTo(0, { immediate: true });
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  }, [type, subcategory]);
+
   useEffect(() => {
     if (!config) {
       setLoading(false);
       return;
     }
 
+    setLoading(true);
+    setProjects([]);
+
     let q = query(collection(firestore, config.collection));
 
     if (subcategory && config.subcategories) {
-      const fullTitle = config.subcategories.find((s) => titleToSlug(s) === subcategory) || slugToTitle(subcategory);
+      const fullTitle =
+        config.subcategories.find((s) => titleToSlug(s) === subcategory) ||
+        slugToTitle(subcategory);
       q = query(collection(firestore, config.collection), where('subcategory', '==', fullTitle));
     }
 
@@ -122,8 +176,12 @@ const CategoryPage = () => {
       raf = requestAnimationFrame(step);
     };
 
-    const pause = () => { paused = true; };
-    const resume = () => { paused = false; };
+    const pause = () => {
+      paused = true;
+    };
+    const resume = () => {
+      paused = false;
+    };
 
     el.addEventListener('pointerdown', pause);
     el.addEventListener('pointerup', resume);
@@ -178,12 +236,13 @@ const CategoryPage = () => {
         </div>
 
         {loading ? (
-          <div className="py-20 text-center text-white/50">Loading projects...</div>
+          <CategorySkeleton />
         ) : projects.length === 0 ? (
-          <div className="py-20 text-center text-white/50 px-6">No projects in this category yet.</div>
+          <div className="py-20 text-center text-white/50 px-6">
+            No projects in this category yet.
+          </div>
         ) : (
           <>
-            {/* Stylish horizontal moving cards — touch interactive */}
             <div
               ref={scrollRef}
               className="flex gap-6 overflow-x-auto pb-8 px-6 md:px-12 lg:px-20 scrollbar-hide snap-x snap-mandatory"
@@ -202,7 +261,9 @@ const CategoryPage = () => {
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                     <div className="absolute bottom-0 left-0 right-0 p-5">
-                      <h3 className="font-bold text-white text-lg mb-1 line-clamp-2">{project.title}</h3>
+                      <h3 className="font-bold text-white text-lg mb-1 line-clamp-2">
+                        {project.title}
+                      </h3>
                       {project.link && (
                         <a
                           href={project.link}
@@ -220,7 +281,6 @@ const CategoryPage = () => {
               ))}
             </div>
 
-            {/* Detailed list below */}
             <div className="mt-12 px-6 md:px-12 lg:px-20 grid grid-cols-1 md:grid-cols-2 gap-6">
               {projects.map((project) => (
                 <div
