@@ -9,6 +9,7 @@ import NotFound from './pages/NotFound'
 import ProtectedRoute from './components/ProtectedRoute'
 import { AuthProvider } from './contexts/AuthContext'
 import CategoryPage from './pages/CategoryPage'
+import GalleryPage from './pages/GalleryPage'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -18,6 +19,7 @@ createRoot(document.getElementById('root')!).render(
           <Route path="/" element={<App />} />
           <Route path="/portfolio/:type" element={<CategoryPage />} />
           <Route path="/portfolio/:type/:subcategory" element={<CategoryPage />} />
+          <Route path="/gallery/:category" element={<GalleryPage />} />
           <Route path="/greatness" element={<AdminLogin />} />
           <Route
             path="/greatness/dashboard"
@@ -27,7 +29,6 @@ createRoot(document.getElementById('root')!).render(
               </ProtectedRoute>
             }
           />
-          {/* Catch-all route for 404 */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
