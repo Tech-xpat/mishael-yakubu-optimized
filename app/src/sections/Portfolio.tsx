@@ -15,12 +15,15 @@ const CATEGORIES = [
 
 function FolderSkeleton() {
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 animate-pulse">
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
       {CATEGORIES.map((c) => (
-        <div key={c.slug} className="aspect-square rounded-3xl bg-white/5 border border-white/10 flex flex-col items-center justify-center p-8">
-          <div className="w-16 h-16 rounded-2xl bg-white/10 mb-4" />
-          <div className="h-4 bg-white/10 rounded w-3/4" />
-          <div className="h-3 bg-white/10 rounded w-1/2 mt-2" />
+        <div
+          key={c.slug}
+          className="aspect-square rounded-3xl bg-white/5 border border-white/10 flex flex-col items-center justify-center p-8 animate-pulse"
+        >
+          <div className="w-16 h-16 rounded-2xl bg-white/15 mb-4" />
+          <div className="h-4 bg-white/15 rounded-full w-3/4" />
+          <div className="h-3 bg-white/10 rounded-full w-1/2 mt-3" />
         </div>
       ))}
     </div>
@@ -36,9 +39,7 @@ export default function Portfolio() {
       .from('portfolio_items')
       .select('category')
       .then(({ data, error }) => {
-        if (error) {
-          console.error(error);
-        }
+        if (error) console.error(error);
         const c: Record<string, number> = {};
         (data || []).forEach((row: any) => {
           const cat = row.category || 'web';
@@ -55,7 +56,7 @@ export default function Portfolio() {
         <p className="text-xs uppercase tracking-[0.3em] text-white/50 mb-4">Selected Work</p>
         <h2 className="text-4xl md:text-5xl font-bold mb-4">Portfolio</h2>
         <p className="text-white/60 mb-12 max-w-2xl">
-          Tap any folder to open the full gallery. Limited preview on the main page — no crowding.
+          Tap any folder to open the full gallery. Tap the preview inside to go full screen.
         </p>
 
         {loading ? (
