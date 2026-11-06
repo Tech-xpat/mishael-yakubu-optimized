@@ -16,12 +16,20 @@ const CATEGORIES = [
 
 type CategorySlug = (typeof CATEGORIES)[number]['slug'];
 
+const SUBCATEGORIES: Record<string, string[]> = {
+  flyer: ['Birthday Flyers', 'Church Flyers', 'Social Media Flyers', 'Event Flyers', 'Business Flyers', 'Other Flyers'],
+  brand: ['Logo', 'Brand Identity', 'Social Media Kit', 'Other Branding'],
+  video: ['Promo Videos', 'Testimonials', 'Tutorials', 'Other Videos'],
+  motion: ['Logo Animation', 'Explainer', 'Social Motion', 'Other Motion'],
+};
+
 interface PortfolioItem {
   id: string;
   title: string;
   description?: string | null;
   image_url: string;
   category?: string;
+  subcategory?: string | null;
   website_url?: string | null;
   created_at?: string;
 }
@@ -34,11 +42,14 @@ const AdminDashboard = () => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState<CategorySlug>('web');
+  const [subcategory, setSubcategory] = useState('');
   const [websiteUrl, setWebsiteUrl] = useState('');
   const [files, setFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
   const [status, setStatus] = useState('');
   const [filter, setFilter] = useState<string>('all');
+
+  const availableSubs = SUBCATEGORIES[category] || [];
 
   const loadItems = async () => {
     setLoadingItems(true);
@@ -54,6 +65,10 @@ const AdminDashboard = () => {
     if (!currentUser || !isAdmin) return;
     loadItems();
   }, [currentUser, isAdmin]);
+
+  useEffect(() => {
+    setSubcategory('');
+  }, [category]);
 
   if (authLoading) {
     return (
@@ -127,6 +142,7 @@ const AdminDashboard = () => {
           description: description.trim() || null,
           image_url: urlData.publicUrl,
           category,
+          subcategory: subcategory || null,
           website_url: category === 'website' ? websiteUrl.trim() : null,
         });
 
@@ -139,12 +155,13 @@ const AdminDashboard = () => {
 
       setStatus(
         success > 0
-          ? `Uploaded ${success} item(s) to ${CATEGORIES.find((c) => c.slug === category)?.name}`
+          ? `Uploaded ${success} item(s) to ${CATEGORIES.find((c) => c.slug === category)?.name}${subcategory ? ` / ${subcategory}` : ''}`
           : 'No items uploaded'
       );
       setTitle('');
       setDescription('');
       setWebsiteUrl('');
+      setSubcategory('');
       setFiles([]);
       await loadItems();
     } catch (err: any) {
@@ -221,6 +238,26 @@ const AdminDashboard = () => {
                 ))}
               </select>
             </div>
+
+            {availableSubs.length > 0 && (
+              <div>
+                <label className="text-xs text-white/50 uppercase tracking-wider block mb-2">
+                  Subcategory (optional)
+                </label>
+                <select
+                  value={subcategory}
+                  onChange={(e) => setSubcategory(e.target.value)}
+                  className="w-full px-4 py-3 bg-black/40 border border-white/15 rounded-xl outline-none focus:border-white/40 text-white"
+                >
+                  <option value="">None</option>
+                  {availableSubs.map((s) => (
+                    <option key={s} value={s}>
+                      {s}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
 
             <input
               value={title}
@@ -344,6 +381,7 @@ const AdminDashboard = () => {
                     <div className="p-3">
                       <p className="text-[10px] uppercase tracking-wider text-white/40">
                         {CATEGORIES.find((c) => c.slug === item.category)?.name || item.category || 'web'}
+                        {item.subcategory ? ` · ${item.subcategory}` : ''}
                       </p>
                       <p className="font-medium text-sm mt-0.5">{item.title}</p>
                       {item.website_url && (
