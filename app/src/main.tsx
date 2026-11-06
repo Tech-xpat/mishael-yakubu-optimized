@@ -10,11 +10,13 @@ import ProtectedRoute from './components/ProtectedRoute'
 import { AuthProvider } from './contexts/AuthContext'
 import CategoryPage from './pages/CategoryPage'
 import GalleryPage from './pages/GalleryPage'
+import ScrollToTop from './components/ScrollToTop'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <AuthProvider>
       <BrowserRouter>
+        <ScrollToTop />
         <Routes>
           <Route path="/" element={<App />} />
           <Route path="/portfolio/:type" element={<CategoryPage />} />
