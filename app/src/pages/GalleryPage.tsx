@@ -1,5 +1,5 @@
-import { useEffect, useState, useRef } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { ArrowLeft, ExternalLink, Play, ChevronLeft, ChevronRight } from 'lucide-react';
 import Navbar from '../sections/Navbar';
@@ -32,7 +32,6 @@ export default function GalleryPage() {
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
   const [active, setActive] = useState(0);
-  const containerRef = useRef<HTMLDivElement>(null);
 
   const title = category ? CATEGORY_NAMES[category] || category : 'Gallery';
 
@@ -60,7 +59,6 @@ export default function GalleryPage() {
     });
   };
 
-  // Keyboard navigation
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'ArrowRight') go(1);
@@ -97,7 +95,6 @@ export default function GalleryPage() {
           <div className="text-center py-32 text-white/40">No items in this category yet.</div>
         ) : (
           <div className="relative max-w-5xl mx-auto px-4">
-            {/* Main viewer */}
             <div className="relative aspect-[16/10] md:aspect-video bg-zinc-900 rounded-2xl overflow-hidden border border-white/10">
               {items[active] && (
                 items[active].media_type === 'video' || items[active].image_url?.match(/\.(mp4|webm|mov)$/i) ? (
@@ -120,7 +117,6 @@ export default function GalleryPage() {
                 )
               )}
 
-              {/* Nav arrows */}
               <button
                 onClick={() => go(-1)}
                 className="absolute left-3 top-1/2 -translate-y-1/2 p-3 rounded-full bg-black/50 hover:bg-black/70 text-white"
@@ -134,13 +130,11 @@ export default function GalleryPage() {
                 <ChevronRight size={24} />
               </button>
 
-              {/* Counter */}
               <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-black/60 text-xs">
                 {active + 1} / {items.length}
               </div>
             </div>
 
-            {/* Caption */}
             {items[active] && (
               <div className="mt-6 text-center">
                 <h2 className="text-2xl md:text-3xl font-bold">{items[active].title}</h2>
@@ -160,7 +154,6 @@ export default function GalleryPage() {
               </div>
             )}
 
-            {/* Thumbnails strip */}
             <div className="mt-8 flex gap-3 overflow-x-auto pb-4 scrollbar-hide">
               {items.map((item, idx) => (
                 <button
