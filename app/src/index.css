@@ -33,17 +33,26 @@
   * {
     @apply border-border;
   }
-  
+
   html {
     scroll-behavior: smooth;
+    background-color: #000;
+    color-scheme: dark;
   }
-  
+
   body {
     @apply bg-black text-white antialiased;
     font-family: 'Inter', sans-serif;
     overflow-x: hidden;
+    background-color: #000;
+    color-scheme: dark;
   }
-  
+
+  #root {
+    min-height: 100vh;
+    background-color: #000;
+  }
+
   ::selection {
     background: rgba(255, 255, 255, 0.2);
     color: white;
@@ -388,12 +397,14 @@
 }
 
 /* Hide scrollbar but keep functionality */
-.hide-scrollbar {
+.hide-scrollbar,
+.scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
 
-.hide-scrollbar::-webkit-scrollbar {
+.hide-scrollbar::-webkit-scrollbar,
+.scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
 
