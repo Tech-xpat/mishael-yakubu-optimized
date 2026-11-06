@@ -30,7 +30,11 @@ const webSubcategories = [
 ];
 
 function titleToSlug(title: string): string {
-  return title.toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+  return title
+    .toLowerCase()
+    .replace(/&/g, 'and')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '');
 }
 
 const WebDevelopment = () => {
@@ -59,7 +63,9 @@ const WebDevelopment = () => {
         });
 
         Object.keys(data).forEach((key) => {
-          data[key].sort((a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0));
+          data[key].sort(
+            (a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0)
+          );
         });
 
         setProjects(data);
@@ -99,7 +105,6 @@ const WebDevelopment = () => {
   return (
     <section
       ref={sectionRef}
-      id="web-development"
       className="relative w-full py-20 md:py-32 bg-black px-6 md:px-12 lg:px-20"
     >
       <div ref={headingRef} className="mb-16">
@@ -110,7 +115,8 @@ const WebDevelopment = () => {
           Web Development
         </h2>
         <p className="text-lg text-white/60 max-w-2xl">
-          Explore websites built for various industries and businesses. Tap any category to view the full collection.
+          Explore websites built for various industries and businesses. Tap any category to view the
+          full collection.
         </p>
       </div>
 
@@ -124,9 +130,12 @@ const WebDevelopment = () => {
               to={`/portfolio/web-development/${titleToSlug(category)}`}
               className="group p-6 rounded-xl bg-white/5 border border-white/10 hover:border-white/40 hover:bg-white/10 transition-all"
             >
-              <h3 className="text-lg font-semibold text-white mb-2 group-hover:text-white">{category}</h3>
+              <h3 className="text-lg font-semibold text-white mb-2 group-hover:text-white">
+                {category}
+              </h3>
               <p className="text-sm text-white/50">
-                {projects[category]?.length || 0} project{(projects[category]?.length || 0) === 1 ? '' : 's'}
+                {projects[category]?.length || 0} project
+                {(projects[category]?.length || 0) === 1 ? '' : 's'}
               </p>
               <p className="mt-4 text-sm text-white/70 group-hover:text-white">View full list →</p>
             </Link>
