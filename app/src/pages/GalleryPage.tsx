@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { ArrowLeft, ExternalLink, Play, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -11,6 +11,7 @@ interface Item {
   description?: string | null;
   image_url: string;
   category?: string;
+  subcategory?: string | null;
   website_url?: string | null;
   media_type?: string | null;
   created_at?: string;
@@ -32,6 +33,7 @@ export default function GalleryPage() {
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
   const [active, setActive] = useState(0);
+  const [subFilter, setSubFilter] = useState<string>('all');
 
   const title = category ? CATEGORY_NAMES[category] || category : 'Gallery';
 
@@ -47,14 +49,32 @@ export default function GalleryPage() {
         setItems(data || []);
         setLoading(false);
         setActive(0);
+        setSubFilter('all');
       });
   }, [category]);
+
+  const subcategories = useMemo(() => {
+    const set = new Set<string>();
+    items.forEach((i) => {
+      if (i.subcategory) set.add(i.subcategory);
+    });
+    return Array.from(set).sort();
+  }, [items]);
+
+  const filtered = useMemo(() => {
+    if (subFilter === 'all') return items;
+    return items.filter((i) => i.subcategory === subFilter);
+  }, [items, subFilter]);
+
+  useEffect(() => {
+    setActive(0);
+  }, [subFilter]);
 
   const go = (dir: number) => {
     setActive((i) => {
       const next = i + dir;
-      if (next < 0) return items.length - 1;
-      if (next >= items.length) return 0;
+      if (next < 0) return filtered.length - 1;
+      if (next >= filtered.length) return 0;
       return next;
     });
   };
@@ -66,7 +86,7 @@ export default function GalleryPage() {
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [items.length]);
+  }, [filtered.length]);
 
   if (loading) {
     return (
@@ -91,16 +111,40 @@ export default function GalleryPage() {
           <p className="text-xs uppercase tracking-[0.3em] text-white/40">{title}</p>
         </div>
 
-        {items.length === 0 ? (
-          <div className="text-center py-32 text-white/40">No items in this category yet.</div>
+        {subcategories.length > 0 && (
+          <div className="px-6 md:px-12 mb-6 flex flex-wrap gap-2">
+            <button
+              onClick={() => setSubFilter('all')}
+              className={`px-3 py-1.5 rounded-full text-xs ${
+                subFilter === 'all' ? 'bg-white text-black' : 'bg-white/10 text-white/70'
+              }`}
+            >
+              All
+            </button>
+            {subcategories.map((s) => (
+              <button
+                key={s}
+                onClick={() => setSubFilter(s)}
+                className={`px-3 py-1.5 rounded-full text-xs ${
+                  subFilter === s ? 'bg-white text-black' : 'bg-white/10 text-white/70'
+                }`}
+              >
+                {s}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {filtered.length === 0 ? (
+          <div className="text-center py-32 text-white/40">No items in this filter yet.</div>
         ) : (
           <div className="relative max-w-5xl mx-auto px-4">
             <div className="relative aspect-[16/10] md:aspect-video bg-zinc-900 rounded-2xl overflow-hidden border border-white/10">
-              {items[active] && (
-                items[active].media_type === 'video' || items[active].image_url?.match(/\.(mp4|webm|mov)$/i) ? (
+              {filtered[active] && (
+                filtered[active].media_type === 'video' || filtered[active].image_url?.match(/\.(mp4|webm|mov)$/i) ? (
                   <video
-                    key={items[active].id}
-                    src={items[active].image_url}
+                    key={filtered[active].id}
+                    src={filtered[active].image_url}
                     controls
                     className="w-full h-full object-contain bg-black"
                     autoPlay
@@ -109,9 +153,9 @@ export default function GalleryPage() {
                   />
                 ) : (
                   <img
-                    key={items[active].id}
-                    src={items[active].image_url}
-                    alt={items[active].title}
+                    key={filtered[active].id}
+                    src={filtered[active].image_url}
+                    alt={filtered[active].title}
                     className="w-full h-full object-contain"
                   />
                 )
@@ -131,19 +175,22 @@ export default function GalleryPage() {
               </button>
 
               <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-black/60 text-xs">
-                {active + 1} / {items.length}
+                {active + 1} / {filtered.length}
               </div>
             </div>
 
-            {items[active] && (
+            {filtered[active] && (
               <div className="mt-6 text-center">
-                <h2 className="text-2xl md:text-3xl font-bold">{items[active].title}</h2>
-                {items[active].description && (
-                  <p className="mt-2 text-white/60 max-w-2xl mx-auto">{items[active].description}</p>
+                <h2 className="text-2xl md:text-3xl font-bold">{filtered[active].title}</h2>
+                {filtered[active].subcategory && (
+                  <p className="text-xs uppercase tracking-wider text-white/50 mt-1">{filtered[active].subcategory}</p>
                 )}
-                {items[active].website_url && (
+                {filtered[active].description && (
+                  <p className="mt-2 text-white/60 max-w-2xl mx-auto">{filtered[active].description}</p>
+                )}
+                {filtered[active].website_url && (
                   <a
-                    href={items[active].website_url}
+                    href={filtered[active].website_url}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 mt-4 px-5 py-2.5 bg-white text-black rounded-full text-sm font-medium"
@@ -155,7 +202,7 @@ export default function GalleryPage() {
             )}
 
             <div className="mt-8 flex gap-3 overflow-x-auto pb-4 scrollbar-hide">
-              {items.map((item, idx) => (
+              {filtered.map((item, idx) => (
                 <button
                   key={item.id}
                   onClick={() => setActive(idx)}
