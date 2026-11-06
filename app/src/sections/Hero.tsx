@@ -46,16 +46,6 @@ const Hero = () => {
 
       // Corner elements slide in
       gsap.fromTo(
-        '.corner-tl',
-        { opacity: 0, x: -50 },
-        { opacity: 1, x: 0, duration: 1, ease: 'expo.out', delay: 1.8 }
-      );
-      gsap.fromTo(
-        '.corner-tr',
-        { opacity: 0, x: 50 },
-        { opacity: 1, x: 0, duration: 1, ease: 'expo.out', delay: 1.9 }
-      );
-      gsap.fromTo(
         '.corner-bl',
         { opacity: 0, y: 50 },
         { opacity: 1, y: 0, duration: 1, ease: 'expo.out', delay: 2 }
@@ -106,19 +96,6 @@ const Hero = () => {
         />
         {/* Dark Overlay */}
         <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/80" />
-      </div>
-
-      {/* Corner Metadata */}
-      <div className="corner-tl absolute top-8 left-8 z-20 opacity-0">
-        <p className="text-xs tracking-[0.3em] text-white/60 uppercase font-body">
-          Based In Delta State, NG
-        </p>
-      </div>
-
-      <div className="corner-tr absolute top-8 right-8 z-20 opacity-0">
-        <p className="text-xs tracking-[0.3em] text-white/60 uppercase font-body">
-          Portfolio 2026
-        </p>
       </div>
 
       <div className="corner-bl absolute bottom-8 left-8 z-20 opacity-0">
