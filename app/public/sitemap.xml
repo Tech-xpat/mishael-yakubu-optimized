@@ -1,43 +1,103 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://mishael-yakubu.com/</loc>
-    <changefreq>weekly</changefreq>
+    <loc>https://www.mishael.space/</loc>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://mishael-yakubu.com/gallery/web</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <loc>https://www.mishael.space/portfolio/web-development</loc>
+    <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://mishael-yakubu.com/gallery/website</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://mishael-yakubu.com/gallery/flyer</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://mishael-yakubu.com/gallery/brand</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://mishael-yakubu.com/gallery/ai</loc>
-    <changefreq>weekly</changefreq>
+    <loc>https://www.mishael.space/portfolio/web-development/church-website</loc>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://mishael-yakubu.com/gallery/video</loc>
-    <changefreq>weekly</changefreq>
+    <loc>https://www.mishael.space/portfolio/web-development/banking-and-investment</loc>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://mishael-yakubu.com/gallery/motion</loc>
-    <changefreq>weekly</changefreq>
+    <loc>https://www.mishael.space/portfolio/web-development/real-estate-agent</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.mishael.space/portfolio/web-development/company-management</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.mishael.space/portfolio/web-development/school-management</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.mishael.space/portfolio/web-development/broker-site</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.mishael.space/portfolio/web-development/e-commerce</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.mishael.space/portfolio/web-development/courier-service</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.mishael.space/portfolio/web-development/other-businesses</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.mishael.space/portfolio/brand-design</loc>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.mishael.space/portfolio/brand-design/church-branding</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.mishael.space/portfolio/brand-design/flyers</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.mishael.space/portfolio/brand-design/birthday-flyers</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.mishael.space/portfolio/brand-design/logo</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.mishael.space/portfolio/brand-design/other-visuals</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.mishael.space/portfolio/ai-automation</loc>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.mishael.space/gallery/web</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.mishael.space/gallery/website</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.mishael.space/gallery/flyer</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.mishael.space/gallery/brand</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.mishael.space/gallery/ai</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.mishael.space/gallery/video</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.mishael.space/gallery/motion</loc>
     <priority>0.7</priority>
   </url>
 </urlset>
