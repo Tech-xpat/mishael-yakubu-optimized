@@ -5,33 +5,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="color-scheme" content="dark" />
     <meta name="theme-color" content="#000000" />
-    
+
     <!-- Primary SEO Meta Tags -->
     <title>Mishael Yakubu | Web Developer, Brand Designer & AI Automation | Empire Digitals</title>
-    <meta name="description" content="Mishael Yakubu is the CEO of Empire Digitals and a web developer in Delta State, Nigeria. Portfolio of web development, brand design, AI automation, and software projects. Based in Delta State." />
-    <meta name="keywords" content="Mishael Yakubu, Mishael Yakubu Portfolio, Empire Digitals CEO, Empire Digitals, Web Developer in Delta State, Web Developer Delta, Mishael Yakubu Delta, Empire Digitals Worldwide, Portfolio, Web Development, Brand Design, AI Automation, Software Developer Nigeria, Delta State Developer, Warri Developer, Ughelli Developer" />
+    <meta name="description" content="Mishael Yakubu is the CEO of Empire Digitals and a web developer based in Ughelli, Delta State, Nigeria. Portfolio of web development, brand design, AI automation, and software projects." />
+    <meta name="keywords" content="Mishael Yakubu, Mishael Yakubu Portfolio, Empire Digitals CEO, Empire Digitals, Web Developer in Ughelli, Web Developer in Delta State, Mishael Yakubu Ughelli, Empire Digitals Worldwide, Portfolio, Web Development, Brand Design, AI Automation, Software Developer Nigeria, Delta State Developer, Warri Developer, Ughelli Developer" />
     <meta name="author" content="Mishael Yakubu" />
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
     <link rel="canonical" href="https://www.mishael.space" />
-    
-    <!-- Open Graph -->
+
+    <!-- Open Graph / link preview card: About portrait with the description beside it -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://www.mishael.space" />
     <meta property="og:title" content="Mishael Yakubu | Web Developer, Brand Designer & AI Automation | Empire Digitals" />
-    <meta property="og:description" content="Portfolio of Mishael Yakubu, CEO of Empire Digitals. Web developer in Delta State specializing in web development, brand design, and AI automation." />
-    <meta property="og:image" content="https://www.mishael.space/og-image.jpg" />
+    <meta property="og:description" content="I specialize in building digital experiences that merge creativity with technical precision. CEO of Empire Digitals, based in Ughelli, Delta State, Nigeria." />
+    <meta property="og:image" content="https://www.mishael.space/og-card.jpg" />
+    <meta property="og:image:type" content="image/jpeg" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Mishael Yakubu, CEO of Empire Digitals, with a short description of his work" />
     <meta property="og:site_name" content="Mishael Yakubu Portfolio" />
     <meta property="og:locale" content="en_NG" />
-    
+
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:url" content="https://www.mishael.space" />
     <meta name="twitter:title" content="Mishael Yakubu | Web Developer, Brand Designer & AI Automation" />
-    <meta name="twitter:description" content="CEO of Empire Digitals. Portfolio of web development, brand design and AI projects by Mishael Yakubu, web developer in Delta State." />
-    <meta name="twitter:image" content="https://www.mishael.space/og-image.jpg" />
-    
+    <meta name="twitter:description" content="CEO of Empire Digitals, based in Ughelli, Delta State, Nigeria. Web development, brand design and AI automation projects." />
+    <meta name="twitter:image" content="https://www.mishael.space/og-card.jpg" />
+    <meta name="twitter:image:alt" content="Mishael Yakubu, CEO of Empire Digitals, with a short description of his work" />
+
     <!-- Structured Data -->
     <script type="application/ld+json">
     {
@@ -44,11 +47,11 @@
           "url": "https://www.mishael.space/",
           "image": "https://www.mishael.space/about-portrait.webp",
           "jobTitle": "CEO of Empire Digitals, Web Developer, Brand Designer, AI Automator",
-          "description": "Mishael Yakubu is the CEO of Empire Digitals and a web developer in Delta State, Nigeria, specializing in web development, brand design and AI automation.",
+          "description": "Mishael Yakubu is the CEO of Empire Digitals and a web developer based in Ughelli, Delta State, Nigeria, specializing in web development, brand design and AI automation.",
           "address": {
             "@type": "PostalAddress",
-            "addressLocality": "Delta State",
-            "addressRegion": "Delta",
+            "addressLocality": "Ughelli",
+            "addressRegion": "Delta State",
             "addressCountry": "NG"
           },
           "worksFor": { "@id": "https://www.mishael.space/#organization" },
@@ -89,16 +92,28 @@
       ]
     }
     </script>
-    
+
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
-    
+
+    <!-- Start the slow things as early as possible -->
+    <link rel="preload" as="image" href="/apppublichero-bg.webp" type="image/webp" fetchpriority="high" />
+    <link rel="preconnect" href="https://mmnsovgpmojjeqajbcfo.supabase.co" crossorigin />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@100;200;300;400;500;600;700;800;900&family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
-    
+    <!-- Fonts load without blocking the first paint (text swaps in when ready) -->
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800&family=Inter:wght@300;400;500;600;700&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <noscript>
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" />
+    </noscript>
+
     <style>
       html, body {
         background-color: #000 !important;
@@ -110,11 +125,57 @@
         min-height: 100vh;
         background-color: #000;
       }
+
+      /* Instant page skeleton: painted before any JavaScript runs.
+         React replaces it the moment the app mounts. */
+      #boot { position: fixed; inset: 0; z-index: 10000; background: #000; overflow: hidden; }
+      #boot .b {
+        border-radius: 4px;
+        background: linear-gradient(90deg, rgba(255,255,255,.05) 25%, rgba(255,255,255,.1) 50%, rgba(255,255,255,.05) 75%);
+        background-size: 200% 100%;
+        animation: bootShimmer 1.5s infinite;
+      }
+      @keyframes bootShimmer { 0% { background-position: -200% 0 } 100% { background-position: 200% 0 } }
+      #boot .nav { height: 80px; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; }
+      #boot .links { display: none; gap: 40px; }
+      #boot .links .b { height: 12px; }
+      #boot .hero { height: calc(100vh - 224px); min-height: 320px; padding: 0 24px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px; }
+      #boot .btns { margin-top: 24px; display: flex; flex-direction: column; gap: 16px; }
+      #boot .tiles { padding: 0 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; opacity: .6; }
+      #boot .tiles .b { aspect-ratio: 1; border-radius: 24px; }
+      @media (min-width: 768px) {
+        #boot .nav { padding: 0 48px; }
+        #boot .links { display: flex; }
+        #boot .tiles { padding: 0 48px; gap: 24px; }
+        #boot .btns { flex-direction: row; }
+      }
+      @media (prefers-reduced-motion: reduce) { #boot .b { animation: none } }
     </style>
   </head>
   <body style="background-color:#000;color-scheme:dark">
-    <div id="root"></div>
-    <noscript><h1>Mishael Yakubu — Web Developer, Brand Designer &amp; AI Automation</h1><p>CEO of Empire Digitals, based in Delta State, Nigeria. Portfolio: <a href="/portfolio/web-development">Web Development</a>, <a href="/portfolio/brand-design">Brand Design</a>, <a href="/portfolio/ai-automation">AI Automation</a>.</p></noscript>
+    <div id="root">
+      <div id="boot" role="status" aria-busy="true" aria-label="Loading">
+        <div class="nav">
+          <div class="b" style="height:28px;width:112px"></div>
+          <div class="links">
+            <div class="b" style="width:56px"></div><div class="b" style="width:52px"></div>
+            <div class="b" style="width:72px"></div><div class="b" style="width:60px"></div>
+          </div>
+        </div>
+        <div class="hero">
+          <div class="b" style="height:84px;width:88%;max-width:896px"></div>
+          <div class="b" style="height:12px;width:75%;max-width:576px"></div>
+          <div class="btns">
+            <div class="b" style="height:48px;width:176px"></div>
+            <div class="b" style="height:48px;width:176px"></div>
+          </div>
+        </div>
+        <div class="tiles">
+          <div class="b"></div><div class="b"></div><div class="b"></div><div class="b"></div>
+        </div>
+      </div>
+    </div>
+    <noscript><h1>Mishael Yakubu — Web Developer, Brand Designer &amp; AI Automation</h1><p>CEO of Empire Digitals, based in Ughelli, Delta State, Nigeria. Portfolio: <a href="/portfolio/web-development">Web Development</a>, <a href="/portfolio/brand-design">Brand Design</a>, <a href="/portfolio/ai-automation">AI Automation</a>.</p></noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

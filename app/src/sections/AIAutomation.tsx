@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import { firestore } from '../lib/firebase';
 import { collection, query, onSnapshot } from 'firebase/firestore';
 
+
 gsap.registerPlugin(ScrollTrigger);
 
 interface AIProject {
@@ -86,7 +87,11 @@ const AIAutomation = () => {
       </div>
 
       {loading ? (
-        <div className="py-12 text-center text-white/50">Loading...</div>
+        <div className="max-w-md p-8 rounded-xl bg-white/[0.03] border border-white/10" aria-busy="true">
+          <div className="h-7 w-1/2 skeleton rounded mb-4" />
+          <div className="h-4 w-1/4 skeleton rounded mb-6" />
+          <div className="h-4 w-1/3 skeleton rounded" />
+        </div>
       ) : (
         <Link
           to="/portfolio/ai-automation"

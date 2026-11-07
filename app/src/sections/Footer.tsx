@@ -1,8 +1,10 @@
-import { useEffect, useRef } from 'react';
+import { lazy, useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Twitter, Linkedin, Instagram, Dribbble, Github, ArrowUpRight } from 'lucide-react';
-import NewsletterSignup from '../components/NewsletterSignup';
+import DeferredSection from '../components/DeferredSection';
+
+const NewsletterSignup = lazy(() => import('../components/NewsletterSignup'));
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -92,7 +94,16 @@ const Footer = () => {
             Newsletter
           </p>
         </div>
-        <NewsletterSignup />
+        <DeferredSection
+          fallback={
+            <div className="max-w-xl" aria-busy="true">
+              <div className="h-6 w-1/2 skeleton rounded mb-4" />
+              <div className="h-12 w-full skeleton" />
+            </div>
+          }
+        >
+          <NewsletterSignup />
+        </DeferredSection>
       </div>
 
       <div className="w-full px-6 md:px-12 lg:px-20">
@@ -188,7 +199,7 @@ const Footer = () => {
           if (lenis?.scrollTo) lenis.scrollTo(0, { duration: 1.1 });
           else window.scrollTo({ top: 0, behavior: 'smooth' });
         }}
-        className="fixed bottom-8 right-8 w-12 h-12 bg-white text-black flex items-center justify-center hover:bg-white/90 transition-all duration-300 z-50 opacity-0 pointer-events-none"
+        className="fixed bottom-24 right-7 w-12 h-12 bg-white text-black flex items-center justify-center hover:bg-white/90 transition-all duration-300 z-50 opacity-0 pointer-events-none"
         id="back-to-top"
         aria-label="Back to top"
       >

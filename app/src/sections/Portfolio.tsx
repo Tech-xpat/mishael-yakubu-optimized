@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Folder, Play } from 'lucide-react';
-import { supabase } from '../lib/supabase';
+import { cachedCounts, fetchCounts, prefetchItems } from '../lib/portfolioApi';
+import { FolderGridSkeleton } from '../components/Skeletons';
 
 const CATEGORIES = [
   { slug: 'web', name: 'Web Development', icon: Folder },
@@ -13,41 +14,22 @@ const CATEGORIES = [
   { slug: 'motion', name: 'Motion Graphics', icon: Play },
 ];
 
-function FolderSkeleton() {
-  return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-      {CATEGORIES.map((c) => (
-        <div
-          key={c.slug}
-          className="aspect-square rounded-3xl bg-white/5 border border-white/10 flex flex-col items-center justify-center p-8 animate-pulse"
-        >
-          <div className="w-16 h-16 rounded-2xl bg-white/15 mb-4" />
-          <div className="h-4 bg-white/15 rounded-full w-3/4" />
-          <div className="h-3 bg-white/10 rounded-full w-1/2 mt-3" />
-        </div>
-      ))}
-    </div>
-  );
-}
-
 export default function Portfolio() {
-  const [counts, setCounts] = useState<Record<string, number>>({});
-  const [loading, setLoading] = useState(true);
+  // Counts from the last visit paint instantly (e.g. when coming back with Back);
+  // fresh numbers replace them as soon as the database answers.
+  const [counts, setCounts] = useState<Record<string, number> | null>(() => cachedCounts());
 
   useEffect(() => {
-    supabase
-      .from('portfolio_items')
-      .select('category')
-      .then(({ data, error }) => {
-        if (error) console.error(error);
-        const c: Record<string, number> = {};
-        (data || []).forEach((row: any) => {
-          const cat = row.category || 'web';
-          c[cat] = (c[cat] || 0) + 1;
-        });
-        setCounts(c);
-        setLoading(false);
+    let alive = true;
+    fetchCounts()
+      .then((c) => alive && setCounts(c))
+      .catch((err) => {
+        console.error(err);
+        if (alive) setCounts((prev) => prev ?? {});
       });
+    return () => {
+      alive = false;
+    };
   }, []);
 
   return (
@@ -59,24 +41,30 @@ export default function Portfolio() {
           Tap any folder to open the full gallery. Tap the preview inside to go full screen.
         </p>
 
-        {loading ? (
-          <FolderSkeleton />
+        {counts === null ? (
+          <FolderGridSkeleton count={CATEGORIES.length} />
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {CATEGORIES.map((cat) => {
               const Icon = cat.icon;
               const count = counts[cat.slug] || 0;
+              const warm = () => prefetchItems(cat.slug);
               return (
                 <Link
                   key={cat.slug}
                   to={`/gallery/${cat.slug}`}
-                  className="group flex flex-col items-center justify-center p-8 rounded-3xl bg-white/5 border border-white/10 hover:border-white/40 hover:bg-white/10 transition-all aspect-square"
+                  onPointerEnter={warm}
+                  onPointerDown={warm}
+                  onFocus={warm}
+                  className="group flex flex-col items-center justify-center p-8 rounded-3xl bg-white/5 border border-white/10 hover:border-white/40 hover:bg-white/10 transition-colors aspect-square"
                 >
-                  <div className="mb-4 p-6 rounded-2xl bg-white/10 group-hover:bg-white/20 transition">
+                  <div className="mb-4 p-6 rounded-2xl bg-white/10 group-hover:bg-white/20 transition-colors">
                     <Icon size={48} className="text-white/80 group-hover:text-white" />
                   </div>
                   <h3 className="text-center font-semibold text-sm md:text-base">{cat.name}</h3>
-                  <p className="text-xs text-white/40 mt-1">{count} item{count === 1 ? '' : 's'}</p>
+                  <p className="text-xs text-white/40 mt-1">
+                    {count} item{count === 1 ? '' : 's'}
+                  </p>
                 </Link>
               );
             })}

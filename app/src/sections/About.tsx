@@ -19,21 +19,29 @@ const About = () => {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      // Image scale and grayscale effect on scroll
+      // Gentle zoom while scrolling (transform only, so it stays on the GPU)
       gsap.fromTo(
         imageRef.current,
-        { scale: 1, filter: 'grayscale(100%)' },
+        { scale: 1 },
         {
-          scale: 1.1,
-          filter: 'grayscale(0%)',
+          scale: 1.08,
+          ease: 'none',
           scrollTrigger: {
             trigger: sectionRef.current,
             start: 'top bottom',
             end: 'bottom top',
-            scrub: 1,
+            scrub: 0.6,
           },
         }
       );
+
+      // Black & white -> colour once, as the portrait enters view
+      ScrollTrigger.create({
+        trigger: imageRef.current,
+        start: 'top 85%',
+        once: true,
+        onEnter: () => imageRef.current?.classList.add('is-colored'),
+      });
 
       // Heading character reveal
       if (headingRef.current) {
@@ -113,11 +121,15 @@ const About = () => {
           <div className="relative lg:sticky lg:top-32">
             <div
               ref={imageRef}
-              className="relative aspect-[4/5] overflow-hidden"
+              className="about-image relative aspect-[4/5] overflow-hidden will-change-transform"
             >
               <img
                 src="/about-portrait.webp"
                 alt="Mishael Yakubu"
+                width={1086}
+                height={1086}
+                loading="lazy"
+                decoding="async"
                 className="w-full h-full object-cover"
               />
               {/* Overlay gradient */}

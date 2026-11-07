@@ -111,7 +111,7 @@ const NotFound = () => {
             <span className="block mb-1 text-xs font-semibold text-white/80">
               Service Location
             </span>
-            Delta State, Nigeria
+            Ughelli, Delta State, Nigeria
           </p>
         </div>
 

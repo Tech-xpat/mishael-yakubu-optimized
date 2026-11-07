@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import gsap from 'gsap';
 import { Menu, X } from 'lucide-react';
+import { scrollToTarget } from '../lib/scrollTo';
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -61,10 +62,7 @@ const Navbar = () => {
       return;
     }
 
-    const target = document.querySelector(href);
-    if (target) {
-      target.scrollIntoView({ behavior: 'smooth' });
-    }
+    scrollToTarget(href);
   };
 
   const handleAdminLogoClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
@@ -138,6 +136,7 @@ const Navbar = () => {
             {/* Mobile Menu Button */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              data-no-press
               className="md:hidden p-2 text-white"
               aria-label="Toggle menu"
             >

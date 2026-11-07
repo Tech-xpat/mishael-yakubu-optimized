@@ -4,6 +4,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Link } from 'react-router-dom';
 import { firestore } from '../lib/firebase';
 import { collection, query, onSnapshot } from 'firebase/firestore';
+import { CardGridSkeleton } from '../components/Skeletons';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -115,7 +116,7 @@ const BrandDesign = () => {
       </div>
 
       {loading ? (
-        <div className="py-12 text-center text-white/50">Loading categories...</div>
+        <CardGridSkeleton count={brandSubcategories.length} />
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {brandSubcategories.map((category) => (

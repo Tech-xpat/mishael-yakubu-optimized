@@ -4,7 +4,8 @@ import { useEffect } from 'react';
  *  Change this ONE line if the live domain changes. */
 export const SITE_URL = 'https://www.mishael.space';
 export const SITE_NAME = 'Mishael Yakubu';
-export const DEFAULT_IMAGE = `${SITE_URL}/og-image.jpg`;
+/** Link-preview card: the About-section portrait with the description beside it (1200x630). */
+export const DEFAULT_IMAGE = `${SITE_URL}/og-card.jpg`;
 
 interface SeoOptions {
   title: string;

@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
 import { firestore } from '../lib/firebase';
 import { collection, query, onSnapshot, where } from 'firebase/firestore';
 import { ArrowLeft, ExternalLink } from 'lucide-react';
@@ -104,6 +104,13 @@ function CategorySkeleton() {
 const CategoryPage = () => {
   const { type, subcategory } = useParams<{ type: string; subcategory?: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
+  // Back returns to the exact spot the visitor left on the home page; if this page was
+  // opened directly there is no history, so go to the portfolio menu instead.
+  const goBack = () => {
+    if (location.key !== 'default') navigate(-1);
+    else navigate('/', { state: { scrollTo: '#portfolio' } });
+  };
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -175,47 +182,63 @@ const CategoryPage = () => {
     return unsubscribe;
   }, [type, subcategory, config]);
 
-  // Smooth auto-scroll for the carousel (pauses on touch/hover)
+  // Gentle auto-scroll for the carousel. Position is tracked as a float (browsers round
+  // scrollLeft to whole pixels, which makes slow speeds stutter), it is time-based so it
+  // runs at the same speed on every screen, and it hands over to the visitor on touch/drag.
   useEffect(() => {
     const el = scrollRef.current;
     if (!el || projects.length === 0) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-    let raf: number;
-    let speed = 0.6;
+    const SPEED = 36; // pixels per second
+    let raf = 0;
+    let last = performance.now();
+    let pos = el.scrollLeft;
     let paused = false;
+    let resumeTimer: ReturnType<typeof setTimeout> | undefined;
 
-    const step = () => {
-      if (!paused && el.scrollWidth > el.clientWidth) {
-        el.scrollLeft += speed;
-        if (el.scrollLeft >= el.scrollWidth - el.clientWidth - 1) {
-          el.scrollLeft = 0;
-        }
+    const step = (now: number) => {
+      const dt = Math.min(64, now - last) / 1000;
+      last = now;
+      const max = el.scrollWidth - el.clientWidth;
+      if (!paused && max > 0) {
+        pos += SPEED * dt;
+        if (pos >= max) pos = 0;
+        el.scrollLeft = pos;
       }
       raf = requestAnimationFrame(step);
     };
 
     const pause = () => {
       paused = true;
+      if (resumeTimer) clearTimeout(resumeTimer);
     };
     const resume = () => {
-      paused = false;
+      if (resumeTimer) clearTimeout(resumeTimer);
+      resumeTimer = setTimeout(() => {
+        pos = el.scrollLeft;
+        paused = false;
+      }, 1500);
     };
 
-    el.addEventListener('pointerdown', pause);
-    el.addEventListener('pointerup', resume);
-    el.addEventListener('pointerleave', resume);
-    el.addEventListener('touchstart', pause, { passive: true });
-    el.addEventListener('touchend', resume);
+    el.addEventListener('pointerdown', pause, { passive: true });
+    el.addEventListener('pointerup', resume, { passive: true });
+    el.addEventListener('pointercancel', resume, { passive: true });
+    el.addEventListener('mouseenter', pause, { passive: true });
+    el.addEventListener('mouseleave', resume, { passive: true });
+    el.addEventListener('wheel', pause, { passive: true });
 
     raf = requestAnimationFrame(step);
 
     return () => {
       cancelAnimationFrame(raf);
+      if (resumeTimer) clearTimeout(resumeTimer);
       el.removeEventListener('pointerdown', pause);
       el.removeEventListener('pointerup', resume);
-      el.removeEventListener('pointerleave', resume);
-      el.removeEventListener('touchstart', pause);
-      el.removeEventListener('touchend', resume);
+      el.removeEventListener('pointercancel', resume);
+      el.removeEventListener('mouseenter', pause);
+      el.removeEventListener('mouseleave', resume);
+      el.removeEventListener('wheel', pause);
     };
   }, [projects]);
 
@@ -239,7 +262,7 @@ const CategoryPage = () => {
       <main className="pt-24 pb-20">
         <div className="px-6 md:px-12 lg:px-20 mb-10">
           <button
-            onClick={() => navigate(-1)}
+            onClick={goBack}
             className="inline-flex items-center gap-2 text-white/60 hover:text-white mb-6 transition"
           >
             <ArrowLeft size={18} />
@@ -263,18 +286,20 @@ const CategoryPage = () => {
           <>
             <div
               ref={scrollRef}
-              className="flex gap-6 overflow-x-auto pb-8 px-6 md:px-12 lg:px-20 scrollbar-hide snap-x snap-mandatory"
-              style={{ scrollBehavior: 'smooth', WebkitOverflowScrolling: 'touch' }}
+              className="flex gap-6 overflow-x-auto pb-8 px-6 md:px-12 lg:px-20 scrollbar-hide"
+              style={{ WebkitOverflowScrolling: 'touch' }}
             >
               {projects.map((project) => (
                 <div
                   key={project.id}
-                  className="flex-shrink-0 w-[280px] md:w-[340px] snap-center group"
+                  className="flex-shrink-0 w-[280px] md:w-[340px] group"
                 >
                   <div className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-white/5 border border-white/10 group-hover:border-white/40 transition-all shadow-2xl">
                     <img
                       src={project.imageUrl}
                       alt={project.title}
+                      loading="lazy"
+                      decoding="async"
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />

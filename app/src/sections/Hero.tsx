@@ -1,78 +1,68 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef } from 'react';
 import gsap from 'gsap';
+import { scrollToTarget } from '../lib/scrollTo';
 
-const Hero = () => {
+interface HeroProps {
+  /** true once the page loader has finished: the intro animation starts then. */
+  ready: boolean;
+}
+
+const Hero = ({ ready }: HeroProps) => {
   const heroRef = useRef<HTMLDivElement>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const subheadingRef = useRef<HTMLParagraphElement>(null);
   const bgRef = useRef<HTMLDivElement>(null);
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const parallaxRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
+  // Hidden starting state, applied before the first paint.
+  useLayoutEffect(() => {
     const ctx = gsap.context(() => {
-      // Background zoom and unblur animation
-      gsap.fromTo(
-        bgRef.current,
-        { scale: 1.2, filter: 'blur(10px)' },
-        { scale: 1, filter: 'blur(0px)', duration: 1.8, ease: 'expo.out' }
-      );
-
-      // Heading character animation
-      if (headingRef.current) {
-        const chars = headingRef.current.querySelectorAll('.char');
-        gsap.fromTo(
-          chars,
-          { opacity: 0, rotateX: 90, y: -50 },
-          {
-            opacity: 1,
-            rotateX: 0,
-            y: 0,
-            duration: 1.2,
-            ease: 'expo.out',
-            stagger: 0.05,
-            delay: 0.2,
-          }
-        );
-      }
-
-      // Subheading decode effect
-      if (subheadingRef.current) {
-        gsap.fromTo(
-          subheadingRef.current,
-          { opacity: 0, y: 20 },
-          { opacity: 1, y: 0, duration: 1, ease: 'expo.out', delay: 1.5 }
-        );
-      }
-
-      // Corner elements slide in
-      gsap.fromTo(
-        '.corner-bl',
-        { opacity: 0, y: 50 },
-        { opacity: 1, y: 0, duration: 1, ease: 'expo.out', delay: 2 }
-      );
-      gsap.fromTo(
-        '.corner-br',
-        { opacity: 0, y: 50 },
-        { opacity: 1, y: 0, duration: 1, ease: 'expo.out', delay: 2.1 }
-      );
+      gsap.set('.char', { opacity: 0, rotateX: 90, y: -50 });
+      gsap.set(subheadingRef.current, { opacity: 0, y: 20 });
+      gsap.set('.hero-cta', { opacity: 0, y: 24 });
+      gsap.set('.corner-bl, .corner-br', { opacity: 0, y: 40 });
+      gsap.set(bgRef.current, { scale: 1.12 });
     }, heroRef);
-
     return () => ctx.revert();
   }, []);
 
-  // Mouse parallax effect
+  // Intro: plays once the loader is gone.
   useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      const x = (e.clientX / window.innerWidth - 0.5) * 20;
-      const y = (e.clientY / window.innerHeight - 0.5) * 20;
-      setMousePos({ x, y });
-    };
+    if (!ready) return;
+    const ctx = gsap.context(() => {
+      const tl = gsap.timeline({ defaults: { ease: 'expo.out' } });
+      tl.to(bgRef.current, { scale: 1, duration: 1.6 }, 0)
+        .to('.char', { opacity: 1, rotateX: 0, y: 0, duration: 1.1, stagger: 0.045 }, 0.1)
+        .to(subheadingRef.current, { opacity: 1, y: 0, duration: 0.9 }, 0.8)
+        .to('.hero-cta', { opacity: 1, y: 0, duration: 0.8 }, 1.0)
+        .to('.corner-bl', { opacity: 1, y: 0, duration: 0.9 }, 1.1)
+        .to('.corner-br', { opacity: 1, y: 0, duration: 0.9 }, 1.2);
+    }, heroRef);
+    return () => ctx.revert();
+  }, [ready]);
 
-    window.addEventListener('mousemove', handleMouseMove, { passive: true });
-    return () => window.removeEventListener('mousemove', handleMouseMove);
+  // Mouse parallax (desktop only). Runs outside React state, so moving the mouse
+  // never re-renders the hero.
+  useEffect(() => {
+    if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+    const el = parallaxRef.current;
+    if (!el) return;
+    const xTo = gsap.quickTo(el, 'x', { duration: 0.9, ease: 'power3.out' });
+    const yTo = gsap.quickTo(el, 'y', { duration: 0.9, ease: 'power3.out' });
+    const onMove = (e: MouseEvent) => {
+      xTo((e.clientX / window.innerWidth - 0.5) * 12);
+      yTo((e.clientY / window.innerHeight - 0.5) * 12);
+    };
+    window.addEventListener('mousemove', onMove, { passive: true });
+    return () => window.removeEventListener('mousemove', onMove);
   }, []);
 
   const name = 'MISHAEL YAKUBU';
+
+  const goTo = (selector: string) => (e: React.MouseEvent) => {
+    e.preventDefault();
+    scrollToTarget(selector);
+  };
 
   return (
     <section
@@ -80,20 +70,19 @@ const Hero = () => {
       id="home"
       className="relative w-full h-screen overflow-hidden bg-black"
     >
-      {/* Background Image with Parallax */}
-      <div
-        ref={bgRef}
-        className="absolute inset-0 w-full h-full"
-        style={{
-          transform: `translate(${mousePos.x * 0.5}px, ${mousePos.y * 0.5}px)`,
-          transition: 'transform 0.3s ease-out',
-        }}
-      >
-        <img
-          src="/apppublichero-bg.jpeg"
-          alt="Mishael Yakubu"
-          className="w-full h-full object-cover breathing"
-        />
+      {/* Background image: entry zoom on bgRef, mouse parallax on parallaxRef */}
+      <div ref={bgRef} className="absolute inset-0 w-full h-full will-change-transform">
+        <div ref={parallaxRef} className="absolute -inset-4 will-change-transform">
+          <img
+            src="/apppublichero-bg.webp"
+            alt="Mishael Yakubu"
+            width={896}
+            height={1116}
+            fetchPriority="high"
+            decoding="async"
+            className="w-full h-full object-cover breathing"
+          />
+        </div>
         {/* Dark Overlay */}
         <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/80" />
       </div>
@@ -102,7 +91,7 @@ const Hero = () => {
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
           <p className="text-xs tracking-[0.2em] text-white/60 uppercase font-body">
-            Available for freelance 
+            Available for freelance
           </p>
         </div>
       </div>
@@ -130,7 +119,7 @@ const Hero = () => {
                 textShadow: '0 0 80px rgba(255,255,255,0.1)',
               }}
             >
-              {char === ' ' ? '\u00A0' : char}
+              {char === ' ' ? ' ' : char}
             </span>
           ))}
         </h1>
@@ -144,16 +133,18 @@ const Hero = () => {
         </p>
 
         {/* CTA Buttons */}
-        <div className="mt-12 flex flex-col sm:flex-row gap-4 opacity-0 animate-[fadeUp_1s_ease-out_2.5s_forwards]">
+        <div className="hero-cta mt-12 flex flex-col sm:flex-row gap-4 opacity-0">
           <a
             href="#portfolio"
-            className="px-8 py-4 bg-white text-black font-body text-sm tracking-wider uppercase hover:bg-white/90 transition-all duration-300 hover:scale-105"
+            onClick={goTo('#portfolio')}
+            className="px-8 py-4 bg-white text-black font-body text-sm tracking-wider uppercase hover:bg-white/90 transition-colors duration-300 text-center"
           >
             View My Work
           </a>
           <a
             href="#contact"
-            className="px-8 py-4 border border-white/30 text-white font-body text-sm tracking-wider uppercase hover:bg-white/10 transition-all duration-300"
+            onClick={goTo('#contact')}
+            className="px-8 py-4 border border-white/30 text-white font-body text-sm tracking-wider uppercase hover:bg-white/10 transition-colors duration-300 text-center"
           >
             Get In Touch
           </a>

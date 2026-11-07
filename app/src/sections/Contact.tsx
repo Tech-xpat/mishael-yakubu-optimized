@@ -123,8 +123,8 @@ const Contact = () => {
     {
       icon: MapPin,
       label: 'Location',
-      value: 'Lagos, Nigeria',
-      href: '#',
+      value: 'Ughelli, Delta State, Nigeria',
+      href: 'https://www.google.com/maps/search/?api=1&query=Ughelli%2C+Delta+State%2C+Nigeria',
     },
   ];
 

@@ -1,23 +1,24 @@
-import { useEffect, useState, useMemo, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { supabase } from '../lib/supabase';
-import { ArrowLeft, ExternalLink, Play, ChevronLeft, ChevronRight, AlertCircle, X, Maximize2 } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import {
+  cachedItems,
+  fetchItems,
+  type PortfolioItem,
+} from '../lib/portfolioApi';
+import {
+  ArrowLeft,
+  ExternalLink,
+  Play,
+  ChevronLeft,
+  ChevronRight,
+  AlertCircle,
+  X,
+  Maximize2,
+} from 'lucide-react';
 import Navbar from '../sections/Navbar';
 import Footer from '../sections/Footer';
+import { GallerySkeleton } from '../components/Skeletons';
 import { useSeo, breadcrumbs } from '../lib/seo';
-
-interface Item {
-  id: string;
-  title: string;
-  description?: string | null;
-  image_url: string;
-  category?: string;
-  subcategory?: string | null;
-  website_url?: string | null;
-  media_type?: string | null;
-  priority?: number | null;
-  created_at?: string;
-}
 
 const CATEGORY_NAMES: Record<string, string> = {
   web: 'Web Development',
@@ -29,30 +30,35 @@ const CATEGORY_NAMES: Record<string, string> = {
   motion: 'Motion Graphics',
 };
 
-/** Animated skeleton frame loader — shown while data is fetching */
-function PageSkeleton() {
+const isVideo = (item?: PortfolioItem) =>
+  !!item && (item.media_type === 'video' || !!item.image_url?.match(/\.(mp4|webm|mov)$/i));
+
+/** Main preview image with a shimmer until the picture has actually decoded. */
+function PreviewImage({ src, alt }: { src: string; alt: string }) {
+  const [loaded, setLoaded] = useState(false);
+  const imgRef = useRef<HTMLImageElement>(null);
+
+  useEffect(() => {
+    setLoaded(false);
+    const img = imgRef.current;
+    if (img?.complete && img.naturalWidth > 0) setLoaded(true);
+  }, [src]);
+
   return (
-    <div className="relative max-w-5xl mx-auto px-4" aria-busy="true" aria-label="Loading gallery">
-      <div className="aspect-[16/10] md:aspect-video rounded-2xl overflow-hidden border border-white/10 relative">
-        <div className="absolute inset-0 skeleton" />
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-12 h-12 rounded-full border-2 border-white/20 border-t-white/60 animate-spin" />
-        </div>
-      </div>
-      <div className="mt-6 flex flex-col items-center gap-3">
-        <div className="h-8 skeleton rounded-lg w-2/3 max-w-md" />
-        <div className="h-4 skeleton rounded w-1/2 max-w-xs" />
-      </div>
-      <div className="mt-8 flex gap-3 justify-center overflow-hidden">
-        {[1, 2, 3, 4, 5].map((i) => (
-          <div
-            key={i}
-            className="w-20 h-20 skeleton rounded-lg flex-shrink-0"
-            style={{ animationDelay: `${i * 0.1}s` }}
-          />
-        ))}
-      </div>
-    </div>
+    <>
+      {!loaded && <div className="absolute inset-0 skeleton" aria-hidden="true" />}
+      <img
+        ref={imgRef}
+        src={src}
+        alt={alt}
+        decoding="async"
+        onLoad={() => setLoaded(true)}
+        onError={() => setLoaded(true)}
+        className={`w-full h-full object-contain transition-opacity duration-300 ${
+          loaded ? 'opacity-100' : 'opacity-0'
+        }`}
+      />
+    </>
   );
 }
 
@@ -72,8 +78,11 @@ export default function GalleryPage() {
     ],
   });
   const navigate = useNavigate();
-  const [items, setItems] = useState<Item[]>([]);
-  const [loading, setLoading] = useState(true);
+  const location = useLocation();
+
+  // Items fetched earlier this session (or warmed by hovering the folder) show instantly.
+  const [items, setItems] = useState<PortfolioItem[]>(() => (category ? cachedItems(category) ?? [] : []));
+  const [loading, setLoading] = useState(() => !(category && cachedItems(category)));
   const [error, setError] = useState<string | null>(null);
   const [active, setActive] = useState(0);
   const [subFilter, setSubFilter] = useState<string>('all');
@@ -84,19 +93,18 @@ export default function GalleryPage() {
 
   const title = category ? CATEGORY_NAMES[category] || category : 'Gallery';
 
-  const showArrows = () => {
+  // Back goes to wherever the visitor came from (the home page portfolio menu, at the
+  // same scroll spot). If the page was opened directly, fall back to the portfolio menu.
+  const goBack = () => {
+    if (location.key !== 'default') navigate(-1);
+    else navigate('/', { state: { scrollTo: '#portfolio' } });
+  };
+
+  const showArrows = useCallback(() => {
     setArrowsVisible(true);
     if (idleTimer.current) clearTimeout(idleTimer.current);
     idleTimer.current = setTimeout(() => setArrowsVisible(false), 4000);
-  };
-
-  useEffect(() => {
-    const lenis = (window as any).__lenis;
-    if (lenis?.scrollTo) lenis.scrollTo(0, { immediate: true });
-    window.scrollTo(0, 0);
-    document.documentElement.scrollTop = 0;
-    document.body.scrollTop = 0;
-  }, [category]);
+  }, []);
 
   useEffect(() => {
     if (!category) {
@@ -104,32 +112,38 @@ export default function GalleryPage() {
       setError('Invalid category');
       return;
     }
-    setLoading(true);
+    let alive = true;
+    const warm = cachedItems(category);
     setError(null);
-    setItems([]);
     setActive(0);
     setSubFilter('all');
+    if (warm) {
+      setItems(warm);
+      setLoading(false);
+    } else {
+      setItems([]);
+      setLoading(true);
+    }
 
-    supabase
-      .from('portfolio_items')
-      .select('*')
-      .eq('category', category)
-      .then(({ data, error: err }) => {
-        if (err) {
-          console.error(err);
+    // Always revalidate in the background so new uploads appear.
+    fetchItems(category)
+      .then((fresh) => {
+        if (!alive) return;
+        setItems(fresh);
+        setLoading(false);
+      })
+      .catch((err: Error) => {
+        if (!alive) return;
+        console.error(err);
+        if (!warm) {
           setError(err.message || 'Failed to load items');
           setItems([]);
-        } else {
-          const sorted = (data || []).sort((a, b) => {
-            const pa = a.priority || 0;
-            const pb = b.priority || 0;
-            if (pb !== pa) return pb - pa;
-            return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
-          });
-          setItems(sorted);
         }
         setLoading(false);
       });
+    return () => {
+      alive = false;
+    };
   }, [category]);
 
   const subcategories = useMemo(() => {
@@ -154,17 +168,32 @@ export default function GalleryPage() {
     return () => {
       if (idleTimer.current) clearTimeout(idleTimer.current);
     };
-  }, [active, fullscreen]);
+  }, [active, fullscreen, showArrows]);
 
-  const go = (dir: number) => {
-    setActive((i) => {
-      const next = i + dir;
-      if (next < 0) return filtered.length - 1;
-      if (next >= filtered.length) return 0;
-      return next;
+  // Preload the neighbouring pictures so swiping never waits on the network.
+  useEffect(() => {
+    if (filtered.length < 2) return;
+    [active + 1, active - 1].forEach((i) => {
+      const item = filtered[(i + filtered.length) % filtered.length];
+      if (item && !isVideo(item)) {
+        const img = new Image();
+        img.src = item.image_url;
+      }
     });
-    showArrows();
-  };
+  }, [active, filtered]);
+
+  const go = useCallback(
+    (dir: number) => {
+      setActive((i) => {
+        const next = i + dir;
+        if (next < 0) return filtered.length - 1;
+        if (next >= filtered.length) return 0;
+        return next;
+      });
+      showArrows();
+    },
+    [filtered.length, showArrows]
+  );
 
   const onTouchStart = (e: React.TouchEvent) => {
     touchStartX.current = e.touches[0].clientX;
@@ -188,7 +217,7 @@ export default function GalleryPage() {
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [filtered.length]);
+  }, [go]);
 
   const current = filtered[active];
 
@@ -200,7 +229,7 @@ export default function GalleryPage() {
         {!fullscreen && (
           <div className="px-6 md:px-12 mb-6 flex items-center justify-between">
             <button
-              onClick={() => navigate(-1)}
+              onClick={goBack}
               className="inline-flex items-center gap-2 text-white/60 hover:text-white"
             >
               <ArrowLeft size={18} /> Back
@@ -210,7 +239,7 @@ export default function GalleryPage() {
         )}
 
         {loading ? (
-          <PageSkeleton />
+          <GallerySkeleton />
         ) : error ? (
           <div className="text-center py-32 px-6">
             <AlertCircle size={40} className="mx-auto text-red-400 mb-4" />
@@ -230,7 +259,7 @@ export default function GalleryPage() {
         ) : (
           <>
             {!fullscreen && subcategories.length > 0 && (
-              <div className="px-6 md:px-12 mb-6 flex flex-wrap gap-2">
+              <div className="px-6 md:px-12 mb-6 flex flex-wrap gap-2" data-no-press>
                 <button
                   onClick={() => setSubFilter('all')}
                   className={`px-3 py-1.5 rounded-full text-xs ${
@@ -265,7 +294,7 @@ export default function GalleryPage() {
                 }}
               >
                 {current &&
-                  (current.media_type === 'video' || current.image_url?.match(/\.(mp4|webm|mov)$/i) ? (
+                  (isVideo(current) ? (
                     <video
                       key={current.id}
                       src={current.image_url}
@@ -277,27 +306,25 @@ export default function GalleryPage() {
                       playsInline
                     />
                   ) : (
-                    <img
-                      key={current.id}
-                      src={current.image_url}
-                      alt={current.title}
-                      className="w-full h-full object-contain"
-                    />
+                    <PreviewImage key={current.id} src={current.image_url} alt={current.title} />
                   ))}
 
                 {fullscreen && (
                   <button
+                    data-no-press
                     onClick={(e) => {
                       e.stopPropagation();
                       setFullscreen(false);
                     }}
                     className="absolute top-4 right-4 z-10 p-3 rounded-full bg-black/60 text-white"
+                    aria-label="Close full screen"
                   >
                     <X size={22} />
                   </button>
                 )}
 
                 <button
+                  data-no-press
                   onClick={(e) => {
                     e.stopPropagation();
                     go(-1);
@@ -310,6 +337,7 @@ export default function GalleryPage() {
                   <ChevronLeft size={24} />
                 </button>
                 <button
+                  data-no-press
                   onClick={(e) => {
                     e.stopPropagation();
                     go(1);
@@ -356,7 +384,7 @@ export default function GalleryPage() {
               )}
 
               {!fullscreen && (
-                <div className="mt-8 flex gap-3 overflow-x-auto pb-4 scrollbar-hide">
+                <div className="mt-8 flex gap-3 overflow-x-auto pb-4 scrollbar-hide" data-no-press>
                   {filtered.map((item, idx) => (
                     <button
                       key={item.id}
@@ -364,16 +392,23 @@ export default function GalleryPage() {
                         setActive(idx);
                         showArrows();
                       }}
+                      aria-label={`Show ${item.title}`}
                       className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition ${
                         idx === active ? 'border-white' : 'border-transparent opacity-60 hover:opacity-100'
                       }`}
                     >
-                      {item.media_type === 'video' || item.image_url?.match(/\.(mp4|webm|mov)$/i) ? (
+                      {isVideo(item) ? (
                         <div className="w-full h-full bg-zinc-800 flex items-center justify-center">
                           <Play size={20} />
                         </div>
                       ) : (
-                        <img src={item.image_url} alt="" className="w-full h-full object-cover" />
+                        <img
+                          src={item.image_url}
+                          alt=""
+                          loading="lazy"
+                          decoding="async"
+                          className="w-full h-full object-cover bg-white/5"
+                        />
                       )}
                     </button>
                   ))}
