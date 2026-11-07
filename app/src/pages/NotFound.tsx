@@ -2,8 +2,10 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import gsap from 'gsap';
 import { Home } from 'lucide-react';
+import { useSeo } from '../lib/seo';
 
 const NotFound = () => {
+  useSeo({ title: 'Page not found | Mishael Yakubu', description: 'Page not found', path: typeof window !== 'undefined' ? window.location.pathname : '/', noindex: true });
   const navigate = useNavigate();
   const [remainingTime, setRemainingTime] = useState(5);
 

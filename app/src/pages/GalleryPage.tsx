@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase';
 import { ArrowLeft, ExternalLink, Play, ChevronLeft, ChevronRight, AlertCircle, X, Maximize2 } from 'lucide-react';
 import Navbar from '../sections/Navbar';
 import Footer from '../sections/Footer';
+import { useSeo, breadcrumbs } from '../lib/seo';
 
 interface Item {
   id: string;
@@ -57,6 +58,19 @@ function PageSkeleton() {
 
 export default function GalleryPage() {
   const { category } = useParams<{ category: string }>();
+  const galleryName = (category && CATEGORY_NAMES[category]) || 'Gallery';
+  useSeo({
+    title: `${galleryName} Portfolio | Mishael Yakubu`,
+    description: `${galleryName} by Mishael Yakubu, CEO of Empire Digitals. Browse the full collection of projects.`,
+    path: `/gallery/${category ?? ''}`,
+    noindex: !category || !CATEGORY_NAMES[category],
+    jsonLd: [
+      breadcrumbs([
+        { name: 'Home', path: '/' },
+        { name: galleryName, path: `/gallery/${category ?? ''}` },
+      ]),
+    ],
+  });
   const navigate = useNavigate();
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);

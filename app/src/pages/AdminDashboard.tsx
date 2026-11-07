@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { LogOut, BarChart3, Loader2, Upload, ExternalLink, Trash2, Play, Edit2, ChevronUp, ChevronDown, X } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { useSeo } from '../lib/seo';
 
 const CATEGORIES = [
   { slug: 'web', name: 'Web Development' },
@@ -36,6 +37,7 @@ interface PortfolioItem {
 }
 
 const AdminDashboard = () => {
+  useSeo({ title: 'Admin | Mishael Yakubu', description: 'Admin', path: typeof window !== 'undefined' ? window.location.pathname : '/', noindex: true });
   const navigate = useNavigate();
   const { currentUser, isAdmin, logout, loading: authLoading } = useAuth();
   const [items, setItems] = useState<PortfolioItem[]>([]);

@@ -5,6 +5,7 @@ import { collection, query, onSnapshot, where } from 'firebase/firestore';
 import { ArrowLeft, ExternalLink } from 'lucide-react';
 import Navbar from '../sections/Navbar';
 import Footer from '../sections/Footer';
+import { useSeo, breadcrumbs } from '../lib/seo';
 
 interface Project {
   id: string;
@@ -109,6 +110,23 @@ const CategoryPage = () => {
 
   const config = type ? categoryConfig[type] : null;
   const displayTitle = subcategory ? slugToTitle(subcategory) : config?.title || 'Portfolio';
+
+  const seoPath = `/portfolio/${type ?? ''}${subcategory ? `/${subcategory}` : ''}`;
+  useSeo({
+    title: `${displayTitle} Projects | Mishael Yakubu`,
+    description: `${displayTitle} projects by Mishael Yakubu, CEO of Empire Digitals. View selected work and get in touch for your own project.`,
+    path: seoPath,
+    noindex: !config,
+    jsonLd: config
+      ? [
+          breadcrumbs([
+            { name: 'Home', path: '/' },
+            { name: config.title, path: `/portfolio/${type}` },
+            ...(subcategory ? [{ name: displayTitle, path: seoPath }] : []),
+          ]),
+        ]
+      : [],
+  });
 
   // Always open at the top of the page
   useEffect(() => {

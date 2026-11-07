@@ -3,8 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { toast } from 'sonner';
 import { Loader2, Chrome, Mail, Lock } from 'lucide-react';
+import { useSeo } from '../lib/seo';
 
 const AdminLogin = () => {
+  useSeo({ title: 'Admin | Mishael Yakubu', description: 'Admin', path: typeof window !== 'undefined' ? window.location.pathname : '/', noindex: true });
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [isInitializing, setIsInitializing] = useState(true);
