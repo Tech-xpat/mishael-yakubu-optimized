@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
+import { useSeo } from './lib/seo';
 import Lenis from '@studio-freight/lenis';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -20,6 +21,13 @@ gsap.registerPlugin(ScrollTrigger);
 function App() {
   const lenisRef = useRef<Lenis | null>(null);
   const location = useLocation();
+
+  useSeo({
+    title: 'Mishael Yakubu | Web Developer, Brand Designer & AI Automation | Empire Digitals',
+    description:
+      'Mishael Yakubu is the CEO of Empire Digitals and a web developer in Delta State, Nigeria. Browse web development, brand design and AI automation projects.',
+    path: '/',
+  });
 
   useEffect(() => {
     // Always start homepage at the top on load/refresh
