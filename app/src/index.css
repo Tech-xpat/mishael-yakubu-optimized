@@ -612,3 +612,15 @@ html[data-theme='light'] .paper-inner {
 html[data-theme='light'] .paper-shade {
   background: rgb(10 10 10 / 0.07);
 }
+
+/* Card effect: everything after the hero slides up over it as a rounded sheet. */
+.slide-over {
+  background: rgb(var(--t-black, 0 0 0));
+  border-top-left-radius: 28px;
+  border-top-right-radius: 28px;
+  box-shadow: 0 -24px 60px -12px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.14);
+}
+@media (min-width: 768px) {
+  .slide-over { border-top-left-radius: 44px; border-top-right-radius: 44px; }
+}
+html[data-theme='light'] .slide-over { box-shadow: 0 -24px 60px -16px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.9); }

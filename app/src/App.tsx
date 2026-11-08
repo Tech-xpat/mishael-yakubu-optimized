@@ -1,4 +1,6 @@
-import { lazy, useEffect, useState } from 'react';
+import { lazy, useEffect, useRef, useState } from 'react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useLocation, useNavigationType } from 'react-router-dom';
 import { useSeo } from './lib/seo';
 import { scrollToTarget } from './lib/scrollTo';
@@ -19,6 +21,8 @@ import { SectionSkeleton, SiteSkeleton } from './components/Skeletons';
 const WebDevelopment = lazy(() => import('./sections/WebDevelopment'));
 const BrandDesign = lazy(() => import('./sections/BrandDesign'));
 const AIAutomation = lazy(() => import('./sections/AIAutomation'));
+
+gsap.registerPlugin(ScrollTrigger);
 
 const HERO_IMAGE = '/apppublichero-bg.webp';
 const MAX_WAIT_MS = 2200;
@@ -70,6 +74,33 @@ function App() {
     return () => clearTimeout(t);
   }, [ready]);
 
+  // Card effect: the hero stays put while the rest of the page slides up over it like a card.
+  const heroWrapRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const wrap = heroWrapRef.current;
+    if (!wrap) return;
+    // If the hero is taller than the screen, let it stick by its bottom so nothing is cut off.
+    const fit = () => {
+      wrap.style.top = `${Math.min(0, window.innerHeight - wrap.offsetHeight)}px`;
+    };
+    fit();
+    window.addEventListener('resize', fit);
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const ctx = gsap.context(() => {
+      if (reduce) return;
+      gsap.to('.hero-recede', {
+        scale: 0.93,
+        opacity: 0.35,
+        ease: 'none',
+        scrollTrigger: { trigger: '.slide-over', start: 'top bottom', end: 'top top', scrub: 0.4 },
+      });
+    });
+    return () => {
+      window.removeEventListener('resize', fit);
+      ctx.revert();
+    };
+  }, []);
+
   // Back-to-top button visibility
   useEffect(() => {
     const btn = document.getElementById('back-to-top');
@@ -100,7 +131,12 @@ function App() {
       <div className="grain-overlay" aria-hidden="true" />
       <Navbar />
       <main>
-        <Hero ready={ready} />
+        <div ref={heroWrapRef} className="sticky top-0 z-0">
+          <div className="hero-recede origin-center will-change-transform">
+            <Hero ready={ready} />
+          </div>
+        </div>
+        <div className="slide-over relative z-10">
         <About />
         <Portfolio />
         <DeferredSection eager={restoring} fallback={<SectionSkeleton />}>
@@ -115,6 +151,7 @@ function App() {
         <Services />
         <Contact />
         <Footer />
+        </div>
       </main>
       {overlay && <SiteSkeleton hiding={ready} />}
     </div>
