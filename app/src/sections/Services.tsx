@@ -1,113 +1,111 @@
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Rocket, Package, TrendingUp, Layers, Crown, ArrowUpRight, MessageCircle } from 'lucide-react';
+import {
+  Rocket, Package, TrendingUp, Layers, Crown, ArrowUpRight, MessageCircle, Image as ImageIcon, Clapperboard,
+  Facebook, Youtube, Share2, Search, Flag, Printer, IdCard, Megaphone, Palette, Globe, ChartNoAxesCombined,
+  CalendarDays, Briefcase, Gauge, PenTool, Clock, Zap, Gem,
+} from 'lucide-react';
 import { servicesWhatsappUrl } from '../lib/contact';
 
 gsap.registerPlugin(ScrollTrigger);
 
 interface Feature {
-  emoji: string;
+  icon: React.ElementType;
   text: string;
 }
 
 interface Service {
   id: number;
   title: string;
-  emoji: string;
   description: string;
   icon: React.ElementType;
   features: Feature[];
 }
 
-const f = (emoji: string, text: string): Feature => ({ emoji, text });
+const f = (icon: React.ElementType, text: string): Feature => ({ icon, text });
 
 /** Five levels: each one includes more than the last. Every card leads to the services WhatsApp line. */
 const services: Service[] = [
   {
     id: 1,
     title: 'Starter Package',
-    emoji: '🚀',
     description: 'Everything you need to get noticed online from day one.',
     icon: Rocket,
     features: [
-      f('🎨', '2 Flyers'),
-      f('🎬', '2 Advertisement Videos'),
-      f('📘', 'Facebook Setup'),
-      f('▶️', 'YouTube Setup'),
-      f('💬', 'WhatsApp Setup'),
+      f(ImageIcon, '2 Flyers'),
+      f(Clapperboard, '2 Advertisement Videos'),
+      f(Facebook, 'Facebook Setup'),
+      f(Youtube, 'YouTube Setup'),
+      f(MessageCircle, 'WhatsApp Setup'),
     ],
   },
   {
     id: 2,
     title: 'Mini Package',
-    emoji: '📦',
     description: 'More designs and video, with your social media set up and ready.',
     icon: Package,
     features: [
-      f('🎨', '4 Flyers'),
-      f('🎬', '3 Advertisement Videos'),
-      f('📱', 'Social Media Setup'),
+      f(ImageIcon, '4 Flyers'),
+      f(Clapperboard, '3 Advertisement Videos'),
+      f(Share2, 'Social Media Setup'),
     ],
   },
   {
     id: 3,
     title: 'Growth Package',
-    emoji: '📈',
     description: 'Get found on Google and put your brand in people\'s hands.',
     icon: TrendingUp,
     features: [
-      f('🔍', 'Google Registration'),
-      f('🪧', '2 Physical Banners'),
-      f('🖨️', '50 Printed Flyers'),
-      f('🪪', '2 ID Cards'),
-      f('🎨', '6 Flyers'),
-      f('🎬', '4 Advertisement Videos'),
+      f(Search, 'Google Registration'),
+      f(Flag, '2 Physical Banners'),
+      f(Printer, '50 Printed Flyers'),
+      f(IdCard, '2 ID Cards'),
+      f(ImageIcon, '6 Flyers'),
+      f(Clapperboard, '4 Advertisement Videos'),
     ],
   },
   {
     id: 4,
     title: 'Mega Package',
-    emoji: '🏆',
     description: 'Print, video and social media, set up and managed for you.',
     icon: Layers,
     features: [
-      f('🔍', 'Google Registration'),
-      f('🪧', '4 Physical Banners'),
-      f('🖨️', '100 Printed Flyers'),
-      f('🪪', '4 ID Cards'),
-      f('🎨', '10 Flyers'),
-      f('🎬', '6 Advertisement Videos'),
-      f('📱', 'Social Media Setup'),
-      f('📣', 'Social Media Management'),
+      f(Search, 'Google Registration'),
+      f(Flag, '4 Physical Banners'),
+      f(Printer, '100 Printed Flyers'),
+      f(IdCard, '4 ID Cards'),
+      f(ImageIcon, '10 Flyers'),
+      f(Clapperboard, '6 Advertisement Videos'),
+      f(Share2, 'Social Media Setup'),
+      f(Megaphone, 'Social Media Management'),
     ],
   },
   {
     id: 5,
     title: 'Super Package',
-    emoji: '👑',
     description: 'The complete business presence, built and run end to end.',
     icon: Crown,
     features: [
-      f('🏆', 'Everything in the Mega Package'),
-      f('✨', 'Full Branding'),
-      f('🌐', 'Full Website Development & Administration'),
-      f('📊', 'Full SEO Packages'),
-      f('📲', 'All Social Media Platforms Setup'),
-      f('🗓️', 'Monthly Social Media Management'),
-      f('💼', 'Business Cards'),
+      f(Gem, 'Everything in the Mega Package'),
+      f(PenTool, 'Full Branding'),
+      f(Globe, 'Full Website Development & Administration'),
+      f(ChartNoAxesCombined, 'Full SEO Packages'),
+      f(Share2, 'All Social Media Platforms Setup'),
+      f(CalendarDays, 'Monthly Social Media Management'),
+      f(Briefcase, 'Business Cards'),
     ],
   },
 ];
 
 const additional: Feature[] = [
-  f('⚙️', 'SSD Optimization'),
-  f('📣', 'Social Media Management'),
-  f('🪪', 'Up to 8 ID Cards'),
-  f('🗓️', '7 Social Media Posts/Flyers for Daily Posting'),
-  f('🎨', 'Custom Designs'),
-  f('💼', 'Business Cards'),
-  f('🪧', 'Physical Banners'),
+  f(Gauge, 'SSD Optimization'),
+  f(Megaphone, 'Social Media Management'),
+  f(IdCard, 'Up to 8 ID Cards'),
+  f(CalendarDays, '7 Social Media Posts/Flyers for Daily Posting'),
+  f(Palette, 'Custom Designs'),
+  f(Briefcase, 'Business Cards'),
+  f(Flag, 'Physical Banners'),
 ];
 
 const enquiry = (s: Service) =>
@@ -241,7 +239,7 @@ const Services = () => {
                         </div>
                       </div>
                       <h3 className="mb-3 font-display text-3xl font-bold text-white md:mb-4 md:text-4xl">
-                        {service.title} <span className="emoji align-middle text-2xl md:text-3xl">{service.emoji}</span>
+                        {service.title}
                       </h3>
                       <p className="max-w-md font-body text-sm leading-relaxed text-white/65 md:text-base">
                         {service.description}
@@ -255,9 +253,7 @@ const Services = () => {
                             key={feature.text}
                             className="flex items-center gap-2.5 border-b border-white/10 pb-2.5 font-body text-xs text-white/75 md:gap-3 md:pb-3 md:text-sm"
                           >
-                            <span className="emoji shrink-0 text-base leading-none md:text-lg" aria-hidden="true">
-                              {feature.emoji}
-                            </span>
+                            <feature.icon size={17} strokeWidth={1.5} className="shrink-0 text-white/90" aria-hidden="true" />
                             {feature.text}
                           </li>
                         ))}
@@ -291,7 +287,7 @@ const Services = () => {
                   key={item.text}
                   className="flex items-center gap-2 rounded-full border border-white/20 px-4 py-2 font-body text-xs text-white/80 sm:text-sm"
                 >
-                  <span className="emoji text-base leading-none" aria-hidden="true">{item.emoji}</span>
+                  <item.icon size={16} strokeWidth={1.5} className="shrink-0 text-white/90" aria-hidden="true" />
                   {item.text}
                 </li>
               ))}
@@ -311,23 +307,23 @@ const Services = () => {
           <div className="rounded-xl border border-white/10 bg-white/[0.04] p-5 sm:p-8">
             <p className="mb-2 font-body text-xs uppercase tracking-[0.3em] text-white/50">Fast turnaround</p>
             <h3 className="mb-4 font-display text-3xl font-bold text-white md:text-4xl">
-              Delivery <span className="emoji align-middle text-2xl md:text-3xl">⚡</span>
+              Delivery
             </h3>
             <div className="mb-5 flex items-end gap-3">
               <span className="font-display text-7xl font-bold leading-none text-white md:text-8xl">24</span>
               <span className="pb-2 font-display text-2xl font-bold uppercase leading-none text-white/60">
-                hours <span className="emoji text-xl">⏱️</span>
+                hours
               </span>
             </div>
             <ul className="space-y-4">
               <li className="flex items-start gap-3">
-                <span className="emoji mt-0.5 shrink-0 text-xl leading-none" aria-hidden="true">🎨</span>
+                <Zap size={20} strokeWidth={1.5} className="mt-0.5 shrink-0 text-white/90" aria-hidden="true" />
                 <span className="font-body text-sm leading-relaxed text-white/80 sm:text-base">
                   Get your designs within 24 hours.
                 </span>
               </li>
               <li className="flex items-start gap-3">
-                <span className="emoji mt-0.5 shrink-0 text-xl leading-none" aria-hidden="true">🚀</span>
+                <Clock size={20} strokeWidth={1.5} className="mt-0.5 shrink-0 text-white/90" aria-hidden="true" />
                 <span className="font-body text-sm leading-relaxed text-white/80 sm:text-base">
                   Get your projects within 24 hours (depending on project scope).
                 </span>
