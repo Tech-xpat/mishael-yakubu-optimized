@@ -126,7 +126,7 @@ const ENTRIES: Entry[] = [
     id: 'packages',
     keys: ['package', 'bundle', 'offer', 'what do you offer', 'what service', 'your service', 'what do you do', 'what can you do', 'provide'],
     answer: () =>
-      'Mishael offers five Digital Services & Packages:\n\n1. Starter Package: 2 flyers, 2 advertisement videos, and Facebook, YouTube and WhatsApp setup.\n2. Mini Package: flyers, advertisement videos and social media setup.\n3. Growth Package: Google registration, 2 physical banners, 50 printed flyers, 2 ID cards, 1 flyer and 1 advertisement video.\n4. Mega Package: Growth package items plus social media setup and social media management.\n5. Super Package: full branding, full website development and administration, full SEO, all social media platforms setup and monthly social media management.\n\nThere are also additional services, and he builds websites, brands and AI automation too.',
+      'Mishael offers five Digital Services & Packages, and each level includes more than the last:\n\n1. Starter: 2 flyers, 2 advertisement videos, Facebook, YouTube and WhatsApp setup.\n2. Mini: 4 flyers, 3 advertisement videos and social media setup.\n3. Growth: Google registration, 2 physical banners, 50 printed flyers, 2 ID cards, 6 flyers, 4 advertisement videos.\n4. Mega: Google registration, 4 physical banners, 100 printed flyers, 4 ID cards, 10 flyers, 6 advertisement videos, social media setup and management.\n5. Super: everything in Mega plus full branding, full website development and administration, full SEO, all social media platforms and monthly management.\n\nThere are also additional services, and delivery takes 24 hours.',
     chips: [ask('Tell me about the Starter Package'), ask('What are the additional services?'), ask('How fast is delivery?'), WA_CHIP],
     offerWhatsApp: true,
   },
@@ -134,34 +134,34 @@ const ENTRIES: Entry[] = [
     id: 'starter',
     keys: ['starter package', 'starter'],
     answer: () =>
-      'Starter Package: 2 flyers, 2 advertisement videos and social media account setup for Facebook, YouTube and WhatsApp.',
+      'Starter Package (Level 1): 2 flyers, 2 advertisement videos and social media account setup for Facebook, YouTube and WhatsApp.',
     chips: [WA_CHIP, ask('Show me all packages')],
   },
   {
     id: 'mini',
     keys: ['mini package', 'mini'],
-    answer: () => 'Mini Package: flyers, advertisement videos and social media setup. Mishael can confirm the exact quantities with you.',
+    answer: () => 'Mini Package (Level 2): 4 flyers, 3 advertisement videos and social media setup.',
     chips: [WA_CHIP, ask('Show me all packages')],
   },
   {
     id: 'growth',
     keys: ['growth package', 'growth'],
     answer: () =>
-      'Growth Package: Google registration, 2 physical banners, 50 printed flyers, 2 ID cards, 1 flyer and 1 advertisement video.',
+      'Growth Package (Level 3): Google registration, 2 physical banners, 50 printed flyers, 2 ID cards, 6 flyers and 4 advertisement videos.',
     chips: [WA_CHIP, ask('Show me all packages')],
   },
   {
     id: 'mega',
     keys: ['mega package', 'mega'],
     answer: () =>
-      'Mega Package: Google registration, physical banners, 50 printed flyers, ID cards, 1 flyer, 1 advertisement video, social media setup and social media management.',
+      'Mega Package (Level 4): Google registration, 4 physical banners, 100 printed flyers, 4 ID cards, 10 flyers, 6 advertisement videos, social media setup and social media management.',
     chips: [WA_CHIP, ask('Show me all packages')],
   },
   {
     id: 'super',
     keys: ['super package', 'super', 'everything', 'complete', 'full package'],
     answer: () =>
-      'Super Package: full branding, full website development and administration, full SEO packages, setup of all social media platforms and monthly social media management.',
+      'Super Package (Level 5): everything in the Mega Package plus full branding, full website development and administration, full SEO packages, setup of all social media platforms, monthly social media management and business cards.',
     chips: [WA_CHIP, ask('Show me all packages')],
   },
   {

@@ -1,95 +1,120 @@
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Rocket, Package, TrendingUp, Layers, Crown, Clock, Zap, ArrowUpRight, MessageCircle } from 'lucide-react';
+import { Rocket, Package, TrendingUp, Layers, Crown, ArrowUpRight, MessageCircle } from 'lucide-react';
 import { servicesWhatsappUrl } from '../lib/contact';
 
 gsap.registerPlugin(ScrollTrigger);
 
+interface Feature {
+  emoji: string;
+  text: string;
+}
+
 interface Service {
   id: number;
   title: string;
+  emoji: string;
   description: string;
   icon: React.ElementType;
-  features: string[];
+  features: Feature[];
 }
 
-/** The five packages. Every card leads to the services WhatsApp line with a message naming the package. */
+const f = (emoji: string, text: string): Feature => ({ emoji, text });
+
+/** Five levels: each one includes more than the last. Every card leads to the services WhatsApp line. */
 const services: Service[] = [
   {
     id: 1,
     title: 'Starter Package',
+    emoji: '🚀',
     description: 'Everything you need to get noticed online from day one.',
     icon: Rocket,
-    features: ['2 Flyers', '2 Advertisement Videos', 'Facebook Setup', 'YouTube Setup', 'WhatsApp Setup'],
+    features: [
+      f('🎨', '2 Flyers'),
+      f('🎬', '2 Advertisement Videos'),
+      f('📘', 'Facebook Setup'),
+      f('▶️', 'YouTube Setup'),
+      f('💬', 'WhatsApp Setup'),
+    ],
   },
   {
     id: 2,
     title: 'Mini Package',
-    description: 'A compact bundle of designs, video and social media setup.',
+    emoji: '📦',
+    description: 'More designs and video, with your social media set up and ready.',
     icon: Package,
-    features: ['Flyers', 'Advertisement Videos', 'Social Media Setup'],
+    features: [
+      f('🎨', '4 Flyers'),
+      f('🎬', '3 Advertisement Videos'),
+      f('📱', 'Social Media Setup'),
+    ],
   },
   {
     id: 3,
     title: 'Growth Package',
+    emoji: '📈',
     description: 'Get found on Google and put your brand in people\'s hands.',
     icon: TrendingUp,
     features: [
-      'Google Registration',
-      '2 Physical Banners',
-      '50 Printed Flyers',
-      '2 ID Cards',
-      '1 Flyer',
-      '1 Advertisement Video',
+      f('🔍', 'Google Registration'),
+      f('🪧', '2 Physical Banners'),
+      f('🖨️', '50 Printed Flyers'),
+      f('🪪', '2 ID Cards'),
+      f('🎨', '6 Flyers'),
+      f('🎬', '4 Advertisement Videos'),
     ],
   },
   {
     id: 4,
     title: 'Mega Package',
+    emoji: '🏆',
     description: 'Print, video and social media, set up and managed for you.',
     icon: Layers,
     features: [
-      'Google Registration',
-      'Physical Banners',
-      '50 Printed Flyers',
-      'ID Cards',
-      '1 Flyer',
-      '1 Advertisement Video',
-      'Social Media Setup',
-      'Social Media Management',
+      f('🔍', 'Google Registration'),
+      f('🪧', '4 Physical Banners'),
+      f('🖨️', '100 Printed Flyers'),
+      f('🪪', '4 ID Cards'),
+      f('🎨', '10 Flyers'),
+      f('🎬', '6 Advertisement Videos'),
+      f('📱', 'Social Media Setup'),
+      f('📣', 'Social Media Management'),
     ],
   },
   {
     id: 5,
     title: 'Super Package',
+    emoji: '👑',
     description: 'The complete business presence, built and run end to end.',
     icon: Crown,
     features: [
-      'Full Branding',
-      'Full Website Development & Administration',
-      'Full SEO Packages',
-      'All Social Media Platforms Setup',
-      'Monthly Social Media Management',
+      f('🏆', 'Everything in the Mega Package'),
+      f('✨', 'Full Branding'),
+      f('🌐', 'Full Website Development & Administration'),
+      f('📊', 'Full SEO Packages'),
+      f('📲', 'All Social Media Platforms Setup'),
+      f('🗓️', 'Monthly Social Media Management'),
+      f('💼', 'Business Cards'),
     ],
   },
 ];
 
-const additional = [
-  'SSD Optimization',
-  'Social Media Management',
-  'Up to 8 ID Cards',
-  '7 Social Media Posts/Flyers for Daily Posting',
-  'Custom Designs',
-  'Business Cards',
-  'Physical Banners',
+const additional: Feature[] = [
+  f('⚙️', 'SSD Optimization'),
+  f('📣', 'Social Media Management'),
+  f('🪪', 'Up to 8 ID Cards'),
+  f('🗓️', '7 Social Media Posts/Flyers for Daily Posting'),
+  f('🎨', 'Custom Designs'),
+  f('💼', 'Business Cards'),
+  f('🪧', 'Physical Banners'),
 ];
 
 const enquiry = (s: Service) =>
-  `Hello Mishael, I'm interested in the ${s.title} (${s.features.join(', ')}). I'd like to get started.`;
+  `Hello Mishael, I'm interested in the ${s.title} (${s.features.map((x) => x.text).join(', ')}). I'd like to get started.`;
 
 const extraEnquiry =
-  'Hello Mishael, I saw your additional services (' + additional.join(', ') + ') and I would like to place an order.';
+  'Hello Mishael, I saw your additional services (' + additional.map((x) => x.text).join(', ') + ') and I would like to place an order.';
 
 const Services = () => {
   const sectionRef = useRef<HTMLElement>(null);
@@ -201,9 +226,22 @@ const Services = () => {
                         <span className="font-display text-4xl font-bold text-white/10 md:text-5xl">
                           0{service.id}
                         </span>
+                        <div className="ml-auto flex flex-col items-end gap-1.5 md:ml-2" aria-label={`Level ${service.id} of ${services.length}`}>
+                          <span className="font-body text-[10px] font-semibold uppercase tracking-[0.25em] text-white/50">
+                            Level {service.id}
+                          </span>
+                          <span className="flex gap-1" aria-hidden="true">
+                            {services.map((_, n) => (
+                              <span
+                                key={n}
+                                className={`h-1.5 w-4 rounded-full ${n < service.id ? 'bg-white' : 'bg-white/15'}`}
+                              />
+                            ))}
+                          </span>
+                        </div>
                       </div>
                       <h3 className="mb-3 font-display text-3xl font-bold text-white md:mb-4 md:text-4xl">
-                        {service.title}
+                        {service.title} <span className="emoji align-middle text-2xl md:text-3xl">{service.emoji}</span>
                       </h3>
                       <p className="max-w-md font-body text-sm leading-relaxed text-white/65 md:text-base">
                         {service.description}
@@ -214,11 +252,13 @@ const Services = () => {
                       <ul className="grid grid-cols-2 gap-x-4 gap-y-2.5 md:grid-cols-1 md:gap-y-3">
                         {service.features.map((feature) => (
                           <li
-                            key={feature}
+                            key={feature.text}
                             className="flex items-center gap-2.5 border-b border-white/10 pb-2.5 font-body text-xs text-white/75 md:gap-3 md:pb-3 md:text-sm"
                           >
-                            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-white/60" />
-                            {feature}
+                            <span className="emoji shrink-0 text-base leading-none md:text-lg" aria-hidden="true">
+                              {feature.emoji}
+                            </span>
+                            {feature.text}
                           </li>
                         ))}
                       </ul>
@@ -248,10 +288,11 @@ const Services = () => {
             <ul className="flex flex-wrap gap-2.5">
               {additional.map((item) => (
                 <li
-                  key={item}
-                  className="rounded-full border border-white/20 px-4 py-2 font-body text-xs text-white/80 sm:text-sm"
+                  key={item.text}
+                  className="flex items-center gap-2 rounded-full border border-white/20 px-4 py-2 font-body text-xs text-white/80 sm:text-sm"
                 >
-                  {item}
+                  <span className="emoji text-base leading-none" aria-hidden="true">{item.emoji}</span>
+                  {item.text}
                 </li>
               ))}
             </ul>
@@ -269,16 +310,24 @@ const Services = () => {
 
           <div className="rounded-xl border border-white/10 bg-white/[0.04] p-5 sm:p-8">
             <p className="mb-2 font-body text-xs uppercase tracking-[0.3em] text-white/50">Fast turnaround</p>
-            <h3 className="mb-5 font-display text-3xl font-bold text-white md:text-4xl">Delivery</h3>
+            <h3 className="mb-4 font-display text-3xl font-bold text-white md:text-4xl">
+              Delivery <span className="emoji align-middle text-2xl md:text-3xl">⚡</span>
+            </h3>
+            <div className="mb-5 flex items-end gap-3">
+              <span className="font-display text-7xl font-bold leading-none text-white md:text-8xl">24</span>
+              <span className="pb-2 font-display text-2xl font-bold uppercase leading-none text-white/60">
+                hours <span className="emoji text-xl">⏱️</span>
+              </span>
+            </div>
             <ul className="space-y-4">
               <li className="flex items-start gap-3">
-                <Zap size={20} className="mt-0.5 shrink-0 text-white" />
+                <span className="emoji mt-0.5 shrink-0 text-xl leading-none" aria-hidden="true">🎨</span>
                 <span className="font-body text-sm leading-relaxed text-white/80 sm:text-base">
                   Get your designs within 24 hours.
                 </span>
               </li>
               <li className="flex items-start gap-3">
-                <Clock size={20} className="mt-0.5 shrink-0 text-white" />
+                <span className="emoji mt-0.5 shrink-0 text-xl leading-none" aria-hidden="true">🚀</span>
                 <span className="font-body text-sm leading-relaxed text-white/80 sm:text-base">
                   Get your projects within 24 hours (depending on project scope).
                 </span>

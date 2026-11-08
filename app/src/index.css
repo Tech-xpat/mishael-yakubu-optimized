@@ -639,3 +639,11 @@ html[data-theme='light'] .slide-over { box-shadow: 0 -24px 60px -16px rgba(0, 0,
 @media (prefers-reduced-motion: reduce) {
   .assistant-in, .msg-in { animation: none; }
 }
+
+/* Emoji: always use the platform's colour emoji font, never the site font. */
+.emoji {
+  font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', 'Twemoji Mozilla', sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  letter-spacing: 0;
+}
