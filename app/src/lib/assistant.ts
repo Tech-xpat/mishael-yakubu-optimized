@@ -58,31 +58,13 @@ interface Entry {
   offerWhatsApp?: boolean;
 }
 
-const INTEGRATIONS: { name: string; keys: string[]; blurb: string }[] = [
-  { name: 'WhatsApp Business API', keys: ['whatsapp api', 'whatsapp business', 'business api', 'whatsapp integration'], blurb: 'connects your website to WhatsApp so customers can reach you and get automated replies where they already chat.' },
-  { name: 'Payment Gateway Integration', keys: ['payment', 'gateway', 'paystack', 'flutterwave', 'stripe', 'checkout', 'accept payment'], blurb: 'lets visitors pay you directly on your website.' },
-  { name: 'Online Booking / Appointment System', keys: ['booking', 'appointment', 'schedule', 'reservation'], blurb: 'lets customers book a time with you online instead of going back and forth.' },
-  { name: 'E-commerce Integration', keys: ['ecommerce', 'e commerce', 'online store', 'online shop', 'shop', 'store', 'sell online'], blurb: 'turns your website into a store where people can browse and buy.' },
-  { name: 'Customer Relationship Management (CRM) Integration', keys: ['crm', 'customer relationship'], blurb: 'sends your website enquiries into a CRM so every customer and follow-up is tracked in one place.' },
-  { name: 'Email Marketing Automation', keys: ['email marketing', 'newsletter', 'mailing list', 'email automation', 'drip'], blurb: 'sends the right emails to your contacts automatically.' },
-  { name: 'AI Chatbot Integration', keys: ['chatbot', 'chat bot', 'bot', 'ai chat'], blurb: 'adds a chatbot to your site that answers visitors any time of day.' },
-  { name: 'Customer Support Automation', keys: ['support automation', 'customer support', 'helpdesk', 'help desk', 'support'], blurb: 'automates common support replies and routes the rest to you.' },
-  { name: 'Lead Generation System', keys: ['lead generation', 'lead', 'capture lead', 'get customer'], blurb: 'captures enquiries from your website and organises them so nothing is missed.' },
-  { name: 'Google Analytics & Conversion Tracking', keys: ['google analytics', 'analytics', 'conversion tracking', 'tracking', 'traffic'], blurb: 'shows who visits your site and which actions turn visitors into customers.' },
-  { name: 'Google Search Console Integration', keys: ['search console', 'seo', 'google search', 'rank', 'indexing'], blurb: 'connects your site to Google Search Console so you can see how you appear in search.' },
-  { name: 'Facebook Pixel / Meta Conversion API', keys: ['facebook pixel', 'meta pixel', 'meta conversion', 'conversion api', 'pixel', 'facebook ads', 'instagram ads', 'meta ads'], blurb: 'tracks results from your Facebook and Instagram ads so you can see what pays off.' },
-  { name: 'Third-Party API Integrations', keys: ['third party', 'api', 'connect tool', 'integrate with'], blurb: 'connects your website to other services and tools you already use.' },
-  { name: 'Website Security and Backup Integration', keys: ['security', 'backup', 'secure', 'hack', 'protect', 'ssl'], blurb: 'protects your website and keeps backups so you can recover if something goes wrong.' },
-  { name: 'Automated Notifications and Email Systems', keys: ['notification', 'automated email', 'auto email', 'alert', 'confirmation email'], blurb: 'sends customers and you instant notifications and emails when something happens on your site.' },
-];
-
 const ENTRIES: Entry[] = [
   {
     id: 'greet',
     keys: ['hi', 'hello', 'hey', 'good morning', 'good afternoon', 'good evening', 'howdy', 'hola'],
     answer: () =>
-      "Hello! I'm Mishael's Assistant, always online. Ask me about Mishael's services, website integrations, portfolio, or how to start a project.",
-    chips: [ask('What services do you offer?'), ask('Show me the integrations'), ask('How do I contact Mishael?')],
+      "Hello! I'm Mishael's Assistant, always online. Ask me about Mishael's packages, portfolio, or how to start a project.",
+    chips: [ask('What packages do you offer?'), ask('Show me all packages'), ask('How do I contact Mishael?')],
   },
   {
     id: 'identity',
@@ -96,28 +78,28 @@ const ENTRIES: Entry[] = [
     keys: ['who is mishael', 'about mishael', 'about you', 'background', 'experience', 'ceo', 'empire digital', 'founder', 'yakubu', 'years'],
     answer: () =>
       "Mishael Yakubu is a web developer, brand designer and AI automation specialist, and the CEO of Empire Digitals, based in Ughelli, Delta State, Nigeria. He has over 5 years of experience in the digital space and has worked with startups, agencies and established brands across different industries.",
-    chips: [ask('What services do you offer?'), ask('Show me the portfolio')],
+    chips: [ask('What packages do you offer?'), ask('Show me the portfolio')],
   },
   {
     id: 'stack',
     keys: ['react', 'typescript', 'node', 'python', 'figma', 'tech stack', 'technology', 'skill', 'tools', 'stack', 'ui ux', 'next'],
     answer: () =>
       'Mishael works with React, Next.js, TypeScript, Node.js and Python for development, Figma for UI/UX and design, plus AI/ML and brand strategy.',
-    chips: [ask('Show me the integrations'), ask('What services do you offer?')],
+    chips: [ask('Show me all packages'), ask('What packages do you offer?')],
   },
   {
     id: 'services',
-    keys: ['service', 'offer', 'what do you do', 'what can you do', 'help with', 'provide', 'expertise'],
+    keys: ['help with', 'expertise'],
     answer: () =>
-      'Mishael offers Web Development (React, Next.js, Node.js, TypeScript), Brand Design (logos, brand identity, guidelines), AI Automation (workflows, chatbots, data processing) and custom Software Development (SaaS products, databases, cloud solutions). He also builds Advanced Website Integrations such as WhatsApp, payments, booking, CRM and analytics.',
-    chips: [ask('Show me the integrations'), ask('Show me the portfolio'), ask('How do I start a project?')],
+      'Mishael offers Web Development (React, Next.js, Node.js, TypeScript), Brand Design (logos, brand identity, guidelines), AI Automation (workflows, chatbots, data processing) and custom Software Development (SaaS products, databases, cloud solutions).',
+    chips: [ask('Show me all packages'), ask('Show me the portfolio'), ask('How do I start a project?')],
   },
   {
     id: 'webdev',
     keys: ['web development', 'website', 'web app', 'web design', 'build a site', 'landing page', 'frontend', 'backend'],
     answer: () =>
       'Web Development: high-performance, responsive websites and web applications built with modern technologies such as React and Next.js, TypeScript and a Node.js backend, with API integration.',
-    chips: [ask('Show me the portfolio'), ask('Show me the integrations')],
+    chips: [ask('Show me the portfolio'), ask('Show me all packages')],
   },
   {
     id: 'brand',
@@ -131,7 +113,7 @@ const ENTRIES: Entry[] = [
     keys: ['ai automation', 'automation', 'automate', 'artificial intelligence', 'workflow', 'machine learning'],
     answer: () =>
       'AI Automation: intelligent automation to streamline workflows and boost productivity, covering workflow automation, chatbot development, data processing and AI integration.',
-    chips: [ask('Tell me about chatbots'), ask('Show me the integrations')],
+    chips: [ask('Show me all packages'), ask('Show me all packages')],
   },
   {
     id: 'software',
@@ -141,23 +123,54 @@ const ENTRIES: Entry[] = [
     chips: [ask('How do I start a project?'), WA_CHIP],
   },
   {
-    id: 'integrations',
-    keys: ['integration', 'integrate', 'advanced website', 'connect my website', 'add feature', 'add-on'],
+    id: 'packages',
+    keys: ['package', 'bundle', 'offer', 'what do you offer', 'what service', 'your service', 'what do you do', 'what can you do', 'provide'],
     answer: () =>
-      'Advanced Website Integrations cover four areas.\n\nMessaging & Support: WhatsApp Business API, AI chatbot, customer support automation, automated notifications and emails.\nPayments & Sales: payment gateway, online booking, e-commerce, CRM.\nMarketing & Leads: lead generation, email marketing automation, Facebook Pixel / Meta Conversion API.\nAnalytics & Security: Google Analytics and conversion tracking, Google Search Console, third-party APIs, website security and backup.\n\nTell me which one you need and I can explain it, or discuss it on WhatsApp.',
-    chips: [ask('Payment gateway'), ask('WhatsApp Business API'), { label: 'Discuss integrations', kind: 'whatsapp' }],
+      'Mishael offers five Digital Services & Packages:\n\n1. Starter Package: 2 flyers, 2 advertisement videos, and Facebook, YouTube and WhatsApp setup.\n2. Mini Package: flyers, advertisement videos and social media setup.\n3. Growth Package: Google registration, 2 physical banners, 50 printed flyers, 2 ID cards, 1 flyer and 1 advertisement video.\n4. Mega Package: Growth package items plus social media setup and social media management.\n5. Super Package: full branding, full website development and administration, full SEO, all social media platforms setup and monthly social media management.\n\nThere are also additional services, and he builds websites, brands and AI automation too.',
+    chips: [ask('Tell me about the Starter Package'), ask('What are the additional services?'), ask('How fast is delivery?'), WA_CHIP],
     offerWhatsApp: true,
   },
-  ...INTEGRATIONS.map(
-    (i): Entry => ({
-      id: 'int-' + i.name,
-      keys: i.keys,
-      answer: () =>
-        `${i.name}: this ${i.blurb} It's one of the Advanced Website Integrations Mishael builds, and the details depend on your business. Want to talk it through on WhatsApp?`,
-      chips: [WA_CHIP, ask('Show me the integrations')],
-      offerWhatsApp: false,
-    })
-  ),
+  {
+    id: 'starter',
+    keys: ['starter package', 'starter'],
+    answer: () =>
+      'Starter Package: 2 flyers, 2 advertisement videos and social media account setup for Facebook, YouTube and WhatsApp.',
+    chips: [WA_CHIP, ask('Show me all packages')],
+  },
+  {
+    id: 'mini',
+    keys: ['mini package', 'mini'],
+    answer: () => 'Mini Package: flyers, advertisement videos and social media setup. Mishael can confirm the exact quantities with you.',
+    chips: [WA_CHIP, ask('Show me all packages')],
+  },
+  {
+    id: 'growth',
+    keys: ['growth package', 'growth'],
+    answer: () =>
+      'Growth Package: Google registration, 2 physical banners, 50 printed flyers, 2 ID cards, 1 flyer and 1 advertisement video.',
+    chips: [WA_CHIP, ask('Show me all packages')],
+  },
+  {
+    id: 'mega',
+    keys: ['mega package', 'mega'],
+    answer: () =>
+      'Mega Package: Google registration, physical banners, 50 printed flyers, ID cards, 1 flyer, 1 advertisement video, social media setup and social media management.',
+    chips: [WA_CHIP, ask('Show me all packages')],
+  },
+  {
+    id: 'super',
+    keys: ['super package', 'super', 'everything', 'complete', 'full package'],
+    answer: () =>
+      'Super Package: full branding, full website development and administration, full SEO packages, setup of all social media platforms and monthly social media management.',
+    chips: [WA_CHIP, ask('Show me all packages')],
+  },
+  {
+    id: 'additional',
+    keys: ['additional service', 'additional', 'add on', 'add-on', 'extra', 'id card', 'business card', 'banner', 'ssd', 'custom design', 'daily post', 'social media post', 'social media management'],
+    answer: () =>
+      'Additional services: SSD optimization, social media management, up to 8 ID cards, 7 social media posts/flyers for daily posting, custom designs, business cards and physical banners.',
+    chips: [WA_CHIP, ask('Show me all packages')],
+  },
   {
     id: 'portfolio',
     keys: ['portfolio', 'project', 'work', 'sample', 'example', 'gallery', 'previous', 'showcase', 'case study'],
@@ -167,13 +180,13 @@ const ENTRIES: Entry[] = [
         : 'Web Development, Live Websites, Flyers & Graphics, Brand Design, AI Automation, Videos and Motion Graphics';
       return `The portfolio is organised in folders: ${list}. Open the Portfolio section on the home page and tap a folder to browse its full gallery.`;
     },
-    chips: [{ label: 'Open the portfolio', kind: 'portfolio' }, ask('What services do you offer?')],
+    chips: [{ label: 'Open the portfolio', kind: 'portfolio' }, ask('What packages do you offer?')],
   },
   {
     id: 'contact',
     keys: ['contact', 'phone', 'call', 'email', 'reach', 'number', 'whatsapp', 'talk to', 'speak to', 'message'],
     answer: () =>
-      `You can reach Mishael here:\nWhatsApp: ${WHATSAPP_DISPLAY}\nProject and integration enquiries on WhatsApp: ${SERVICES_WHATSAPP_DISPLAY}\nPhone calls: ${PHONE_DISPLAY}\nEmail: ${EMAIL}`,
+      `You can reach Mishael here:\nWhatsApp: ${WHATSAPP_DISPLAY}\nPackage and project enquiries on WhatsApp: ${SERVICES_WHATSAPP_DISPLAY}\nPhone calls: ${PHONE_DISPLAY}\nEmail: ${EMAIL}`,
     chips: [WA_CHIP],
   },
   {
@@ -192,25 +205,24 @@ const ENTRIES: Entry[] = [
   },
   {
     id: 'timeline',
-    keys: ['how long', 'deadline', 'timeline', 'turnaround', 'delivery', 'how fast', 'duration', 'time frame', 'timeframe'],
+    keys: ['how long', 'deadline', 'timeline', 'turnaround', 'delivery', 'deliver', 'how fast', 'duration', 'time frame', 'timeframe', '24 hour', 'fast'],
     answer: () =>
-      "I don't have set delivery times on the site. They depend on the size of the project, and Mishael can give you a realistic timeline when he hears the details.",
-    chips: [WA_CHIP],
-    offerWhatsApp: true,
+      'Delivery is fast: you get your designs within 24 hours, and your projects within 24 hours too (depending on project scope).',
+    chips: [WA_CHIP, ask('Show me all packages')],
   },
   {
     id: 'start',
     keys: ['start a project', 'how do i start', 'start project', 'start', 'hire', 'get started', 'work with', 'order', 'available', 'availability', 'new project', 'begin', 'collaborate'],
     answer: () =>
       "Mishael is available for new projects. The quickest way to start is to message him on WhatsApp with a short description of what you want, and he'll reply there.",
-    chips: [WA_CHIP, ask('What services do you offer?')],
+    chips: [WA_CHIP, ask('What packages do you offer?')],
     offerWhatsApp: true,
   },
   {
     id: 'thanks',
     keys: ['thank', 'thanks', 'thx', 'appreciate', 'great', 'nice', 'cool', 'awesome'],
     answer: () => "You're welcome! Anything else you'd like to know?",
-    chips: [ask('What services do you offer?'), WA_CHIP],
+    chips: [ask('What packages do you offer?'), WA_CHIP],
   },
   {
     id: 'bye',
@@ -237,7 +249,7 @@ export function answer(question: string, ctx: KnowledgeContext): Reply {
   if (!best) {
     return {
       text: "I don't have that detail on the site, and I'd rather not guess. Mishael can answer it directly. Would you like to continue this chat on WhatsApp?",
-      chips: [WA_CHIP, ask('What services do you offer?')],
+      chips: [WA_CHIP, ask('What packages do you offer?')],
       offerWhatsApp: false,
     };
   }
@@ -245,8 +257,8 @@ export function answer(question: string, ctx: KnowledgeContext): Reply {
 }
 
 export const WELCOME: Reply = {
-  text: "Hi, I'm Mishael's Assistant, always online. Ask me anything about Mishael's work, services and website integrations, or how to get a project started.",
-  chips: [ask('What services do you offer?'), ask('Show me the integrations'), ask('Show me the portfolio'), ask('How do I contact Mishael?')],
+  text: "Hi, I'm Mishael's Assistant, always online. Ask me anything about Mishael's work, packages and services, or how to get a project started.",
+  chips: [ask('What packages do you offer?'), ask('Show me all packages'), ask('Show me the portfolio'), ask('How do I contact Mishael?')],
 };
 
 export const WA_PROMPT = 'By the way, would you prefer to talk on WhatsApp instead? I can carry this whole conversation over so you do not have to repeat yourself.';

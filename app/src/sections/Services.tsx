@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { MessageCircle, CreditCard, Megaphone, ShieldCheck, ArrowUpRight } from 'lucide-react';
+import { Rocket, Package, TrendingUp, Layers, Crown, Clock, Zap, ArrowUpRight, MessageCircle } from 'lucide-react';
 import { servicesWhatsappUrl } from '../lib/contact';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -14,50 +14,82 @@ interface Service {
   features: string[];
 }
 
-/** The 15 website integrations, grouped into four cards. Every card leads to the services WhatsApp line. */
+/** The five packages. Every card leads to the services WhatsApp line with a message naming the package. */
 const services: Service[] = [
   {
     id: 1,
-    title: 'Messaging & Support',
-    description: 'Meet customers where they already are and answer them around the clock.',
-    icon: MessageCircle,
-    features: [
-      'WhatsApp Business API',
-      'AI Chatbot Integration',
-      'Customer Support Automation',
-      'Automated Notifications & Emails',
-    ],
+    title: 'Starter Package',
+    description: 'Everything you need to get noticed online from day one.',
+    icon: Rocket,
+    features: ['2 Flyers', '2 Advertisement Videos', 'Facebook Setup', 'YouTube Setup', 'WhatsApp Setup'],
   },
   {
     id: 2,
-    title: 'Payments & Sales',
-    description: 'Let visitors pay, book and buy straight from your website.',
-    icon: CreditCard,
-    features: ['Payment Gateway', 'Online Booking / Appointments', 'E-commerce Integration', 'CRM Integration'],
+    title: 'Mini Package',
+    description: 'A compact bundle of designs, video and social media setup.',
+    icon: Package,
+    features: ['Flyers', 'Advertisement Videos', 'Social Media Setup'],
   },
   {
     id: 3,
-    title: 'Marketing & Leads',
-    description: 'Capture every enquiry and follow up automatically so no lead goes cold.',
-    icon: Megaphone,
-    features: ['Lead Generation System', 'Email Marketing Automation', 'Facebook Pixel / Meta Conversion API'],
+    title: 'Growth Package',
+    description: 'Get found on Google and put your brand in people\'s hands.',
+    icon: TrendingUp,
+    features: [
+      'Google Registration',
+      '2 Physical Banners',
+      '50 Printed Flyers',
+      '2 ID Cards',
+      '1 Flyer',
+      '1 Advertisement Video',
+    ],
   },
   {
     id: 4,
-    title: 'Analytics & Security',
-    description: 'Know what works, connect the tools you already use, and keep it all safe.',
-    icon: ShieldCheck,
+    title: 'Mega Package',
+    description: 'Print, video and social media, set up and managed for you.',
+    icon: Layers,
     features: [
-      'Google Analytics & Conversion Tracking',
-      'Google Search Console',
-      'Third-Party API Integrations',
-      'Website Security & Backup',
+      'Google Registration',
+      'Physical Banners',
+      '50 Printed Flyers',
+      'ID Cards',
+      '1 Flyer',
+      '1 Advertisement Video',
+      'Social Media Setup',
+      'Social Media Management',
+    ],
+  },
+  {
+    id: 5,
+    title: 'Super Package',
+    description: 'The complete business presence, built and run end to end.',
+    icon: Crown,
+    features: [
+      'Full Branding',
+      'Full Website Development & Administration',
+      'Full SEO Packages',
+      'All Social Media Platforms Setup',
+      'Monthly Social Media Management',
     ],
   },
 ];
 
+const additional = [
+  'SSD Optimization',
+  'Social Media Management',
+  'Up to 8 ID Cards',
+  '7 Social Media Posts/Flyers for Daily Posting',
+  'Custom Designs',
+  'Business Cards',
+  'Physical Banners',
+];
+
 const enquiry = (s: Service) =>
-  `Hello Mishael, I'm interested in "${s.title}" website integrations (${s.features.join(', ')}). I'd like to discuss what fits my business.`;
+  `Hello Mishael, I'm interested in the ${s.title} (${s.features.join(', ')}). I'd like to get started.`;
+
+const extraEnquiry =
+  'Hello Mishael, I saw your additional services (' + additional.join(', ') + ') and I would like to place an order.';
 
 const Services = () => {
   const sectionRef = useRef<HTMLElement>(null);
@@ -130,9 +162,9 @@ const Services = () => {
         <div ref={headingRef} className="mb-10 md:mb-20">
           <p className="mb-4 font-body text-xs uppercase tracking-[0.3em] text-white/50">What I Do</p>
           <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between md:gap-6">
-            <h2 className="font-display text-responsive-lg font-bold text-white">ADVANCED WEBSITE INTEGRATIONS</h2>
+            <h2 className="font-display text-responsive-lg font-bold text-white">DIGITAL SERVICES & PACKAGES</h2>
             <p className="max-w-md font-body text-sm text-white/50">
-              Connect your website to the tools that grow your business. Tap any card to talk it through on WhatsApp.
+              Pick the package that fits your business. Tap any card to order on WhatsApp.
             </p>
           </div>
         </div>
@@ -197,7 +229,7 @@ const Services = () => {
                         className="key-btn key-btn-wa group inline-flex items-center justify-center gap-2.5 self-stretch px-6 py-3.5 font-body text-sm font-semibold uppercase tracking-wider md:self-start"
                       >
                         <MessageCircle size={18} fill="currentColor" />
-                        <span>Discuss on WhatsApp</span>
+                        <span>Get this package</span>
                         <ArrowUpRight size={16} className="transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1" />
                       </a>
                     </div>
@@ -206,6 +238,53 @@ const Services = () => {
               </article>
             );
           })}
+        </div>
+
+        {/* Additional services + delivery */}
+        <div className="mx-auto mt-16 grid max-w-5xl gap-4 md:mt-24 md:grid-cols-[1.4fr_1fr] md:gap-6">
+          <div className="rounded-xl border border-white/10 bg-white/[0.04] p-5 sm:p-8">
+            <p className="mb-2 font-body text-xs uppercase tracking-[0.3em] text-white/50">Add-ons</p>
+            <h3 className="mb-5 font-display text-3xl font-bold text-white md:text-4xl">Additional Services</h3>
+            <ul className="flex flex-wrap gap-2.5">
+              {additional.map((item) => (
+                <li
+                  key={item}
+                  className="rounded-full border border-white/20 px-4 py-2 font-body text-xs text-white/80 sm:text-sm"
+                >
+                  {item}
+                </li>
+              ))}
+            </ul>
+            <a
+              href={servicesWhatsappUrl(extraEnquiry)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="key-btn key-btn-wa group mt-7 inline-flex w-full items-center justify-center gap-2.5 px-6 py-3.5 font-body text-sm font-semibold uppercase tracking-wider sm:w-auto"
+            >
+              <MessageCircle size={18} fill="currentColor" />
+              <span>Order add-ons</span>
+              <ArrowUpRight size={16} className="transition-transform duration-300 group-hover:-translate-y-1 group-hover:translate-x-1" />
+            </a>
+          </div>
+
+          <div className="rounded-xl border border-white/10 bg-white/[0.04] p-5 sm:p-8">
+            <p className="mb-2 font-body text-xs uppercase tracking-[0.3em] text-white/50">Fast turnaround</p>
+            <h3 className="mb-5 font-display text-3xl font-bold text-white md:text-4xl">Delivery</h3>
+            <ul className="space-y-4">
+              <li className="flex items-start gap-3">
+                <Zap size={20} className="mt-0.5 shrink-0 text-white" />
+                <span className="font-body text-sm leading-relaxed text-white/80 sm:text-base">
+                  Get your designs within 24 hours.
+                </span>
+              </li>
+              <li className="flex items-start gap-3">
+                <Clock size={20} className="mt-0.5 shrink-0 text-white" />
+                <span className="font-body text-sm leading-relaxed text-white/80 sm:text-base">
+                  Get your projects within 24 hours (depending on project scope).
+                </span>
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
     </section>
