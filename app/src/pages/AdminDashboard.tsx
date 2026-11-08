@@ -4,25 +4,10 @@ import { useAuth } from '../contexts/AuthContext';
 import { LogOut, BarChart3, Loader2, Upload, ExternalLink, Trash2, Play, Edit2, ChevronUp, ChevronDown, X } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useSeo } from '../lib/seo';
+import AdminCategories from '../components/admin/AdminCategories';
+import { allCategories, subcategoriesFor, fetchConfig, EMPTY_CONFIG, type CategoryConfig } from '../lib/categories';
 
-const CATEGORIES = [
-  { slug: 'web', name: 'Web Development' },
-  { slug: 'website', name: 'Live Websites' },
-  { slug: 'flyer', name: 'Flyers & Graphics' },
-  { slug: 'brand', name: 'Brand Design' },
-  { slug: 'ai', name: 'AI Automation' },
-  { slug: 'video', name: 'Videos' },
-  { slug: 'motion', name: 'Motion Graphics' },
-] as const;
-
-type CategorySlug = (typeof CATEGORIES)[number]['slug'];
-
-const SUBCATEGORIES: Record<string, string[]> = {
-  flyer: ['Birthday Flyers', 'Church Flyers', 'Social Media Flyers', 'Event Flyers', 'Business Flyers', 'Other Flyers'],
-  brand: ['Logo', 'Brand Identity', 'Social Media Kit', 'Other Branding'],
-  video: ['Promo Videos', 'Testimonials', 'Tutorials', 'Other Videos'],
-  motion: ['Logo Animation', 'Explainer', 'Social Motion', 'Other Motion'],
-};
+type CategorySlug = string;
 
 interface PortfolioItem {
   id: string;
@@ -62,8 +47,12 @@ const AdminDashboard = () => {
   const [editPriority, setEditPriority] = useState(0);
   const [savingEdit, setSavingEdit] = useState(false);
 
-  const availableSubs = SUBCATEGORIES[category] || [];
-  const editAvailableSubs = SUBCATEGORIES[editCategory] || [];
+  const [config, setConfig] = useState<CategoryConfig>(EMPTY_CONFIG);
+  const CATEGORIES = allCategories(config, items.map((i) => i.category || 'web'));
+  const seenSubs = (slug: string) =>
+    items.filter((i) => (i.category || 'web') === slug && i.subcategory).map((i) => i.subcategory as string);
+  const availableSubs = subcategoriesFor(category, config, seenSubs(category));
+  const editAvailableSubs = subcategoriesFor(editCategory, config, seenSubs(editCategory));
 
   const loadItems = async () => {
     setLoadingItems(true);
@@ -78,6 +67,7 @@ const AdminDashboard = () => {
   useEffect(() => {
     if (!currentUser || !isAdmin) return;
     loadItems();
+    fetchConfig(true).then(setConfig);
   }, [currentUser, isAdmin]);
 
   useEffect(() => {
@@ -275,6 +265,8 @@ const AdminDashboard = () => {
           ))}
         </div>
 
+        <AdminCategories config={config} items={items} onConfig={setConfig} />
+
         <section className="bg-white/5 border border-white/10 rounded-2xl p-6 md:p-8">
           <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
             <Upload size={20} />
@@ -285,7 +277,7 @@ const AdminDashboard = () => {
               <label className="text-xs text-white/50 uppercase tracking-wider block mb-2">Category</label>
               <select
                 value={category}
-                onChange={(e) => setCategory(e.target.value as CategorySlug)}
+                onChange={(e) => setCategory(e.target.value)}
                 className="w-full px-4 py-3 bg-black/40 border border-white/15 rounded-xl outline-none focus:border-white/40 text-white"
               >
                 {CATEGORIES.map((c) => (
@@ -500,7 +492,7 @@ const AdminDashboard = () => {
                 <select
                   value={editCategory}
                   onChange={(e) => {
-                    setEditCategory(e.target.value as CategorySlug);
+                    setEditCategory(e.target.value);
                     setEditSubcategory('');
                   }}
                   className="w-full px-3 py-2 bg-black/40 border border-white/15 rounded-lg text-white"

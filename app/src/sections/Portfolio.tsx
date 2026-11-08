@@ -4,21 +4,11 @@ import { Folder, Play } from 'lucide-react';
 import { cachedCounts, fetchCounts, prefetchItems } from '../lib/portfolioApi';
 import { FolderGridSkeleton } from '../components/Skeletons';
 import EmptyFold from '../components/EmptyFold';
+import { allCategories, cachedConfig, fetchConfig, EMPTY_CONFIG, type CategoryConfig, type CategoryDef } from '../lib/categories';
 
-const CATEGORIES = [
-  { slug: 'web', name: 'Web Development', icon: Folder },
-  { slug: 'website', name: 'Live Websites', icon: Folder },
-  { slug: 'flyer', name: 'Flyers & Graphics', icon: Folder },
-  { slug: 'brand', name: 'Brand Design', icon: Folder },
-  { slug: 'ai', name: 'AI Automation', icon: Folder },
-  { slug: 'video', name: 'Videos', icon: Play },
-  { slug: 'motion', name: 'Motion Graphics', icon: Play },
-];
 
-type Category = (typeof CATEGORIES)[number];
-
-function FolderTile({ cat, count }: { cat: Category; count: number }) {
-  const Icon = cat.icon;
+function FolderTile({ cat, count }: { cat: CategoryDef; count: number }) {
+  const Icon = cat.kind === 'play' ? Play : Folder;
   const warm = () => prefetchItems(cat.slug);
   const empty = count === 0;
   return (
@@ -51,8 +41,11 @@ export default function Portfolio() {
   // fresh numbers replace them as soon as the database answers.
   const [counts, setCounts] = useState<Record<string, number> | null>(() => cachedCounts());
 
+  const [config, setConfig] = useState<CategoryConfig>(() => cachedConfig() ?? EMPTY_CONFIG);
+
   useEffect(() => {
     let alive = true;
+    fetchConfig().then((c) => alive && setConfig(c));
     fetchCounts()
       .then((c) => alive && setCounts(c))
       .catch((err) => {
@@ -64,6 +57,7 @@ export default function Portfolio() {
     };
   }, []);
 
+  const CATEGORIES = allCategories(config, counts ? Object.keys(counts) : []);
   const filled = counts ? CATEGORIES.filter((c) => (counts[c.slug] || 0) > 0) : [];
   const empty = counts ? CATEGORIES.filter((c) => !(counts[c.slug] || 0)) : [];
 

@@ -19,16 +19,8 @@ import Navbar from '../sections/Navbar';
 import Footer from '../sections/Footer';
 import { GallerySkeleton } from '../components/Skeletons';
 import { useSeo, breadcrumbs } from '../lib/seo';
+import { cachedConfig, fetchConfig, categoryName, allCategories, EMPTY_CONFIG, type CategoryConfig } from '../lib/categories';
 
-const CATEGORY_NAMES: Record<string, string> = {
-  web: 'Web Development',
-  website: 'Live Websites',
-  flyer: 'Flyers & Graphics',
-  brand: 'Brand Design',
-  ai: 'AI Automation',
-  video: 'Videos',
-  motion: 'Motion Graphics',
-};
 
 const isVideo = (item?: PortfolioItem) =>
   !!item && (item.media_type === 'video' || !!item.image_url?.match(/\.(mp4|webm|mov)$/i));
@@ -64,12 +56,21 @@ function PreviewImage({ src, alt }: { src: string; alt: string }) {
 
 export default function GalleryPage() {
   const { category } = useParams<{ category: string }>();
-  const galleryName = (category && CATEGORY_NAMES[category]) || 'Gallery';
+  const [config, setConfig] = useState<CategoryConfig>(() => cachedConfig() ?? EMPTY_CONFIG);
+  useEffect(() => {
+    let alive = true;
+    fetchConfig().then((c) => alive && setConfig(c));
+    return () => {
+      alive = false;
+    };
+  }, []);
+  const known = !!category && allCategories(config).some((c) => c.slug === category);
+  const galleryName = category && known ? categoryName(category, config) : 'Gallery';
   useSeo({
     title: `${galleryName} Portfolio | Mishael Yakubu`,
     description: `${galleryName} by Mishael Yakubu, CEO of Empire Digitals. Browse the full collection of projects.`,
     path: `/gallery/${category ?? ''}`,
-    noindex: !category || !CATEGORY_NAMES[category],
+    noindex: !known,
     jsonLd: [
       breadcrumbs([
         { name: 'Home', path: '/' },
@@ -91,7 +92,7 @@ export default function GalleryPage() {
   const touchStartX = useRef<number | null>(null);
   const idleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const title = category ? CATEGORY_NAMES[category] || category : 'Gallery';
+  const title = category ? categoryName(category, config) : 'Gallery';
 
   // Back goes to wherever the visitor came from (the home page portfolio menu, at the
   // same scroll spot). If the page was opened directly, fall back to the portfolio menu.
