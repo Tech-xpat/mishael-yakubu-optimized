@@ -14,7 +14,7 @@ import './index.css'
 import App from './App.tsx'
 import ScrollToTop from './components/ScrollToTop'
 import SmoothScroll from './components/SmoothScroll'
-import WhatsAppButton from './components/WhatsAppButton'
+import ChatAssistant from './components/ChatAssistant'
 import ThemeGuard from './components/ThemeGuard'
 import { RouteSkeleton } from './components/Skeletons'
 import { installPressFeedback } from './lib/pressFeedback'
@@ -44,7 +44,7 @@ createRoot(document.getElementById('root')!).render(
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>
-      <WhatsAppButton />
+      <ChatAssistant />
     </BrowserRouter>
   </StrictMode>,
 )

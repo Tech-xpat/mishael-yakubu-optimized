@@ -1,8 +1,8 @@
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Code, Palette, Bot, Terminal, ArrowRight } from 'lucide-react';
-import { scrollToTarget } from '../lib/scrollTo';
+import { MessageCircle, CreditCard, Megaphone, ShieldCheck, ArrowUpRight } from 'lucide-react';
+import { servicesWhatsappUrl } from '../lib/contact';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -14,40 +14,50 @@ interface Service {
   features: string[];
 }
 
+/** The 15 website integrations, grouped into four cards. Every card leads to the services WhatsApp line. */
 const services: Service[] = [
   {
     id: 1,
-    title: 'Web Development',
-    description:
-      'Building high-performance, responsive websites and web applications using modern technologies.',
-    icon: Code,
-    features: ['React & Next.js', 'TypeScript', 'Node.js Backend', 'API Integration'],
+    title: 'Messaging & Support',
+    description: 'Meet customers where they already are and answer them around the clock.',
+    icon: MessageCircle,
+    features: [
+      'WhatsApp Business API',
+      'AI Chatbot Integration',
+      'Customer Support Automation',
+      'Automated Notifications & Emails',
+    ],
   },
   {
     id: 2,
-    title: 'Brand Design',
-    description:
-      'Creating distinctive brand identities that communicate your values and resonate with your audience.',
-    icon: Palette,
-    features: ['Logo Design', 'Brand Strategy', 'Visual Identity', 'Brand Guidelines'],
+    title: 'Payments & Sales',
+    description: 'Let visitors pay, book and buy straight from your website.',
+    icon: CreditCard,
+    features: ['Payment Gateway', 'Online Booking / Appointments', 'E-commerce Integration', 'CRM Integration'],
   },
   {
     id: 3,
-    title: 'AI Automation',
-    description:
-      'Implementing intelligent automation solutions to streamline workflows and boost productivity.',
-    icon: Bot,
-    features: ['Workflow Automation', 'Chatbot Development', 'Data Processing', 'AI Integration'],
+    title: 'Marketing & Leads',
+    description: 'Capture every enquiry and follow up automatically so no lead goes cold.',
+    icon: Megaphone,
+    features: ['Lead Generation System', 'Email Marketing Automation', 'Facebook Pixel / Meta Conversion API'],
   },
   {
     id: 4,
-    title: 'Software Dev',
-    description:
-      'Developing custom software solutions tailored to your specific business requirements.',
-    icon: Terminal,
-    features: ['Custom Applications', 'SaaS Products', 'Database Design', 'Cloud Solutions'],
+    title: 'Analytics & Security',
+    description: 'Know what works, connect the tools you already use, and keep it all safe.',
+    icon: ShieldCheck,
+    features: [
+      'Google Analytics & Conversion Tracking',
+      'Google Search Console',
+      'Third-Party API Integrations',
+      'Website Security & Backup',
+    ],
   },
 ];
+
+const enquiry = (s: Service) =>
+  `Hello Mishael, I'm interested in "${s.title}" website integrations (${s.features.join(', ')}). I'd like to discuss what fits my business.`;
 
 const Services = () => {
   const sectionRef = useRef<HTMLElement>(null);
@@ -120,9 +130,9 @@ const Services = () => {
         <div ref={headingRef} className="mb-10 md:mb-20">
           <p className="mb-4 font-body text-xs uppercase tracking-[0.3em] text-white/50">What I Do</p>
           <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between md:gap-6">
-            <h2 className="font-display text-responsive-lg font-bold text-white">MY EXPERTISE</h2>
+            <h2 className="font-display text-responsive-lg font-bold text-white">ADVANCED WEBSITE INTEGRATIONS</h2>
             <p className="max-w-md font-body text-sm text-white/50">
-              Combining technical expertise with creative vision to deliver comprehensive digital solutions.
+              Connect your website to the tools that grow your business. Tap any card to talk it through on WhatsApp.
             </p>
           </div>
         </div>
@@ -181,15 +191,14 @@ const Services = () => {
                         ))}
                       </ul>
                       <a
-                        href="#portfolio"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          scrollToTarget('#portfolio');
-                        }}
-                        className="key-btn group inline-flex items-center justify-center gap-2 self-stretch px-6 py-3.5 font-body text-sm font-semibold uppercase tracking-wider md:self-start"
+                        href={servicesWhatsappUrl(enquiry(service))}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="key-btn key-btn-wa group inline-flex items-center justify-center gap-2.5 self-stretch px-6 py-3.5 font-body text-sm font-semibold uppercase tracking-wider md:self-start"
                       >
-                        <span>See my work</span>
-                        <ArrowRight size={16} className="transition-transform duration-300 group-hover:translate-x-1.5" />
+                        <MessageCircle size={18} fill="currentColor" />
+                        <span>Discuss on WhatsApp</span>
+                        <ArrowUpRight size={16} className="transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1" />
                       </a>
                     </div>
                   </div>

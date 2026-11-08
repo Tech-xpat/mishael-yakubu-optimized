@@ -624,3 +624,18 @@ html[data-theme='light'] .paper-shade {
   .slide-over { border-top-left-radius: 44px; border-top-right-radius: 44px; }
 }
 html[data-theme='light'] .slide-over { box-shadow: 0 -24px 60px -16px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.9); }
+
+/* Chat assistant */
+@keyframes assistantIn {
+  from { opacity: 0; transform: translateY(16px) scale(0.96); }
+  to { opacity: 1; transform: none; }
+}
+.assistant-in { animation: assistantIn 0.32s cubic-bezier(0.16, 1, 0.3, 1) both; transform-origin: bottom right; }
+@keyframes msgIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+.msg-in { animation: msgIn 0.28s ease-out both; }
+@media (prefers-reduced-motion: reduce) {
+  .assistant-in, .msg-in { animation: none; }
+}

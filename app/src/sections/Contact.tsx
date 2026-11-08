@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ArrowUpRight, Mail, MapPin, Phone, MessageCircle } from 'lucide-react';
-import { WHATSAPP_DISPLAY, WHATSAPP_LOCAL, whatsappUrl } from '../lib/contact';
+import { EMAIL, PHONE_DISPLAY, PHONE_TEL, WHATSAPP_DISPLAY, WHATSAPP_LOCAL, whatsappUrl } from '../lib/contact';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -10,14 +10,14 @@ const contactInfo = [
   {
     icon: Mail,
     label: 'Email',
-    value: 'empiredigitalsworldwide@gmail.com',
-    href: 'mailto:empiredigitalsworldwide@gmail.com',
+    value: EMAIL,
+    href: `mailto:${EMAIL}`,
   },
   {
     icon: Phone,
     label: 'Phone',
-    value: '+234 814 265 6848',
-    href: 'tel:+2348142656848',
+    value: PHONE_DISPLAY,
+    href: PHONE_TEL,
   },
   {
     icon: MessageCircle,
