@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { useLocation, useNavigationType } from 'react-router-dom';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { scrollToY } from '../lib/scrollTo';
+import { isHomePath } from '../lib/sections';
 import {
   clearHomeRestore,
   homeRestorePending,
@@ -29,13 +30,13 @@ export default function ScrollToTop() {
 
   // Remember the home-page scroll position while the visitor is on it.
   useEffect(() => {
-    if (pathname !== '/') return;
+    if (!isHomePath(pathname)) return;
     let raf = 0;
     const onScroll = () => {
       if (raf) return;
       raf = requestAnimationFrame(() => {
         raf = 0;
-        if (window.location.pathname === '/') saveHomeY(window.scrollY);
+        if (isHomePath(window.location.pathname)) saveHomeY(window.scrollY);
       });
     };
     window.addEventListener('scroll', onScroll, { passive: true });
@@ -49,16 +50,17 @@ export default function ScrollToTop() {
     const from = previous.current;
     previous.current = pathname;
 
-    if (from === '/' && pathname !== '/') markHomeLeft();
+    const home = isHomePath(pathname);
+    if (from !== null && isHomePath(from) && !home) markHomeLeft();
 
     // Back to the home page from another in-app page: put them where they were.
-    if (pathname === '/' && navType === 'POP' && from !== null && from !== pathname && homeRestorePending()) {
+    if (home && navType === 'POP' && from !== null && !isHomePath(from) && homeRestorePending()) {
       const y = readHomeY();
       clearHomeRestore();
       return restoreScroll(y);
     }
 
-    if (pathname === '/') resetHomeScroll();
+    if (home && navType !== 'POP') resetHomeScroll();
 
     const toTop = () => scrollToY(0, { immediate: true });
     toTop();

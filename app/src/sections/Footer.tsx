@@ -1,3 +1,4 @@
+import { SECTIONS } from '../lib/sections';
 import { lazy, useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -21,13 +22,7 @@ const Footer = () => {
     { name: 'GitHub', icon: Github, href: 'https://github.com/mishael-yakubu' },
   ];
 
-  const navLinks = [
-    { name: 'Home', href: '#home' },
-    { name: 'About', href: '#about' },
-    { name: 'Portfolio', href: '#portfolio' },
-    { name: 'Services', href: '#services' },
-    { name: 'Contact', href: '#contact' },
-  ];
+  const navLinks = SECTIONS;
 
   useEffect(() => {
     const ctx = gsap.context(() => {

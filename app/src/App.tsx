@@ -4,6 +4,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useLocation, useNavigationType } from 'react-router-dom';
 import { useSeo } from './lib/seo';
 import { scrollToTarget } from './lib/scrollTo';
+import { sectionForPath } from './lib/sections';
 import { homeRestorePending } from './lib/scrollRestore';
 
 import Navbar from './sections/Navbar';
@@ -34,7 +35,13 @@ function App() {
   const [overlay, setOverlay] = useState(true);
   // Coming back with the Back button? Mount the lower sections right away so the saved
   // scroll position lands on the same content.
-  const [restoring] = useState(() => navType === 'POP' && homeRestorePending());
+  const [popRestore] = useState(() => navType === 'POP' && homeRestorePending());
+  const [restoring] = useState(
+    () =>
+      popRestore ||
+      window.location.pathname !== '/' ||
+      !!(location.state as { scrollTo?: string } | null)?.scrollTo
+  );
 
   useSeo({
     title: 'Mishael Yakubu | Web Developer, Brand Designer & AI Automation | Empire Digitals',
@@ -119,12 +126,19 @@ function App() {
   // Scroll to a section requested from another page (kept out of the URL).
   // Skipped on Back/Forward so the restored position wins.
   useEffect(() => {
-    if (!ready || navType === 'POP') return;
-    const target = (location.state as { scrollTo?: string } | null)?.scrollTo;
+    if (!ready || popRestore) return;
+    // A section requested from another page, or a direct link such as /contact.
+    const fromState = (location.state as { scrollTo?: string } | null)?.scrollTo;
+    const target = fromState || sectionForPath(window.location.pathname)?.href;
     if (!target || target === '#home') return;
     const t = setTimeout(() => scrollToTarget(target), 250);
-    return () => clearTimeout(t);
-  }, [ready, navType, location.state]);
+    // Sections above the target may still be filling in: land exactly once the page has settled.
+    const t2 = setTimeout(() => scrollToTarget(target), 1400);
+    return () => {
+      clearTimeout(t);
+      clearTimeout(t2);
+    };
+  }, [ready, popRestore, location.state]);
 
   return (
     <div className="relative bg-black min-h-screen">

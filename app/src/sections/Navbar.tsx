@@ -4,6 +4,7 @@ import gsap from 'gsap';
 import { Menu, X } from 'lucide-react';
 import { getLenis, scrollToTarget } from '../lib/scrollTo';
 import { SoundToggle, ThemeToggle } from '../components/ThemeToggle';
+import { SECTIONS, showSectionInUrl } from '../lib/sections';
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -15,12 +16,8 @@ const Navbar = () => {
   const lastScrollY = useRef(0);
   const navRef = useRef<HTMLElement>(null);
 
-  const navLinks = [
-    { name: 'Home', href: '#home' },
-    { name: 'About', href: '#about' },
-    { name: 'Portfolio', href: '#portfolio' },
-    { name: 'Contact', href: '#contact' },
-  ];
+  const navLinks = SECTIONS;
+  const [active, setActive] = useState('#home');
 
   useEffect(() => {
     const handleScroll = () => {
@@ -36,12 +33,25 @@ const Navbar = () => {
       // Add background when scrolled
       setIsScrolled(currentScrollY > 50);
       lastScrollY.current = currentScrollY;
+
+      // Which section is on screen: highlights its menu item and keeps the address bar in step.
+      if (location.pathname === '/') {
+        let current = SECTIONS[0];
+        for (const sec of SECTIONS) {
+          const el = document.querySelector<HTMLElement>(sec.href);
+          if (el && el.getBoundingClientRect().top <= window.innerHeight * 0.4) current = sec;
+        }
+        setActive((prev) => {
+          if (prev !== current.href) showSectionInUrl(current.path);
+          return current.href;
+        });
+      }
     };
 
     handleScroll();
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [location.pathname]);
 
   useEffect(() => {
     if (navRef.current) {
@@ -68,6 +78,7 @@ const Navbar = () => {
 
   const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     e.preventDefault();
+    const menuWasOpen = isMobileMenuOpen;
     setIsMobileMenuOpen(false);
 
     // On any page other than the homepage, go home first, then scroll.
@@ -77,6 +88,12 @@ const Navbar = () => {
       return;
     }
 
+    // The open menu pauses smooth scrolling and locks the page: let it release first, then scroll.
+    if (menuWasOpen) {
+      (getLenis() as any)?.start?.();
+      window.setTimeout(() => scrollToTarget(href), 120);
+      return;
+    }
     scrollToTarget(href);
   };
 
@@ -138,10 +155,17 @@ const Navbar = () => {
                   key={link.name}
                   href={link.href}
                   onClick={(e) => handleLinkClick(e, link.href)}
-                  className="relative text-sm text-white/70 hover:text-white font-body tracking-wider uppercase transition-colors duration-300 group"
+                  aria-current={active === link.href ? 'true' : undefined}
+                  className={`relative text-sm hover:text-white font-body tracking-wider uppercase transition-colors duration-300 group ${
+                    active === link.href ? 'text-white' : 'text-white/70'
+                  }`}
                 >
                   {link.name}
-                  <span className="absolute -bottom-1 left-0 w-0 h-px bg-white group-hover:w-full transition-all duration-300" />
+                  <span
+                    className={`absolute -bottom-1 left-0 h-px bg-white group-hover:w-full transition-all duration-300 ${
+                      active === link.href ? 'w-full' : 'w-0'
+                    }`}
+                  />
                 </a>
               ))}
             </div>
@@ -184,7 +208,10 @@ const Navbar = () => {
               key={link.name}
               href={link.href}
               onClick={(e) => handleLinkClick(e, link.href)}
-              className="font-display text-4xl font-bold text-white hover:text-white/70 transition-colors"
+              aria-current={active === link.href ? 'true' : undefined}
+              className={`font-display text-4xl font-bold transition-colors hover:text-white/70 ${
+                active === link.href ? 'text-white underline underline-offset-8' : 'text-white/70'
+              }`}
             >
               {link.name}
             </a>

@@ -37,6 +37,10 @@ createRoot(document.getElementById('root')!).render(
       <Suspense fallback={<RouteSkeleton />}>
         <Routes>
           <Route path="/" element={<App />} />
+          <Route path="/about" element={<App />} />
+          <Route path="/portfolio" element={<App />} />
+          <Route path="/services" element={<App />} />
+          <Route path="/contact" element={<App />} />
           <Route path="/portfolio/:type" element={<CategoryPage />} />
           <Route path="/portfolio/:type/:subcategory" element={<CategoryPage />} />
           <Route path="/gallery/:category" element={<GalleryPage />} />
