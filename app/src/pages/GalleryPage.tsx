@@ -227,7 +227,7 @@ export default function GalleryPage() {
 
       <main className={fullscreen ? '' : 'pt-20 pb-16'}>
         {!fullscreen && (
-          <div className="px-6 md:px-12 mb-6 flex items-center justify-between">
+          <div className="mb-6 flex items-center justify-between px-5 sm:px-6 md:px-12">
             <button
               onClick={goBack}
               className="inline-flex items-center gap-2 text-white/60 hover:text-white"
@@ -247,7 +247,7 @@ export default function GalleryPage() {
             <p className="text-sm text-white/40 mb-6">{error}</p>
             <button
               onClick={() => window.location.reload()}
-              className="px-5 py-2.5 bg-white text-black rounded-full text-sm font-medium"
+              className="key-btn rounded-full px-6 py-3 text-sm font-semibold"
             >
               Retry
             </button>
@@ -282,9 +282,9 @@ export default function GalleryPage() {
               </div>
             )}
 
-            <div className={fullscreen ? 'fixed inset-0 z-50 bg-black flex flex-col' : 'relative max-w-5xl mx-auto px-4'}>
+            <div className={fullscreen ? 'force-dark fixed inset-0 z-50 bg-black flex flex-col' : 'relative max-w-5xl mx-auto px-4'}>
               <div
-                className={`relative ${fullscreen ? 'flex-1' : 'aspect-[16/10] md:aspect-video'} bg-black overflow-hidden ${fullscreen ? '' : 'rounded-2xl border border-white/10'} touch-pan-y`}
+                className={`force-dark relative ${fullscreen ? 'flex-1' : 'aspect-[16/10] md:aspect-video'} bg-black overflow-hidden ${fullscreen ? '' : 'rounded-2xl border border-white/10'} touch-pan-y`}
                 onTouchStart={onTouchStart}
                 onTouchEnd={onTouchEnd}
                 onMouseMove={showArrows}
@@ -375,7 +375,7 @@ export default function GalleryPage() {
                       href={current.website_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 mt-4 px-5 py-2.5 bg-white text-black rounded-full text-sm font-medium"
+                      className="key-btn mt-5 inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold"
                     >
                       <ExternalLink size={16} /> Open live site
                     </a>

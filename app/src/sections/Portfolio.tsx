@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Folder, Play } from 'lucide-react';
 import { cachedCounts, fetchCounts, prefetchItems } from '../lib/portfolioApi';
 import { FolderGridSkeleton } from '../components/Skeletons';
+import EmptyFold from '../components/EmptyFold';
 
 const CATEGORIES = [
   { slug: 'web', name: 'Web Development', icon: Folder },
@@ -13,6 +14,37 @@ const CATEGORIES = [
   { slug: 'video', name: 'Videos', icon: Play },
   { slug: 'motion', name: 'Motion Graphics', icon: Play },
 ];
+
+type Category = (typeof CATEGORIES)[number];
+
+function FolderTile({ cat, count }: { cat: Category; count: number }) {
+  const Icon = cat.icon;
+  const warm = () => prefetchItems(cat.slug);
+  const empty = count === 0;
+  return (
+    <Link
+      to={`/gallery/${cat.slug}`}
+      onPointerEnter={warm}
+      onPointerDown={warm}
+      onFocus={warm}
+      className={`group flex aspect-square flex-col items-center justify-center rounded-3xl border p-3 transition-colors sm:p-8 ${
+        empty
+          ? 'border-white/10 bg-white/[0.02] opacity-70 hover:opacity-100'
+          : 'border-white/10 bg-white/5 hover:border-white/40 hover:bg-white/10'
+      }`}
+    >
+      <div className="mb-3 rounded-2xl bg-white/10 p-4 transition-colors group-hover:bg-white/20 sm:mb-4 sm:p-6">
+        <Icon size={36} className="text-white/80 group-hover:text-white sm:h-12 sm:w-12" />
+      </div>
+      <h3 className="text-center text-sm font-semibold leading-tight md:text-base">{cat.name}</h3>
+      <p className="mt-1 text-xs text-white/40">
+        {count} item{count === 1 ? '' : 's'}
+      </p>
+    </Link>
+  );
+}
+
+const gridClass = 'grid grid-cols-2 gap-3 sm:gap-6 md:grid-cols-3 lg:grid-cols-4';
 
 export default function Portfolio() {
   // Counts from the last visit paint instantly (e.g. when coming back with Back);
@@ -32,43 +64,40 @@ export default function Portfolio() {
     };
   }, []);
 
+  const filled = counts ? CATEGORIES.filter((c) => (counts[c.slug] || 0) > 0) : [];
+  const empty = counts ? CATEGORIES.filter((c) => !(counts[c.slug] || 0)) : [];
+
   return (
-    <section id="portfolio" className="py-24 bg-black text-white">
-      <div className="max-w-6xl mx-auto px-6">
-        <p className="text-xs uppercase tracking-[0.3em] text-white/50 mb-4">Selected Work</p>
-        <h2 className="text-4xl md:text-5xl font-bold mb-4">Portfolio</h2>
-        <p className="text-white/60 mb-12 max-w-2xl">
+    <section id="portfolio" className="bg-black py-16 text-white md:py-24">
+      <div className="mx-auto max-w-6xl px-5 sm:px-6">
+        <p className="mb-4 text-xs uppercase tracking-[0.3em] text-white/50">Selected Work</p>
+        <h2 className="mb-4 text-4xl font-bold md:text-5xl">Portfolio</h2>
+        <p className="mb-10 max-w-2xl text-white/60 md:mb-12">
           Tap any folder to open the full gallery. Tap the preview inside to go full screen.
         </p>
 
         {counts === null ? (
           <FolderGridSkeleton count={CATEGORIES.length} />
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {CATEGORIES.map((cat) => {
-              const Icon = cat.icon;
-              const count = counts[cat.slug] || 0;
-              const warm = () => prefetchItems(cat.slug);
-              return (
-                <Link
-                  key={cat.slug}
-                  to={`/gallery/${cat.slug}`}
-                  onPointerEnter={warm}
-                  onPointerDown={warm}
-                  onFocus={warm}
-                  className="group flex flex-col items-center justify-center p-8 rounded-3xl bg-white/5 border border-white/10 hover:border-white/40 hover:bg-white/10 transition-colors aspect-square"
-                >
-                  <div className="mb-4 p-6 rounded-2xl bg-white/10 group-hover:bg-white/20 transition-colors">
-                    <Icon size={48} className="text-white/80 group-hover:text-white" />
-                  </div>
-                  <h3 className="text-center font-semibold text-sm md:text-base">{cat.name}</h3>
-                  <p className="text-xs text-white/40 mt-1">
-                    {count} item{count === 1 ? '' : 's'}
-                  </p>
-                </Link>
-              );
-            })}
-          </div>
+          <>
+            {filled.length > 0 ? (
+              <div className={gridClass}>
+                {filled.map((cat) => (
+                  <FolderTile key={cat.slug} cat={cat} count={counts[cat.slug] || 0} />
+                ))}
+              </div>
+            ) : (
+              <p className="text-white/50">Projects are being added. Check back soon.</p>
+            )}
+
+            <EmptyFold count={empty.length} noun="folder">
+              <div className={gridClass}>
+                {empty.map((cat) => (
+                  <FolderTile key={cat.slug} cat={cat} count={0} />
+                ))}
+              </div>
+            </EmptyFold>
+          </>
         )}
       </div>
     </section>

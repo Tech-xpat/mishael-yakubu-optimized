@@ -51,5 +51,24 @@ export default function SmoothScroll() {
     };
   }, [admin]);
 
+  // Page height changes after load (skeletons swap for real content, sections fold open, images arrive).
+  // Scroll animations must re-measure when that happens, or sections further down can stay hidden.
+  useEffect(() => {
+    if (admin || typeof ResizeObserver === 'undefined') return;
+    let timer = 0;
+    const ro = new ResizeObserver(() => {
+      window.clearTimeout(timer);
+      timer = window.setTimeout(() => {
+        (window as any).__lenis?.resize?.();
+        ScrollTrigger.refresh();
+      }, 120);
+    });
+    ro.observe(document.body);
+    return () => {
+      window.clearTimeout(timer);
+      ro.disconnect();
+    };
+  }, [admin, pathname]);
+
   return null;
 }

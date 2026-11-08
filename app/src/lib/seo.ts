@@ -5,7 +5,7 @@ import { useEffect } from 'react';
 export const SITE_URL = 'https://www.mishael.space';
 export const SITE_NAME = 'Mishael Yakubu';
 /** Link-preview card: the About-section portrait with the description beside it (1200x630). */
-export const DEFAULT_IMAGE = `${SITE_URL}/og-card.jpg`;
+export const DEFAULT_IMAGE = `${SITE_URL}/og-card-v2.jpg`;
 
 interface SeoOptions {
   title: string;

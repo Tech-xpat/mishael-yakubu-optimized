@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Code, Palette, Bot, Terminal, ArrowRight } from 'lucide-react';
+import { scrollToTarget } from '../lib/scrollTo';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -20,12 +21,7 @@ const services: Service[] = [
     description:
       'Building high-performance, responsive websites and web applications using modern technologies.',
     icon: Code,
-    features: [
-      'React & Next.js',
-      'TypeScript',
-      'Node.js Backend',
-      'API Integration',
-    ],
+    features: ['React & Next.js', 'TypeScript', 'Node.js Backend', 'API Integration'],
   },
   {
     id: 2,
@@ -33,12 +29,7 @@ const services: Service[] = [
     description:
       'Creating distinctive brand identities that communicate your values and resonate with your audience.',
     icon: Palette,
-    features: [
-      'Logo Design',
-      'Brand Strategy',
-      'Visual Identity',
-      'Brand Guidelines',
-    ],
+    features: ['Logo Design', 'Brand Strategy', 'Visual Identity', 'Brand Guidelines'],
   },
   {
     id: 3,
@@ -46,12 +37,7 @@ const services: Service[] = [
     description:
       'Implementing intelligent automation solutions to streamline workflows and boost productivity.',
     icon: Bot,
-    features: [
-      'Workflow Automation',
-      'Chatbot Development',
-      'Data Processing',
-      'AI Integration',
-    ],
+    features: ['Workflow Automation', 'Chatbot Development', 'Data Processing', 'AI Integration'],
   },
   {
     id: 4,
@@ -59,209 +45,156 @@ const services: Service[] = [
     description:
       'Developing custom software solutions tailored to your specific business requirements.',
     icon: Terminal,
-    features: [
-      'Custom Applications',
-      'SaaS Products',
-      'Database Design',
-      'Cloud Solutions',
-    ],
+    features: ['Custom Applications', 'SaaS Products', 'Database Design', 'Cloud Solutions'],
   },
 ];
 
 const Services = () => {
-  const sectionRef = useRef<HTMLDivElement>(null);
+  const sectionRef = useRef<HTMLElement>(null);
   const headingRef = useRef<HTMLDivElement>(null);
-  const cardsRef = useRef<HTMLDivElement>(null);
-  const [hoveredCard, setHoveredCard] = useState<number | null>(null);
 
   useEffect(() => {
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const small = window.matchMedia('(max-width: 767px)').matches;
+
     const ctx = gsap.context(() => {
-      // Heading animation
       gsap.fromTo(
         headingRef.current,
-        { y: 50, opacity: 0 },
+        { y: 40, opacity: 0 },
         {
           y: 0,
           opacity: 1,
           duration: 1,
           ease: 'expo.out',
-          scrollTrigger: {
-            trigger: headingRef.current,
-            start: 'top 85%',
-            toggleActions: 'play none none reverse',
-          },
+          scrollTrigger: { trigger: headingRef.current, start: 'top 88%', toggleActions: 'play none none reverse' },
         }
       );
 
-      // Cards stagger animation
-      const cards = cardsRef.current?.querySelectorAll('.service-card');
-      if (cards) {
+      if (reduceMotion) return;
+
+      const sheets = gsap.utils.toArray<HTMLElement>('.paper-sheet');
+      sheets.forEach((sheet, i) => {
+        const inner = sheet.querySelector<HTMLElement>('.paper-inner');
+        const shade = sheet.querySelector<HTMLElement>('.paper-shade');
+        if (!inner) return;
+
+        // 1) The card is laid onto the stack: it rises, un-tilts and fades in as it scrolls into view.
         gsap.fromTo(
-          cards,
-          { rotateY: 90, opacity: 0, z: -500 },
+          inner,
+          { y: small ? 56 : 90, rotate: i % 2 === 0 ? -2 : 2, opacity: 0.2 },
           {
-            rotateY: 0,
+            y: 0,
+            rotate: 0,
             opacity: 1,
-            z: 0,
-            duration: 0.8,
-            ease: 'expo.out',
-            stagger: 0.1,
-            scrollTrigger: {
-              trigger: cardsRef.current,
-              start: 'top 75%',
-              toggleActions: 'play none none reverse',
-            },
+            ease: 'none',
+            scrollTrigger: { trigger: sheet, start: 'top 98%', end: 'top 62%', scrub: 0.6 },
           }
         );
-      }
+
+        // 2) When the next card lands on top, this one sinks back and dims a little.
+        const next = sheets[i + 1];
+        if (next) {
+          gsap.to(inner, {
+            scale: 0.94,
+            ease: 'none',
+            scrollTrigger: { trigger: next, start: 'top 80%', end: 'top 22%', scrub: 0.6 },
+          });
+          if (shade) {
+            gsap.to(shade, {
+              opacity: 1,
+              ease: 'none',
+              scrollTrigger: { trigger: next, start: 'top 80%', end: 'top 22%', scrub: 0.6 },
+            });
+          }
+        }
+      });
     }, sectionRef);
 
     return () => ctx.revert();
   }, []);
 
-  // Card tilt effect
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>, cardId: number) => {
-    const card = e.currentTarget;
-    const rect = card.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    const centerX = rect.width / 2;
-    const centerY = rect.height / 2;
-    const rotateX = (y - centerY) / 20;
-    const rotateY = (centerX - x) / 20;
-
-    card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`;
-    setHoveredCard(cardId);
-  };
-
-  const handleMouseLeave = (e: React.MouseEvent<HTMLDivElement>) => {
-    e.currentTarget.style.transform =
-      'perspective(1000px) rotateX(0) rotateY(0) scale(1)';
-    setHoveredCard(null);
-  };
-
   return (
-    <section
-      ref={sectionRef}
-      id="services"
-      className="relative w-full min-h-screen bg-black py-20 md:py-32"
-    >
-      <div className="w-full px-6 md:px-12 lg:px-20">
+    <section ref={sectionRef} id="services" className="relative w-full bg-black py-16 md:py-32">
+      <div className="w-full px-5 sm:px-6 md:px-12 lg:px-20">
         {/* Section Header */}
-        <div ref={headingRef} className="mb-16 md:mb-24">
-          <p className="text-xs tracking-[0.3em] text-white/50 uppercase font-body mb-4">
-            What I Do
-          </p>
-          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
-            <h2 className="font-display text-responsive-lg font-bold text-white">
-              MY EXPERTISE
-            </h2>
-            <p className="text-sm text-white/50 font-body max-w-md">
-              Combining technical expertise with creative vision to deliver
-              comprehensive digital solutions.
+        <div ref={headingRef} className="mb-10 md:mb-20">
+          <p className="mb-4 font-body text-xs uppercase tracking-[0.3em] text-white/50">What I Do</p>
+          <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between md:gap-6">
+            <h2 className="font-display text-responsive-lg font-bold text-white">MY EXPERTISE</h2>
+            <p className="max-w-md font-body text-sm text-white/50">
+              Combining technical expertise with creative vision to deliver comprehensive digital solutions.
             </p>
           </div>
         </div>
 
-        {/* Services Grid */}
-        <div
-          ref={cardsRef}
-          className="grid grid-cols-1 md:grid-cols-2 gap-6"
-          style={{ perspective: '1000px' }}
-        >
-          {services.map((service) => {
+        {/* Stack of cards: each one sticks and the next lands on top of it */}
+        <div className="mx-auto max-w-5xl pb-6">
+          {services.map((service, i) => {
             const Icon = service.icon;
-            const isHovered = hoveredCard === service.id;
-
             return (
-              <div
+              <article
                 key={service.id}
-                className="service-card relative group"
-                onMouseMove={(e) => handleMouseMove(e, service.id)}
-                onMouseLeave={handleMouseLeave}
-                style={{
-                  transformStyle: 'preserve-3d',
-                  transition: 'transform 0.3s ease-out',
-                }}
+                className="paper-sheet sticky mb-[14vh] last:mb-0 md:mb-[16vh]"
+                style={{ top: `calc(var(--stack-top) + ${i} * var(--stack-step))`, zIndex: i + 1 }}
               >
-                <div
-                  className={`relative p-8 md:p-10 h-full border transition-all duration-500 ${
-                    isHovered
-                      ? 'border-white/30 bg-white/10'
-                      : 'border-white/10 bg-white/5'
-                  }`}
-                >
-                  {/* Glow Effect */}
+                <div className="paper-inner relative origin-top overflow-hidden rounded-xl border border-white/10 bg-card p-5 sm:p-8 md:p-12">
+                  {/* folded corner */}
                   <div
-                    className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none`}
+                    className="pointer-events-none absolute right-0 top-0 h-8 w-8 md:h-9 md:w-9"
                     style={{
-                      background: `radial-gradient(circle at ${isHovered ? '50% 50%' : '50% 50%'}, rgba(255,255,255,0.1) 0%, transparent 70%)`,
+                      background:
+                        'linear-gradient(225deg, rgb(var(--t-black)) 50%, rgb(var(--c-white) / 0.14) 50%)',
                     }}
+                    aria-hidden="true"
                   />
+                  {/* dims the card as the next one covers it */}
+                  <div className="paper-shade pointer-events-none absolute inset-0 opacity-0" aria-hidden="true" />
 
-                  {/* Icon */}
-                  <div className="relative mb-6">
-                    <div
-                      className={`w-14 h-14 flex items-center justify-center border transition-all duration-500 ${
-                        isHovered
-                          ? 'border-white/40 bg-white/10'
-                          : 'border-white/20 bg-transparent'
-                      }`}
-                    >
-                      <Icon
-                        size={24}
-                        className={`transition-colors duration-300 ${
-                          isHovered ? 'text-white' : 'text-white/60'
-                        }`}
-                      />
+                  <div className="relative grid gap-6 md:grid-cols-[1.2fr_1fr] md:gap-14">
+                    <div>
+                      <div className="mb-4 flex items-center gap-4 md:mb-6">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-md bg-white text-black md:h-14 md:w-14">
+                          <Icon size={24} />
+                        </div>
+                        <span className="font-display text-4xl font-bold text-white/10 md:text-5xl">
+                          0{service.id}
+                        </span>
+                      </div>
+                      <h3 className="mb-3 font-display text-3xl font-bold text-white md:mb-4 md:text-4xl">
+                        {service.title}
+                      </h3>
+                      <p className="max-w-md font-body text-sm leading-relaxed text-white/65 md:text-base">
+                        {service.description}
+                      </p>
+                    </div>
+
+                    <div className="flex flex-col justify-between gap-6 md:gap-8">
+                      <ul className="grid grid-cols-2 gap-x-4 gap-y-2.5 md:grid-cols-1 md:gap-y-3">
+                        {service.features.map((feature) => (
+                          <li
+                            key={feature}
+                            className="flex items-center gap-2.5 border-b border-white/10 pb-2.5 font-body text-xs text-white/75 md:gap-3 md:pb-3 md:text-sm"
+                          >
+                            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-white/60" />
+                            {feature}
+                          </li>
+                        ))}
+                      </ul>
+                      <a
+                        href="#portfolio"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          scrollToTarget('#portfolio');
+                        }}
+                        className="key-btn group inline-flex items-center justify-center gap-2 self-stretch px-6 py-3.5 font-body text-sm font-semibold uppercase tracking-wider md:self-start"
+                      >
+                        <span>See my work</span>
+                        <ArrowRight size={16} className="transition-transform duration-300 group-hover:translate-x-1.5" />
+                      </a>
                     </div>
                   </div>
-
-                  {/* Content */}
-                  <h3 className="font-display text-2xl md:text-3xl font-bold text-white mb-4">
-                    {service.title}
-                  </h3>
-
-                  <p className="text-sm text-white/60 font-body leading-relaxed mb-6">
-                    {service.description}
-                  </p>
-
-                  {/* Features List */}
-                  <ul className="space-y-2 mb-8">
-                    {service.features.map((feature, index) => (
-                      <li
-                        key={index}
-                        className="flex items-center gap-2 text-sm text-white/50 font-body"
-                      >
-                        <span className="w-1 h-1 bg-white/40 rounded-full" />
-                        {feature}
-                      </li>
-                    ))}
-                  </ul>
-
-                  {/* CTA */}
-                  <div
-                    className={`flex items-center gap-2 text-sm font-body tracking-wider uppercase transition-all duration-300 ${
-                      isHovered ? 'text-white' : 'text-white/50'
-                    }`}
-                  >
-                    <span>Learn More</span>
-                    <ArrowRight
-                      size={16}
-                      className={`transform transition-transform duration-300 ${
-                        isHovered ? 'translate-x-2' : ''
-                      }`}
-                    />
-                  </div>
-
-                  {/* Index */}
-                  <div className="absolute top-8 right-8">
-                    <span className="font-display text-5xl font-bold text-white/5">
-                      0{service.id}
-                    </span>
-                  </div>
                 </div>
-              </div>
+              </article>
             );
           })}
         </div>

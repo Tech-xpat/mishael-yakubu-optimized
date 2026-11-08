@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Link } from 'react-router-dom';
 import { firestore } from '../lib/firebase';
 import { collection, query, onSnapshot } from 'firebase/firestore';
 import { CardGridSkeleton } from '../components/Skeletons';
+import CategoryCard from '../components/CategoryCard';
+import EmptyFold from '../components/EmptyFold';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -106,9 +107,9 @@ const WebDevelopment = () => {
   return (
     <section
       ref={sectionRef}
-      className="relative w-full py-20 md:py-32 bg-black px-6 md:px-12 lg:px-20"
+      className="relative w-full bg-black px-5 py-14 sm:px-6 md:px-12 md:py-32 lg:px-20"
     >
-      <div ref={headingRef} className="mb-16">
+      <div ref={headingRef} className="mb-10 md:mb-16">
         <p className="text-xs tracking-[0.3em] text-white/50 uppercase font-body mb-4">
           Portfolio
         </p>
@@ -123,26 +124,32 @@ const WebDevelopment = () => {
 
       {loading ? (
         <CardGridSkeleton count={webSubcategories.length} />
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {webSubcategories.map((category) => (
-            <Link
-              key={category}
-              to={`/portfolio/web-development/${titleToSlug(category)}`}
-              className="group p-6 rounded-xl bg-white/5 border border-white/10 hover:border-white/40 hover:bg-white/10 transition-all"
-            >
-              <h3 className="text-lg font-semibold text-white mb-2 group-hover:text-white">
-                {category}
-              </h3>
-              <p className="text-sm text-white/50">
-                {projects[category]?.length || 0} project
-                {(projects[category]?.length || 0) === 1 ? '' : 's'}
-              </p>
-              <p className="mt-4 text-sm text-white/70 group-hover:text-white">View full list →</p>
-            </Link>
-          ))}
-        </div>
-      )}
+      ) : (() => {
+        const filled = webSubcategories.filter((c) => (projects[c]?.length || 0) > 0);
+        const empty = webSubcategories.filter((c) => !(projects[c]?.length || 0));
+        const card = (category: string) => (
+          <CategoryCard
+            key={category}
+            to={`/portfolio/web-development/${titleToSlug(category)}`}
+            title={category}
+            count={projects[category]?.length || 0}
+            unit="project"
+            thumbs={(projects[category] || []).map((p) => p.imageUrl)}
+          />
+        );
+        return (
+          <>
+            {filled.length > 0 ? (
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">{filled.map(card)}</div>
+            ) : (
+              <p className="text-white/50">Projects are being added. Check back soon.</p>
+            )}
+            <EmptyFold count={empty.length} noun="category">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">{empty.map(card)}</div>
+            </EmptyFold>
+          </>
+        );
+      })()}
     </section>
   );
 };

@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Link } from 'react-router-dom';
 import { firestore } from '../lib/firebase';
 import { collection, query, onSnapshot } from 'firebase/firestore';
+import CategoryCard from '../components/CategoryCard';
+import EmptyFold from '../components/EmptyFold';
 
 
 gsap.registerPlugin(ScrollTrigger);
@@ -72,9 +73,9 @@ const AIAutomation = () => {
   return (
     <section
       ref={sectionRef}
-      className="relative w-full py-20 md:py-32 bg-black px-6 md:px-12 lg:px-20"
+      className="relative w-full bg-black px-5 py-14 sm:px-6 md:px-12 md:py-32 lg:px-20"
     >
-      <div ref={headingRef} className="mb-16">
+      <div ref={headingRef} className="mb-10 md:mb-16">
         <p className="text-xs tracking-[0.3em] text-white/50 uppercase font-body mb-4">
           Portfolio
         </p>
@@ -87,23 +88,29 @@ const AIAutomation = () => {
       </div>
 
       {loading ? (
-        <div className="max-w-md p-8 rounded-xl bg-white/[0.03] border border-white/10" aria-busy="true">
-          <div className="h-7 w-1/2 skeleton rounded mb-4" />
-          <div className="h-4 w-1/4 skeleton rounded mb-6" />
-          <div className="h-4 w-1/3 skeleton rounded" />
+        <div className="max-w-md rounded-xl border border-white/10 bg-white/[0.03] p-8" aria-busy="true">
+          <div className="skeleton mb-4 h-7 w-1/2 rounded" />
+          <div className="skeleton mb-6 h-4 w-1/4 rounded" />
+          <div className="skeleton h-4 w-1/3 rounded" />
         </div>
-      ) : (
-        <Link
-          to="/portfolio/ai-automation"
-          className="group inline-block p-8 rounded-xl bg-white/5 border border-white/10 hover:border-white/40 hover:bg-white/10 transition-all max-w-md"
-        >
-          <h3 className="text-2xl font-semibold text-white mb-3">All AI Projects</h3>
-          <p className="text-white/50 mb-4">
-            {projects.length} project{projects.length === 1 ? '' : 's'}
-          </p>
-          <p className="text-sm text-white/70 group-hover:text-white">View full list →</p>
-        </Link>
-      )}
+      ) : (() => {
+        const card = (
+          <CategoryCard
+            to="/portfolio/ai-automation"
+            title="All AI Projects"
+            count={projects.length}
+            unit="project"
+            thumbs={projects.map((p) => p.imageUrl)}
+          />
+        );
+        return projects.length > 0 ? (
+          <div className="max-w-md">{card}</div>
+        ) : (
+          <EmptyFold count={1} noun="category">
+            <div className="max-w-md">{card}</div>
+          </EmptyFold>
+        );
+      })()}
     </section>
   );
 };

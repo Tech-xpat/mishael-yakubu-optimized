@@ -87,8 +87,8 @@ const Footer = () => {
   };
 
   return (
-    <footer ref={sectionRef} className="relative w-full bg-black pt-20 md:pt-32 pb-8">
-      <div className="w-full px-6 md:px-12 lg:px-20 mb-20">
+    <footer ref={sectionRef} className="relative w-full bg-black pb-24 pt-16 md:pb-8 md:pt-32">
+      <div className="mb-14 w-full px-5 sm:px-6 md:mb-20 md:px-12 lg:px-20">
         <div className="mb-6">
           <p className="text-xs tracking-[0.3em] text-white/50 uppercase font-body mb-4">
             Newsletter
@@ -106,15 +106,15 @@ const Footer = () => {
         </DeferredSection>
       </div>
 
-      <div className="w-full px-6 md:px-12 lg:px-20">
-        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-12 mb-20">
+      <div className="w-full px-5 sm:px-6 md:px-12 lg:px-20">
+        <div className="mb-14 flex flex-col gap-10 md:mb-20 md:flex-row md:items-start md:justify-between md:gap-12">
           <div>
             <p className="text-xs tracking-[0.3em] text-white/50 uppercase font-body mb-4">
               Start a Project
             </p>
             <a
               href="mailto:empiredigitalsworldwide@gmail.com"
-              className="font-display text-2xl md:text-3xl font-bold text-white hover:text-white/80 transition-colors duration-300"
+              className="break-all font-display text-xl font-bold text-white transition-colors duration-300 hover:text-white/80 sm:text-2xl md:text-3xl"
             >
               empiredigitalsworldwide@gmail.com
             </a>
@@ -199,7 +199,7 @@ const Footer = () => {
           if (lenis?.scrollTo) lenis.scrollTo(0, { duration: 1.1 });
           else window.scrollTo({ top: 0, behavior: 'smooth' });
         }}
-        className="fixed bottom-24 right-7 w-12 h-12 bg-white text-black flex items-center justify-center hover:bg-white/90 transition-all duration-300 z-50 opacity-0 pointer-events-none"
+        className="key-btn fixed bottom-24 right-5 z-50 flex h-12 w-12 items-center justify-center rounded-full opacity-0 pointer-events-none transition-opacity duration-300 sm:right-7"
         id="back-to-top"
         aria-label="Back to top"
       >

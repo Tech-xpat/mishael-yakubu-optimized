@@ -5,6 +5,10 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        // "white" is the text colour and "black" the page colour. Both flip in the light theme
+        // (see the variables in index.html), so every existing text-white / bg-black class adapts.
+        white: "rgb(var(--c-white) / <alpha-value>)",
+        black: "rgb(var(--c-black) / <alpha-value>)",
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",

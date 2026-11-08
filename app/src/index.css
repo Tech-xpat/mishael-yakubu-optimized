@@ -33,25 +33,23 @@
   }
 
   html {
-    background-color: #000;
-    color-scheme: dark;
+    background-color: var(--page-bg);
   }
 
   body {
     @apply bg-black text-white antialiased;
     font-family: 'Inter', sans-serif;
     overflow-x: hidden;
-    background-color: #000;
-    color-scheme: dark;
+    background-color: var(--page-bg);
   }
 
   #root {
     min-height: 100vh;
-    background-color: #000;
+    background-color: var(--page-bg);
   }
 
   ::selection {
-    background: rgba(255, 255, 255, 0.2);
+    background: rgb(var(--c-white) / 0.2);
     color: white;
   }
 }
@@ -200,24 +198,24 @@
 
 /* Glow Effect */
 .glow {
-  box-shadow: 0 0 40px rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 40px rgb(var(--c-white) / 0.1);
 }
 
 .glow-strong {
-  box-shadow: 0 0 60px rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 60px rgb(var(--c-white) / 0.15);
 }
 
 /* Glass Morphism */
 .glass {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgb(var(--c-white) / 0.05);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgb(var(--c-white) / 0.1);
 }
 
 .glass-dark {
-  background: rgba(0, 0, 0, 0.5);
+  background: rgb(var(--c-black) / 0.5);
   backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid rgb(var(--c-white) / 0.05);
 }
 
 /* Magnetic Button Effect */
@@ -227,7 +225,7 @@
 
 /* Text Stroke */
 .text-stroke {
-  -webkit-text-stroke: 1px rgba(255, 255, 255, 0.3);
+  -webkit-text-stroke: 1px rgb(var(--c-white) / 0.3);
   -webkit-text-fill-color: transparent;
 }
 
@@ -264,16 +262,16 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: #000;
+  background: var(--page-bg);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgb(var(--c-white) / 0.2);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: rgb(var(--c-white) / 0.3);
 }
 
 /* Counter Animation */
@@ -305,10 +303,10 @@
 /* Pulse Glow */
 @keyframes pulseGlow {
   0%, 100% {
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+    box-shadow: 0 0 20px rgb(var(--c-white) / 0.1);
   }
   50% {
-    box-shadow: 0 0 40px rgba(255, 255, 255, 0.2);
+    box-shadow: 0 0 40px rgb(var(--c-white) / 0.2);
   }
 }
 
@@ -325,7 +323,7 @@
   content: '';
   position: absolute;
   inset: -1px;
-  background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  background: linear-gradient(45deg, transparent, rgb(var(--c-white) / 0.1), transparent);
   border-radius: inherit;
   z-index: -1;
   opacity: 0;
@@ -417,7 +415,7 @@
 }
 
 .skeleton {
-  background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+  background: linear-gradient(90deg, rgb(var(--c-white) / 0.06) 25%, rgb(var(--c-white) / 0.12) 50%, rgb(var(--c-white) / 0.06) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
 }
@@ -484,4 +482,133 @@ button,
   .about-image img {
     filter: none;
   }
+}
+
+
+/* ------------------------------------------------------------------ */
+/* Light theme: shadcn tokens (the white/black flip lives in index.html) */
+/* ------------------------------------------------------------------ */
+html[data-theme='light'] {
+  --background: 60 14% 96%;
+  --foreground: 0 0% 4%;
+  --card: 0 0% 100%;
+  --card-foreground: 0 0% 4%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 0 0% 4%;
+  --primary: 0 0% 4%;
+  --primary-foreground: 0 0% 98%;
+  --secondary: 60 8% 90%;
+  --secondary-foreground: 0 0% 4%;
+  --muted: 60 8% 90%;
+  --muted-foreground: 0 0% 40%;
+  --accent: 60 8% 90%;
+  --accent-foreground: 0 0% 4%;
+  --border: 0 0% 82%;
+  --input: 0 0% 82%;
+  --ring: 0 0% 4%;
+}
+
+/* Smooth cross-fade while the theme is being switched */
+html.theme-switching *,
+html.theme-switching *::before,
+html.theme-switching *::after {
+  transition:
+    background-color 0.45s ease,
+    color 0.45s ease,
+    border-color 0.45s ease,
+    box-shadow 0.45s ease,
+    fill 0.45s ease,
+    stroke 0.45s ease !important;
+}
+
+/* ------------------------------------------------------------------ */
+/* Key buttons: raised, with a hard offset shadow (yellow in dark, black in light).   */
+/* On press they sink into the shadow, then pop back up (lib/pressFeedback.ts).        */
+/* ------------------------------------------------------------------ */
+.key-btn {
+  --key-bg: #ffffff;
+  --key-fg: #0a0a0a;
+  background-color: var(--key-bg);
+  color: var(--key-fg);
+  border: 2px solid var(--key-edge);
+  box-shadow: 4px 4px 0 0 rgb(var(--key-shadow));
+}
+.key-btn-outline {
+  background-color: transparent;
+  color: rgb(var(--c-white));
+  border: 2px solid rgb(var(--c-white) / 0.9);
+  box-shadow: 4px 4px 0 0 rgb(var(--key-shadow));
+}
+@media (hover: hover) {
+  .key-btn,
+  .key-btn-outline {
+    transition: translate 0.18s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.18s cubic-bezier(0.2, 0.8, 0.2, 1),
+      background-color 0.25s, color 0.25s;
+  }
+  .key-btn:hover,
+  .key-btn-outline:hover {
+    translate: -1px -1px;
+    box-shadow: 5px 5px 0 0 rgb(var(--key-shadow));
+  }
+}
+.key-btn-outline:hover {
+  background-color: rgb(var(--c-white) / 0.08);
+}
+/* Over the always-dark hero the outline button stays white in either theme */
+.force-dark .key-btn-outline {
+  color: #fff;
+  border-color: rgb(255 255 255 / 0.85);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.theme-switching *,
+  html.theme-switching *::before,
+  html.theme-switching *::after {
+    transition: none !important;
+  }
+}
+
+/* WhatsApp-green key button (large contact call to action) */
+.key-btn-wa {
+  --key-bg: #25d366;
+  --key-fg: #04210f;
+  border-color: #25d366;
+}
+html[data-theme='light'] .key-btn-wa {
+  border-color: #0a0a0a;
+}
+.key-btn-wa:hover {
+  filter: brightness(1.04);
+}
+
+/* ------------------------------------------------------------------ */
+/* Stacked cards (Services)                                            */
+/* ------------------------------------------------------------------ */
+.paper-sheet {
+  --stack-top: 76px;
+  --stack-step: 12px;
+}
+@media (min-width: 768px) {
+  .paper-sheet {
+    --stack-top: 96px;
+    --stack-step: 18px;
+  }
+}
+.paper-inner {
+  box-shadow:
+    0 -14px 36px -18px rgb(255 255 255 / 0.1),
+    0 18px 40px -16px rgb(0 0 0 / 0.9),
+    0 2px 6px rgb(0 0 0 / 0.4);
+}
+html[data-theme='light'] .paper-inner {
+  box-shadow:
+    0 -14px 36px -18px rgb(14 17 26 / 0.28),
+    0 18px 40px -16px rgb(14 17 26 / 0.22),
+    0 2px 6px rgb(14 17 26 / 0.06);
+}
+.paper-shade {
+  background: rgb(0 0 0 / 0.5);
+}
+html[data-theme='light'] .paper-shade {
+  background: rgb(10 10 10 / 0.07);
 }

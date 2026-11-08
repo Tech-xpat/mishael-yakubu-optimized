@@ -9,16 +9,16 @@ const bar = 'skeleton rounded';
 export function FolderGridSkeleton({ count = 7 }: { count?: number }) {
   return (
     <div
-      className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
+      className="grid grid-cols-2 gap-3 sm:gap-6 md:grid-cols-3 lg:grid-cols-4"
       aria-busy="true"
       aria-label="Loading portfolio"
     >
       {Array.from({ length: count }).map((_, i) => (
         <div
           key={i}
-          className="aspect-square rounded-3xl bg-white/[0.03] border border-white/10 flex flex-col items-center justify-center p-8"
+          className="flex aspect-square flex-col items-center justify-center rounded-3xl border border-white/10 bg-white/[0.03] p-3 sm:p-8"
         >
-          <div className="w-[88px] h-[88px] rounded-2xl skeleton mb-4" />
+          <div className="skeleton mb-3 h-[68px] w-[68px] rounded-2xl sm:mb-4 sm:h-24 sm:w-24" />
           <div className={`h-4 w-3/4 ${bar}`} />
           <div className={`h-3 w-1/3 mt-3 ${bar}`} />
         </div>

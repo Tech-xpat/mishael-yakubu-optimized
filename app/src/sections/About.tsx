@@ -113,36 +113,41 @@ const About = () => {
     <section
       ref={sectionRef}
       id="about"
-      className="relative w-full min-h-screen bg-black py-20 md:py-32"
+      className="relative w-full bg-black py-16 md:py-32"
     >
-      <div className="w-full px-6 md:px-12 lg:px-20">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-start">
+      <div className="w-full px-5 sm:px-6 md:px-12 lg:px-20">
+        <div className="grid grid-cols-1 items-start gap-10 lg:grid-cols-2 lg:gap-20">
           {/* Left Column - Sticky Image */}
-          <div className="relative lg:sticky lg:top-32">
+          <div className="relative mx-auto w-full max-w-md lg:sticky lg:top-32 lg:max-w-none">
             <div
               ref={imageRef}
-              className="about-image relative aspect-[4/5] overflow-hidden will-change-transform"
+              className="about-image force-dark relative aspect-[3/4] overflow-hidden rounded-2xl bg-black shadow-2xl ring-1 ring-white/10 will-change-transform"
             >
               <img
-                src="/about-portrait.webp"
-                alt="Mishael Yakubu"
-                width={1086}
-                height={1086}
+                src="/about-mishael.webp"
+                alt="Mishael Yakubu, CEO of Empire Digitals"
+                width={736}
+                height={981}
                 loading="lazy"
                 decoding="async"
-                className="w-full h-full object-cover"
+                className="h-full w-full object-cover"
               />
-              {/* Overlay gradient */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+              {/* Name plate */}
+              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent px-5 pb-5 pt-16">
+                <p className="font-display text-2xl font-bold leading-none text-white">Mishael Yakubu</p>
+                <p className="mt-1.5 font-body text-xs uppercase tracking-[0.2em] text-white/70">
+                  CEO, Empire Digitals · Ughelli, Delta State
+                </p>
+              </div>
             </div>
 
             {/* Decorative elements */}
-            <div className="absolute -bottom-4 -right-4 w-32 h-32 border border-white/10" />
-            <div className="absolute -top-4 -left-4 w-20 h-20 border border-white/10" />
+            <div className="pointer-events-none absolute -bottom-3 -right-3 hidden h-28 w-28 rounded-br-2xl border border-white/15 sm:block" />
+            <div className="pointer-events-none absolute -top-3 -left-3 hidden h-16 w-16 rounded-tl-2xl border border-white/15 sm:block" />
           </div>
 
           {/* Right Column - Content */}
-          <div className="lg:pt-20">
+          <div className="lg:pt-16">
             {/* Heading */}
             <h2
               ref={headingRef}
@@ -203,14 +208,14 @@ const About = () => {
             {/* Stats */}
             <div
               ref={statsRef}
-              className="grid grid-cols-3 gap-8 mt-16 pt-16 border-t border-white/10"
+              className="mt-12 grid grid-cols-3 gap-4 border-t border-white/10 pt-12 sm:gap-8 md:mt-16 md:pt-16"
             >
               {stats.map((stat, index) => (
                 <div key={index} className="stat-item text-center md:text-left">
-                  <span className="block font-display text-4xl md:text-5xl font-bold text-white mb-2">
+                  <span className="mb-2 block font-display text-3xl font-bold text-white sm:text-4xl md:text-5xl">
                     {stat.value}
                   </span>
-                  <span className="text-xs text-white/50 font-body tracking-wider uppercase">
+                  <span className="font-body text-[10px] uppercase tracking-wider text-white/50 sm:text-xs">
                     {stat.label}
                   </span>
                 </div>

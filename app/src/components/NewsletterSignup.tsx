@@ -68,7 +68,7 @@ export default function NewsletterSignup() {
           <button
             type="submit"
             disabled={loading || status === 'success'}
-            className="w-full px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-md font-medium hover:from-purple-500 hover:to-pink-500 disabled:from-purple-600/50 disabled:to-pink-600/50 transition-all flex items-center justify-center gap-2"
+            className="key-btn flex w-full items-center justify-center gap-2 px-4 py-3 font-semibold disabled:opacity-60"
           >
             {loading && <Loader2 className="w-4 h-4 animate-spin" />}
             {status === 'success' && <Check className="w-4 h-4" />}

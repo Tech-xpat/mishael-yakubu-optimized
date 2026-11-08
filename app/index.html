@@ -1,10 +1,53 @@
 <!doctype html>
-<html lang="en" style="background-color:#000;color-scheme:dark">
+<html lang="en" data-theme="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="color-scheme" content="dark" />
+    <meta name="color-scheme" content="dark light" />
     <meta name="theme-color" content="#000000" />
+    <style>
+      /* Theme variables. "white" = text colour, "black" = page colour: both flip in light mode,
+         so every text-white / bg-black class on the site adapts. */
+      :root {
+        --c-white: 255 255 255;
+        --c-black: 0 0 0;
+        --t-black: 0 0 0; /* page colour that regions like .force-dark never override */
+        --page-bg: #000;
+        --key-shadow: 250 204 21; /* yellow key-button shadow */
+        --key-edge: #ffffff;
+        color-scheme: dark;
+      }
+      html[data-theme='light'] {
+        --c-white: 10 10 10;
+        --c-black: 245 245 242;
+        --t-black: 245 245 242;
+        --page-bg: #f5f5f2;
+        --key-shadow: 0 0 0; /* black key-button shadow */
+        --key-edge: #0a0a0a;
+        color-scheme: light;
+      }
+      /* Regions that stay dark in either theme (hero photo, photo viewer) */
+      .force-dark {
+        --c-white: 255 255 255;
+        --c-black: 0 0 0;
+        --page-bg: #000;
+        --key-shadow: 250 204 21;
+        --key-edge: #ffffff;
+        color-scheme: dark;
+      }
+    </style>
+    <script>
+      /* Apply the saved theme before first paint so there is no flash. Admin is always dark. */
+      (function () {
+        var t = 'dark';
+        try {
+          if (location.pathname.indexOf('/greatness') !== 0 && localStorage.getItem('theme') === 'light') t = 'light';
+        } catch (e) {}
+        document.documentElement.setAttribute('data-theme', t);
+        var m = document.querySelector('meta[name="theme-color"]');
+        if (m) m.setAttribute('content', t === 'light' ? '#f5f5f2' : '#000000');
+      })();
+    </script>
 
     <!-- Primary SEO Meta Tags -->
     <title>Mishael Yakubu | Web Developer, Brand Designer & AI Automation | Empire Digitals</title>
@@ -19,7 +62,7 @@
     <meta property="og:url" content="https://www.mishael.space" />
     <meta property="og:title" content="Mishael Yakubu | Web Developer, Brand Designer & AI Automation | Empire Digitals" />
     <meta property="og:description" content="I specialize in building digital experiences that merge creativity with technical precision. CEO of Empire Digitals, based in Ughelli, Delta State, Nigeria." />
-    <meta property="og:image" content="https://www.mishael.space/og-card.jpg" />
+    <meta property="og:image" content="https://www.mishael.space/og-card-v2.jpg" />
     <meta property="og:image:type" content="image/jpeg" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
@@ -32,7 +75,7 @@
     <meta name="twitter:url" content="https://www.mishael.space" />
     <meta name="twitter:title" content="Mishael Yakubu | Web Developer, Brand Designer & AI Automation" />
     <meta name="twitter:description" content="CEO of Empire Digitals, based in Ughelli, Delta State, Nigeria. Web development, brand design and AI automation projects." />
-    <meta name="twitter:image" content="https://www.mishael.space/og-card.jpg" />
+    <meta name="twitter:image" content="https://www.mishael.space/og-card-v2.jpg" />
     <meta name="twitter:image:alt" content="Mishael Yakubu, CEO of Empire Digitals, with a short description of his work" />
 
     <!-- Structured Data -->
@@ -45,7 +88,7 @@
           "@id": "https://www.mishael.space/#person",
           "name": "Mishael Yakubu",
           "url": "https://www.mishael.space/",
-          "image": "https://www.mishael.space/about-portrait.webp",
+          "image": "https://www.mishael.space/about-mishael.webp",
           "jobTitle": "CEO of Empire Digitals, Web Developer, Brand Designer, AI Automator",
           "description": "Mishael Yakubu is the CEO of Empire Digitals and a web developer based in Ughelli, Delta State, Nigeria, specializing in web development, brand design and AI automation.",
           "address": {
@@ -101,37 +144,24 @@
     <!-- Start the slow things as early as possible -->
     <link rel="preload" as="image" href="/apppublichero-bg.webp" type="image/webp" fetchpriority="high" />
     <link rel="preconnect" href="https://mmnsovgpmojjeqajbcfo.supabase.co" crossorigin />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <!-- Fonts load without blocking the first paint (text swaps in when ready) -->
-    <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800&family=Inter:wght@300;400;500;600;700&display=swap"
-      media="print"
-      onload="this.media='all'"
-    />
-    <noscript>
-      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" />
-    </noscript>
-
     <style>
       html, body {
-        background-color: #000 !important;
-        color: #fff;
+        background-color: var(--page-bg) !important;
+        color: rgb(var(--c-white));
         margin: 0;
         min-height: 100%;
       }
       #root {
         min-height: 100vh;
-        background-color: #000;
+        background-color: var(--page-bg);
       }
 
       /* Instant page skeleton: painted before any JavaScript runs.
          React replaces it the moment the app mounts. */
-      #boot { position: fixed; inset: 0; z-index: 10000; background: #000; overflow: hidden; }
+      #boot { position: fixed; inset: 0; z-index: 10000; background: var(--page-bg); overflow: hidden; }
       #boot .b {
         border-radius: 4px;
-        background: linear-gradient(90deg, rgba(255,255,255,.05) 25%, rgba(255,255,255,.1) 50%, rgba(255,255,255,.05) 75%);
+        background: linear-gradient(90deg, rgb(var(--c-white) / .06) 25%, rgb(var(--c-white) / .12) 50%, rgb(var(--c-white) / .06) 75%);
         background-size: 200% 100%;
         animation: bootShimmer 1.5s infinite;
       }
@@ -139,7 +169,7 @@
       #boot .nav { height: 80px; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; }
       #boot .links { display: none; gap: 40px; }
       #boot .links .b { height: 12px; }
-      #boot .hero { height: calc(100vh - 224px); min-height: 320px; padding: 0 24px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px; }
+      #boot .hero { height: calc(100svh - 224px); min-height: 320px; padding: 0 24px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px; }
       #boot .btns { margin-top: 24px; display: flex; flex-direction: column; gap: 16px; }
       #boot .tiles { padding: 0 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; opacity: .6; }
       #boot .tiles .b { aspect-ratio: 1; border-radius: 24px; }
@@ -152,7 +182,7 @@
       @media (prefers-reduced-motion: reduce) { #boot .b { animation: none } }
     </style>
   </head>
-  <body style="background-color:#000;color-scheme:dark">
+  <body>
     <div id="root">
       <div id="boot" role="status" aria-busy="true" aria-label="Loading">
         <div class="nav">

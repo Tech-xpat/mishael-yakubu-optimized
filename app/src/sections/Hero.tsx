@@ -68,7 +68,8 @@ const Hero = ({ ready }: HeroProps) => {
     <section
       ref={heroRef}
       id="home"
-      className="relative w-full h-screen overflow-hidden bg-black"
+      className="force-dark relative w-full overflow-hidden bg-black"
+      style={{ height: '100svh', minHeight: 560 }}
     >
       {/* Background image: entry zoom on bgRef, mouse parallax on parallaxRef */}
       <div ref={bgRef} className="absolute inset-0 w-full h-full will-change-transform">
@@ -87,7 +88,7 @@ const Hero = ({ ready }: HeroProps) => {
         <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/80" />
       </div>
 
-      <div className="corner-bl absolute bottom-8 left-8 z-20 opacity-0">
+      <div className="corner-bl absolute bottom-6 left-5 z-20 opacity-0 sm:bottom-8 sm:left-8">
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
           <p className="text-xs tracking-[0.2em] text-white/60 uppercase font-body">
@@ -96,7 +97,7 @@ const Hero = ({ ready }: HeroProps) => {
         </div>
       </div>
 
-      <div className="corner-br absolute bottom-8 right-8 z-20 opacity-0">
+      <div className="corner-br absolute bottom-8 right-8 z-20 hidden opacity-0 sm:block">
         <p className="text-xs tracking-[0.2em] text-white/60 uppercase font-body">
           Scroll to explore
         </p>
@@ -107,19 +108,24 @@ const Hero = ({ ready }: HeroProps) => {
         {/* Heading with 3D Character Animation */}
         <h1
           ref={headingRef}
-          className="font-display text-responsive-xl font-bold text-white text-center leading-none tracking-tight"
+          aria-label={name}
+          className="font-display flex flex-col items-center text-[clamp(3.75rem,19vw,6.5rem)] font-bold leading-[0.9] tracking-tight text-white sm:flex-row sm:gap-[0.28em] sm:text-responsive-xl sm:leading-none"
           style={{ perspective: '1000px' }}
         >
-          {name.split('').map((char, index) => (
-            <span
-              key={index}
-              className="char inline-block"
-              style={{
-                transformStyle: 'preserve-3d',
-                textShadow: '0 0 80px rgba(255,255,255,0.1)',
-              }}
-            >
-              {char === ' ' ? ' ' : char}
+          {name.split(' ').map((word, w) => (
+            <span key={w} className="inline-flex" aria-hidden="true">
+              {word.split('').map((char, index) => (
+                <span
+                  key={index}
+                  className="char inline-block"
+                  style={{
+                    transformStyle: 'preserve-3d',
+                    textShadow: '0 0 80px rgba(255,255,255,0.1)',
+                  }}
+                >
+                  {char}
+                </span>
+              ))}
             </span>
           ))}
         </h1>
@@ -127,24 +133,24 @@ const Hero = ({ ready }: HeroProps) => {
         {/* Subheading */}
         <p
           ref={subheadingRef}
-          className="mt-8 text-sm md:text-base tracking-[0.4em] text-white/70 uppercase font-body text-center max-w-3xl opacity-0"
+          className="mt-6 max-w-3xl px-2 text-center font-body text-xs uppercase leading-relaxed tracking-[0.18em] text-white/70 opacity-0 sm:mt-8 sm:text-sm sm:tracking-[0.32em] md:text-base md:tracking-[0.4em]"
         >
           Web Developer / Brand Designer / AI Automator / Software Developer
         </p>
 
         {/* CTA Buttons */}
-        <div className="hero-cta mt-12 flex flex-col sm:flex-row gap-4 opacity-0">
+        <div className="hero-cta mt-10 flex w-full max-w-xs flex-col gap-5 opacity-0 sm:mt-12 sm:w-auto sm:max-w-none sm:flex-row sm:gap-6">
           <a
             href="#portfolio"
             onClick={goTo('#portfolio')}
-            className="px-8 py-4 bg-white text-black font-body text-sm tracking-wider uppercase hover:bg-white/90 transition-colors duration-300 text-center"
+            className="key-btn px-8 py-4 text-center font-body text-sm font-semibold uppercase tracking-wider"
           >
             View My Work
           </a>
           <a
             href="#contact"
             onClick={goTo('#contact')}
-            className="px-8 py-4 border border-white/30 text-white font-body text-sm tracking-wider uppercase hover:bg-white/10 transition-colors duration-300 text-center"
+            className="key-btn-outline px-8 py-4 text-center font-body text-sm font-semibold uppercase tracking-wider"
           >
             Get In Touch
           </a>
@@ -152,7 +158,10 @@ const Hero = ({ ready }: HeroProps) => {
       </div>
 
       {/* Bottom Gradient Fade */}
-      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black to-transparent z-10" />
+      <div
+        className="pointer-events-none absolute bottom-0 left-0 right-0 z-10 h-28 sm:h-32"
+        style={{ background: 'linear-gradient(to top, rgb(var(--t-black)), rgb(var(--t-black) / 0))' }}
+      />
     </section>
   );
 };
