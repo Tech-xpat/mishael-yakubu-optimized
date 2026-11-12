@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FolderPlus, Trash2, X, Plus, ExternalLink, Pencil, Check } from 'lucide-react';
+import { Trash2, X, Plus, ExternalLink, Pencil, Check } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import {
   CONFIG_PATH,
@@ -23,7 +23,7 @@ interface Props {
 }
 
 const field =
-  'w-full px-4 py-3 bg-black/40 border border-white/15 rounded-xl outline-none focus:border-white/40 text-white';
+  'w-full px-4 py-3 bg-black/40 border border-white/15 rounded-xl outline-none focus:border-white/40 text-white text-base';
 
 /** Admin tool: create / rename / remove categories and subcategories. Changes go live on the site immediately. */
 export default function AdminCategories({ config, items, onConfig }: Props) {
@@ -109,11 +109,7 @@ export default function AdminCategories({ config, items, onConfig }: Props) {
   };
 
   return (
-    <section className="bg-white/5 border border-white/10 rounded-2xl p-6 md:p-8">
-      <h2 className="text-xl font-semibold mb-2 flex items-center gap-2">
-        <FolderPlus size={20} />
-        Categories
-      </h2>
+    <div>
       <p className="text-sm text-white/50 mb-6">
         Add a category here, then pick it when you upload. It appears on the website instantly as a folder in the
         Portfolio section and as its own gallery page.
@@ -246,6 +242,6 @@ export default function AdminCategories({ config, items, onConfig }: Props) {
           );
         })}
       </div>
-    </section>
+    </div>
   );
 }

@@ -1,24 +1,67 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect, useRef } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { LogOut, BarChart3, Loader2, Upload, ExternalLink, Trash2, Play, Edit2, ChevronUp, ChevronDown, X } from 'lucide-react';
+import {
+  LogOut,
+  BarChart3,
+  Loader2,
+  Upload,
+  ExternalLink,
+  Trash2,
+  Play,
+  Edit2,
+  ArrowUp,
+  ArrowDown,
+  X,
+  FolderPlus,
+  Globe,
+  ImagePlus,
+} from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useSeo } from '../lib/seo';
 import AdminCategories from '../components/admin/AdminCategories';
+import Collapsible from '../components/admin/Collapsible';
 import { allCategories, subcategoriesFor, fetchConfig, EMPTY_CONFIG, type CategoryConfig } from '../lib/categories';
+import { comparePosition, type PortfolioItem } from '../lib/portfolioApi';
 
-type CategorySlug = string;
+/** Highest position offered in the dropdowns. */
+const MAX_POSITION = 30;
 
-interface PortfolioItem {
-  id: string;
-  title: string;
-  description?: string | null;
-  image_url: string;
-  category?: string;
-  subcategory?: string | null;
-  website_url?: string | null;
-  priority?: number | null;
-  created_at?: string;
+const input =
+  'w-full px-4 py-3 bg-black/40 border border-white/15 rounded-xl outline-none focus:border-white/40 text-white text-base';
+const label = 'text-xs text-white/50 uppercase tracking-wider block mb-2';
+const iconBtn =
+  'inline-flex h-10 w-10 items-center justify-center rounded-lg bg-white/10 text-white/80 transition-colors hover:bg-white/20 hover:text-white disabled:opacity-30';
+
+const isVideoUrl = (url?: string) => !!url?.match(/\.(mp4|webm|mov)$/i);
+
+/** "Position on site" dropdown: 1 shows first, 2 second... "Automatic" goes after the numbered ones. */
+function PositionSelect({
+  value,
+  onChange,
+  compact = false,
+}: {
+  value: number;
+  onChange: (n: number) => void;
+  compact?: boolean;
+}) {
+  return (
+    <select
+      value={value}
+      onChange={(e) => onChange(Number(e.target.value))}
+      aria-label="Position on site"
+      className={`bg-black/40 border border-white/15 rounded-lg text-white outline-none focus:border-white/40 ${
+        compact ? 'h-10 px-2 text-sm' : 'w-full rounded-xl px-4 py-3 text-base'
+      }`}
+    >
+      <option value={0}>{compact ? 'Auto' : 'Automatic (after numbered)'}</option>
+      {Array.from({ length: MAX_POSITION }, (_, i) => i + 1).map((n) => (
+        <option key={n} value={n}>
+          {compact ? `Position ${n}` : n === 1 ? 'Position 1 (shows first)' : `Position ${n}`}
+        </option>
+      ))}
+    </select>
+  );
 }
 
 const AdminDashboard = () => {
@@ -27,32 +70,46 @@ const AdminDashboard = () => {
   const { currentUser, isAdmin, logout, loading: authLoading } = useAuth();
   const [items, setItems] = useState<PortfolioItem[]>([]);
   const [loadingItems, setLoadingItems] = useState(true);
+  const [config, setConfig] = useState<CategoryConfig>(EMPTY_CONFIG);
+
+  // upload form
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [category, setCategory] = useState<CategorySlug>('web');
+  const [category, setCategory] = useState('web');
   const [subcategory, setSubcategory] = useState('');
   const [websiteUrl, setWebsiteUrl] = useState('');
-  const [priority, setPriority] = useState(0);
+  const [position, setPosition] = useState(0);
   const [files, setFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
-  const [status, setStatus] = useState('');
-  const [filter, setFilter] = useState<string>('all');
+  const [uploadNote, setUploadNote] = useState('');
 
+  // edit sheet
   const [editing, setEditing] = useState<PortfolioItem | null>(null);
   const [editTitle, setEditTitle] = useState('');
   const [editDescription, setEditDescription] = useState('');
-  const [editCategory, setEditCategory] = useState<CategorySlug>('web');
+  const [editCategory, setEditCategory] = useState('web');
   const [editSubcategory, setEditSubcategory] = useState('');
   const [editWebsite, setEditWebsite] = useState('');
-  const [editPriority, setEditPriority] = useState(0);
+  const [editPosition, setEditPosition] = useState(0);
   const [savingEdit, setSavingEdit] = useState(false);
 
-  const [config, setConfig] = useState<CategoryConfig>(EMPTY_CONFIG);
-  const CATEGORIES = allCategories(config, items.map((i) => i.category || 'web'));
+  // small message at the bottom of the screen
+  const [toast, setToast] = useState('');
+  const toastTimer = useRef<number>(0);
+  const flash = (msg: string) => {
+    setToast(msg);
+    window.clearTimeout(toastTimer.current);
+    toastTimer.current = window.setTimeout(() => setToast(''), 3200);
+  };
+  useEffect(() => () => window.clearTimeout(toastTimer.current), []);
+
+  const catOf = (i: PortfolioItem) => i.category || 'web';
+  const CATEGORIES = allCategories(config, items.map(catOf));
   const seenSubs = (slug: string) =>
-    items.filter((i) => (i.category || 'web') === slug && i.subcategory).map((i) => i.subcategory as string);
+    items.filter((i) => catOf(i) === slug && i.subcategory).map((i) => i.subcategory as string);
   const availableSubs = subcategoriesFor(category, config, seenSubs(category));
   const editAvailableSubs = subcategoriesFor(editCategory, config, seenSubs(editCategory));
+  const nameOf = (slug?: string) => CATEGORIES.find((c) => c.slug === slug)?.name || slug || 'Web';
 
   const loadItems = async () => {
     setLoadingItems(true);
@@ -74,19 +131,61 @@ const AdminDashboard = () => {
     setSubcategory('');
   }, [category]);
 
+  /**
+   * Makes room for `count` items starting at `start` inside one category: anything already at or after
+   * that position moves down by `count`, so the item placed there really shows in that spot on the site.
+   */
+  const makeRoom = async (cat: string, start: number, count: number, excludeId?: string) => {
+    if (start <= 0) return;
+    const inCat = items.filter((i) => i.id !== excludeId && catOf(i) === cat);
+    const clash = inCat.some((i) => (i.priority || 0) >= start && (i.priority || 0) < start + count);
+    if (!clash) return;
+    const movers = inCat.filter((i) => (i.priority || 0) >= start);
+    await Promise.all(
+      movers.map((i) =>
+        supabase.from('portfolio_items').update({ priority: (i.priority || 0) + count }).eq('id', i.id)
+      )
+    );
+  };
+
+  const setItemPosition = async (item: PortfolioItem, n: number) => {
+    if (n === (item.priority || 0)) return;
+    await makeRoom(catOf(item), n, 1, item.id);
+    const { error } = await supabase.from('portfolio_items').update({ priority: n }).eq('id', item.id);
+    flash(error ? 'Could not change position: ' + error.message : n ? `Moved to position ${n}` : 'Position cleared');
+    await loadItems();
+  };
+
+  const moveUp = (item: PortfolioItem) => {
+    const p = item.priority || 0;
+    if (p === 1) return;
+    if (p > 1) return setItemPosition(item, p - 1);
+    // unnumbered: add it to the end of the numbered ones
+    const numbered = items.filter((i) => catOf(i) === catOf(item) && (i.priority || 0) > 0);
+    const last = numbered.reduce((m, i) => Math.max(m, i.priority || 0), 0);
+    return setItemPosition(item, Math.min(MAX_POSITION, last + 1));
+  };
+
+  const moveDown = (item: PortfolioItem) => {
+    const p = item.priority || 0;
+    if (p === 0 || p >= MAX_POSITION) return;
+    return setItemPosition(item, p + 1);
+  };
+
   const openEdit = (item: PortfolioItem) => {
     setEditing(item);
     setEditTitle(item.title);
     setEditDescription(item.description || '');
-    setEditCategory((item.category as CategorySlug) || 'web');
+    setEditCategory(catOf(item));
     setEditSubcategory(item.subcategory || '');
     setEditWebsite(item.website_url || '');
-    setEditPriority(item.priority || 0);
+    setEditPosition(item.priority && item.priority > 0 ? item.priority : 0);
   };
 
   const saveEdit = async () => {
     if (!editing) return;
     setSavingEdit(true);
+    await makeRoom(editCategory, editPosition, 1, editing.id);
     const { error } = await supabase
       .from('portfolio_items')
       .update({
@@ -95,26 +194,18 @@ const AdminDashboard = () => {
         category: editCategory,
         subcategory: editSubcategory || null,
         website_url: editWebsite.trim() || null,
-        priority: editPriority || 0,
+        priority: editPosition,
       })
       .eq('id', editing.id);
 
     setSavingEdit(false);
     if (error) {
-      setStatus('Update failed: ' + error.message);
+      flash('Update failed: ' + error.message);
     } else {
-      setStatus('Item updated');
+      flash('Item updated');
       setEditing(null);
       await loadItems();
     }
-  };
-
-  const changePriority = async (id: string, delta: number) => {
-    const item = items.find((i) => i.id === id);
-    if (!item) return;
-    const newPriority = Math.max(0, (item.priority || 0) + delta);
-    await supabase.from('portfolio_items').update({ priority: newPriority }).eq('id', id);
-    await loadItems();
   };
 
   if (authLoading) {
@@ -127,7 +218,7 @@ const AdminDashboard = () => {
 
   if (!currentUser || !isAdmin) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="min-h-screen bg-black flex items-center justify-center px-6">
         <div className="text-center">
           <p className="text-white/60 mb-4">You are not authorized</p>
           <button
@@ -148,23 +239,17 @@ const AdminDashboard = () => {
 
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim()) {
-      setStatus('Title is required');
-      return;
-    }
-    if (files.length === 0) {
-      setStatus('Select at least one file');
-      return;
-    }
-    if (category === 'website' && !websiteUrl.trim()) {
-      setStatus('Website URL is required for Live Websites');
-      return;
-    }
+    if (!title.trim()) return setUploadNote('Title is required');
+    if (files.length === 0) return setUploadNote('Select at least one file');
+    if (category === 'website' && !websiteUrl.trim()) return setUploadNote('Website URL is required for Live Websites');
 
     setUploading(true);
-    setStatus(`Uploading ${files.length} file(s)...`);
+    setUploadNote(`Uploading ${files.length} file(s)...`);
 
     try {
+      // Several files at once take consecutive positions, in the order they were chosen.
+      await makeRoom(category, position, files.length);
+
       let success = 0;
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
@@ -176,13 +261,12 @@ const AdminDashboard = () => {
           .upload(path, file, { upsert: true, contentType: file.type });
 
         if (upErr) {
-          setStatus(`Upload failed on ${file.name}: ${upErr.message}`);
+          setUploadNote(`Upload failed on ${file.name}: ${upErr.message}`);
           continue;
         }
 
         const { data: urlData } = supabase.storage.from('portfolio').getPublicUrl(path);
-        const itemTitle =
-          files.length > 1 ? `${title.trim()} (${i + 1})` : title.trim();
+        const itemTitle = files.length > 1 ? `${title.trim()} (${i + 1})` : title.trim();
 
         const { error: dbErr } = await supabase.from('portfolio_items').insert({
           title: itemTitle,
@@ -191,30 +275,31 @@ const AdminDashboard = () => {
           category,
           subcategory: subcategory || null,
           website_url: category === 'website' ? websiteUrl.trim() : null,
-          priority: priority || 0,
+          priority: position > 0 ? position + i : 0,
         });
 
         if (dbErr) {
-          setStatus(`Saved file but DB failed: ${dbErr.message}`);
+          setUploadNote(`Saved file but DB failed: ${dbErr.message}`);
           continue;
         }
         success++;
       }
 
-      setStatus(
-        success > 0
-          ? `Uploaded ${success} item(s) to ${CATEGORIES.find((c) => c.slug === category)?.name}${subcategory ? ` / ${subcategory}` : ''}`
-          : 'No items uploaded'
-      );
+      if (success > 0) {
+        setUploadNote('');
+        flash(`Uploaded ${success} item(s) to ${nameOf(category)}${subcategory ? ` / ${subcategory}` : ''}`);
+      } else {
+        setUploadNote('No items uploaded');
+      }
       setTitle('');
       setDescription('');
       setWebsiteUrl('');
       setSubcategory('');
-      setPriority(0);
+      setPosition(0);
       setFiles([]);
       await loadItems();
     } catch (err: any) {
-      setStatus(err.message || 'Upload failed');
+      setUploadNote(err.message || 'Upload failed');
     } finally {
       setUploading(false);
     }
@@ -223,63 +308,68 @@ const AdminDashboard = () => {
   const handleDelete = async (id: string) => {
     if (!confirm('Delete this item?')) return;
     await supabase.from('portfolio_items').delete().eq('id', id);
+    flash('Item deleted');
     await loadItems();
   };
 
-  const filtered =
-    filter === 'all' ? items : items.filter((i) => (i.category || 'web') === filter);
+  const groups = CATEGORIES.map((c) => ({
+    cat: c,
+    list: items.filter((i) => catOf(i) === c.slug).sort(comparePosition),
+  })).filter((g) => g.list.length > 0);
 
   return (
     <div className="min-h-screen bg-black text-white">
-      <header className="border-b border-white/10 sticky top-0 z-40 backdrop-blur-sm bg-black/80">
-        <div className="px-6 md:px-12 py-6 flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold">Admin Dashboard</h1>
-            <p className="text-sm text-white/50 mt-1">{currentUser.email}</p>
+      {/* Header: title on the left, actions on the right. Logout is always reachable with the thumb. */}
+      <header
+        className="sticky top-0 z-40 border-b border-white/10 bg-black/90 backdrop-blur-sm"
+        style={{ paddingTop: 'env(safe-area-inset-top)' }}
+      >
+        <div className="mx-auto flex max-w-5xl items-center gap-3 px-4 py-3 sm:px-6">
+          <div className="min-w-0 flex-1">
+            <h1 className="truncate text-lg font-bold sm:text-2xl">Admin Dashboard</h1>
+            <p className="truncate text-xs text-white/50">{currentUser.email}</p>
           </div>
+          <Link
+            to="/"
+            target="_blank"
+            aria-label="View site"
+            className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-white/10 px-3 text-sm text-white/80 hover:bg-white/20 sm:px-4"
+          >
+            <Globe size={18} />
+            <span className="hidden sm:inline">View site</span>
+          </Link>
           <button
             onClick={handleLogout}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/30 transition"
+            aria-label="Log out"
+            className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-red-500/20 px-3 text-sm font-medium text-red-400 hover:bg-red-500/30 sm:px-4"
           >
             <LogOut size={18} />
-            Logout
+            <span className="hidden sm:inline">Logout</span>
           </button>
         </div>
       </header>
 
-      <div className="px-6 md:px-12 py-10 max-w-5xl mx-auto space-y-10">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-white/5 border border-white/10 rounded-xl p-5">
-            <p className="text-xs text-white/50 uppercase tracking-wider mb-1">Total items</p>
-            <p className="text-3xl font-bold">
-              {loadingItems ? '…' : items.length}
-            </p>
+      <main className="mx-auto max-w-5xl space-y-4 px-4 py-5 sm:px-6 sm:py-8" style={{ paddingBottom: 'max(6rem, env(safe-area-inset-bottom))' }}>
+        {/* Overview */}
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+          <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+            <p className="mb-1 text-[11px] uppercase tracking-wider text-white/50">Total items</p>
+            <p className="text-2xl font-bold">{loadingItems ? '…' : items.length}</p>
           </div>
           {CATEGORIES.slice(0, 3).map((c) => (
-            <div key={c.slug} className="bg-white/5 border border-white/10 rounded-xl p-5">
-              <p className="text-xs text-white/50 uppercase tracking-wider mb-1">{c.name}</p>
-              <p className="text-2xl font-bold">
-                {items.filter((i) => (i.category || 'web') === c.slug).length}
-              </p>
+            <div key={c.slug} className="rounded-xl border border-white/10 bg-white/5 p-4">
+              <p className="mb-1 truncate text-[11px] uppercase tracking-wider text-white/50">{c.name}</p>
+              <p className="text-2xl font-bold">{items.filter((i) => catOf(i) === c.slug).length}</p>
             </div>
           ))}
         </div>
 
-        <AdminCategories config={config} items={items} onConfig={setConfig} />
-
-        <section className="bg-white/5 border border-white/10 rounded-2xl p-6 md:p-8">
-          <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
-            <Upload size={20} />
-            Upload to category
-          </h2>
-          <form onSubmit={handleUpload} className="space-y-4 max-w-xl">
+        {/* Upload */}
+        <Collapsible title="Upload to category" icon={<Upload size={20} />} defaultOpen storageKey="upload">
+          <form onSubmit={handleUpload} className="max-w-xl space-y-4">
             <div>
-              <label className="text-xs text-white/50 uppercase tracking-wider block mb-2">Category</label>
-              <select
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                className="w-full px-4 py-3 bg-black/40 border border-white/15 rounded-xl outline-none focus:border-white/40 text-white"
-              >
+              <label className={label}>Category</label>
+              <select value={category} onChange={(e) => setCategory(e.target.value)} className={input}>
                 {CATEGORIES.map((c) => (
                   <option key={c.slug} value={c.slug}>{c.name}</option>
                 ))}
@@ -288,12 +378,8 @@ const AdminDashboard = () => {
 
             {availableSubs.length > 0 && (
               <div>
-                <label className="text-xs text-white/50 uppercase tracking-wider block mb-2">Subcategory (optional)</label>
-                <select
-                  value={subcategory}
-                  onChange={(e) => setSubcategory(e.target.value)}
-                  className="w-full px-4 py-3 bg-black/40 border border-white/15 rounded-xl outline-none focus:border-white/40 text-white"
-                >
+                <label className={label}>Subcategory (optional)</label>
+                <select value={subcategory} onChange={(e) => setSubcategory(e.target.value)} className={input}>
                   <option value="">None</option>
                   {availableSubs.map((s) => (
                     <option key={s} value={s}>{s}</option>
@@ -303,199 +389,164 @@ const AdminDashboard = () => {
             )}
 
             <div>
-              <label className="text-xs text-white/50 uppercase tracking-wider block mb-2">Priority (higher number shows first)</label>
-              <input
-                type="number"
-                value={priority}
-                onChange={(e) => setPriority(Number(e.target.value) || 0)}
-                className="w-full px-4 py-3 bg-black/40 border border-white/15 rounded-xl outline-none focus:border-white/40"
-                min="0"
-              />
+              <label className={label}>Position on site</label>
+              <PositionSelect value={position} onChange={setPosition} />
+              <p className="mt-2 text-xs text-white/40">
+                1 shows first, 2 second, and so on. Items placed after it move down automatically.
+              </p>
             </div>
 
-            <input
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Title"
-              className="w-full px-4 py-3 bg-black/40 border border-white/15 rounded-xl outline-none focus:border-white/40"
-            />
+            <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Title" className={input} />
 
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Description (optional)"
               rows={3}
-              className="w-full px-4 py-3 bg-black/40 border border-white/15 rounded-xl outline-none focus:border-white/40"
+              className={input}
             />
 
             {category === 'website' && (
               <div>
-                <label className="text-xs text-white/50 uppercase tracking-wider block mb-2">Website URL</label>
+                <label className={label}>Website URL</label>
                 <input
                   value={websiteUrl}
                   onChange={(e) => setWebsiteUrl(e.target.value)}
                   placeholder="https://example.com"
                   type="url"
-                  className="w-full px-4 py-3 bg-black/40 border border-white/15 rounded-xl outline-none focus:border-white/40"
+                  className={input}
                 />
               </div>
             )}
 
             <div>
-              <label className="text-xs text-white/50 uppercase tracking-wider block mb-2">Files (images or videos)</label>
-              <input
-                type="file"
-                accept="image/*,video/*"
-                multiple
-                onChange={(e) => setFiles(Array.from(e.target.files || []))}
-                className="w-full text-sm text-white/70"
-              />
-              {files.length > 0 && <p className="text-xs text-white/40 mt-2">{files.length} file(s) selected</p>}
+              <label className={label}>Files (images or videos)</label>
+              <label className="flex min-h-[56px] cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-white/25 px-4 py-4 text-sm text-white/70 hover:border-white/50 hover:text-white">
+                <ImagePlus size={20} />
+                {files.length > 0 ? `${files.length} file(s) selected` : 'Tap to choose files'}
+                <input
+                  type="file"
+                  accept="image/*,video/*"
+                  multiple
+                  onChange={(e) => setFiles(Array.from(e.target.files || []))}
+                  className="sr-only"
+                />
+              </label>
             </div>
 
             <button
               type="submit"
               disabled={uploading}
-              className="px-6 py-3 bg-white text-black rounded-xl font-semibold disabled:opacity-50"
+              className="min-h-[48px] w-full rounded-xl bg-white px-6 py-3 font-semibold text-black disabled:opacity-50 sm:w-auto"
             >
               {uploading ? 'Uploading...' : 'Upload'}
             </button>
-            {status && <p className="text-sm text-white/60">{status}</p>}
+            {uploadNote && <p className="text-sm text-white/60">{uploadNote}</p>}
           </form>
-        </section>
+        </Collapsible>
 
-        <section>
-          <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
-            <h2 className="text-xl font-semibold flex items-center gap-2">
-              <BarChart3 size={20} />
-              Library
-            </h2>
-            <div className="flex flex-wrap gap-2">
-              <button
-                onClick={() => setFilter('all')}
-                className={`px-3 py-1.5 rounded-full text-xs ${
-                  filter === 'all' ? 'bg-white text-black' : 'bg-white/10 text-white/70'
-                }`}
-              >
-                All
-              </button>
-              {CATEGORIES.map((c) => (
-                <button
-                  key={c.slug}
-                  onClick={() => setFilter(c.slug)}
-                  className={`px-3 py-1.5 rounded-full text-xs ${
-                    filter === c.slug ? 'bg-white text-black' : 'bg-white/10 text-white/70'
-                  }`}
-                >
-                  {c.name}
-                </button>
-              ))}
-            </div>
-          </div>
+        {/* Categories */}
+        <Collapsible title="Categories" icon={<FolderPlus size={20} />} badge={CATEGORIES.length} storageKey="categories">
+          <AdminCategories config={config} items={items} onConfig={setConfig} />
+        </Collapsible>
 
+        {/* Library: one dropdown per category, listed in the same order as the website */}
+        <div className="pt-2">
+          <h2 className="mb-3 flex items-center gap-2 px-1 text-lg font-semibold">
+            <BarChart3 size={20} />
+            Library
+          </h2>
           {loadingItems ? (
             <Loader2 className="animate-spin text-white/50" />
-          ) : filtered.length === 0 ? (
-            <p className="text-white/40">No items in this category yet.</p>
+          ) : groups.length === 0 ? (
+            <p className="px-1 text-white/40">Nothing uploaded yet.</p>
           ) : (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filtered.map((item) => {
-                const isVideo = item.image_url?.match(/\.(mp4|webm|mov)$/i);
-                return (
-                  <div
-                    key={item.id}
-                    className="bg-white/5 border border-white/10 rounded-xl overflow-hidden group"
-                  >
-                    <div className="relative">
-                      {isVideo ? (
-                        <div className="w-full h-40 bg-zinc-900 flex items-center justify-center">
-                          <Play size={32} className="text-white/60" />
-                        </div>
-                      ) : (
-                        <img
-                          src={item.image_url}
-                          alt={item.title}
-                          className="w-full h-40 object-cover"
-                        />
-                      )}
-                      <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition">
-                        <button
-                          onClick={() => changePriority(item.id, 1)}
-                          className="p-1.5 rounded-lg bg-black/70 text-white"
-                          title="Increase priority"
-                        >
-                          <ChevronUp size={14} />
-                        </button>
-                        <button
-                          onClick={() => changePriority(item.id, -1)}
-                          className="p-1.5 rounded-lg bg-black/70 text-white"
-                          title="Decrease priority"
-                        >
-                          <ChevronDown size={14} />
-                        </button>
-                        <button
-                          onClick={() => openEdit(item)}
-                          className="p-1.5 rounded-lg bg-black/70 text-blue-400"
-                          title="Edit"
-                        >
-                          <Edit2 size={14} />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(item.id)}
-                          className="p-1.5 rounded-lg bg-black/70 text-red-400"
-                          title="Delete"
-                        >
-                          <Trash2 size={14} />
-                        </button>
-                      </div>
-                    </div>
-                    <div className="p-3">
-                      <p className="text-[10px] uppercase tracking-wider text-white/40">
-                        {CATEGORIES.find((c) => c.slug === item.category)?.name || item.category || 'web'}
-                        {item.subcategory ? ` · ${item.subcategory}` : ''}
-                        {item.priority ? ` · P${item.priority}` : ''}
-                      </p>
-                      <p className="font-medium text-sm mt-0.5">{item.title}</p>
-                      {item.website_url && (
-                        <a
-                          href={item.website_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-xs text-white/50 hover:text-white mt-1"
-                        >
-                          <ExternalLink size={12} />
-                          Preview site
-                        </a>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
+            <div className="space-y-3">
+              {groups.map(({ cat, list }) => (
+                <Collapsible key={cat.slug} title={cat.name} badge={list.length} storageKey={`lib:${cat.slug}`}>
+                  <p className="mb-3 text-xs text-white/40">Listed in the same order as on the website.</p>
+                  <ul className="grid gap-3 lg:grid-cols-2">
+                    {list.map((item) => {
+                      const pos = item.priority && item.priority > 0 ? item.priority : 0;
+                      return (
+                        <li key={item.id} className="flex gap-3 rounded-xl border border-white/10 bg-black/30 p-3">
+                          <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-white/10">
+                            {isVideoUrl(item.image_url) ? (
+                              <div className="flex h-full w-full items-center justify-center">
+                                <Play size={24} className="text-white/60" />
+                              </div>
+                            ) : (
+                              <img src={item.image_url} alt="" loading="lazy" className="h-full w-full object-cover" />
+                            )}
+                            {pos > 0 && (
+                              <span className="absolute left-1 top-1 rounded bg-white px-1.5 py-0.5 text-[10px] font-bold text-black">
+                                #{pos}
+                              </span>
+                            )}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-sm font-medium">{item.title}</p>
+                            <p className="truncate text-[11px] uppercase tracking-wider text-white/40">
+                              {item.subcategory || nameOf(item.category)}
+                            </p>
+                            <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                              <PositionSelect compact value={pos} onChange={(n) => setItemPosition(item, n)} />
+                              <button onClick={() => moveUp(item)} disabled={pos === 1} className={iconBtn} aria-label="Move earlier">
+                                <ArrowUp size={16} />
+                              </button>
+                              <button onClick={() => moveDown(item)} disabled={pos === 0 || pos >= MAX_POSITION} className={iconBtn} aria-label="Move later">
+                                <ArrowDown size={16} />
+                              </button>
+                              <button onClick={() => openEdit(item)} className={`${iconBtn} text-blue-400`} aria-label="Edit">
+                                <Edit2 size={16} />
+                              </button>
+                              <button onClick={() => handleDelete(item.id)} className={`${iconBtn} text-red-400`} aria-label="Delete">
+                                <Trash2 size={16} />
+                              </button>
+                              {item.website_url && (
+                                <a href={item.website_url} target="_blank" rel="noopener noreferrer" className={iconBtn} aria-label="Preview site">
+                                  <ExternalLink size={16} />
+                                </a>
+                              )}
+                            </div>
+                          </div>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </Collapsible>
+              ))}
             </div>
           )}
-        </section>
-      </div>
+        </div>
+      </main>
 
+      {/* Edit: a bottom sheet on phones, a centred dialog on larger screens */}
       {editing && (
-        <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
-          <div className="bg-zinc-900 border border-white/10 rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold">Edit Item</h3>
-              <button onClick={() => setEditing(null)} className="text-white/50 hover:text-white">
-                <X size={20} />
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 sm:items-center sm:p-4" onClick={() => setEditing(null)}>
+          <div
+            role="dialog"
+            aria-label="Edit item"
+            onClick={(e) => e.stopPropagation()}
+            className="flex max-h-[92dvh] w-full flex-col rounded-t-2xl border border-white/10 bg-black sm:max-w-lg sm:rounded-2xl"
+          >
+            <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
+              <h3 className="text-lg font-semibold">Edit item</h3>
+              <button onClick={() => setEditing(null)} aria-label="Close" className={iconBtn}>
+                <X size={18} />
               </button>
             </div>
 
-            <div className="space-y-4">
+            <div className="flex-1 space-y-4 overflow-y-auto px-5 py-4">
               <div>
-                <label className="text-xs text-white/50 uppercase tracking-wider block mb-1">Category</label>
+                <label className={label}>Category</label>
                 <select
                   value={editCategory}
                   onChange={(e) => {
                     setEditCategory(e.target.value);
                     setEditSubcategory('');
                   }}
-                  className="w-full px-3 py-2 bg-black/40 border border-white/15 rounded-lg text-white"
+                  className={input}
                 >
                   {CATEGORIES.map((c) => (
                     <option key={c.slug} value={c.slug}>{c.name}</option>
@@ -505,12 +556,8 @@ const AdminDashboard = () => {
 
               {editAvailableSubs.length > 0 && (
                 <div>
-                  <label className="text-xs text-white/50 uppercase tracking-wider block mb-1">Subcategory</label>
-                  <select
-                    value={editSubcategory}
-                    onChange={(e) => setEditSubcategory(e.target.value)}
-                    className="w-full px-3 py-2 bg-black/40 border border-white/15 rounded-lg text-white"
-                  >
+                  <label className={label}>Subcategory</label>
+                  <select value={editSubcategory} onChange={(e) => setEditSubcategory(e.target.value)} className={input}>
                     <option value="">None</option>
                     {editAvailableSubs.map((s) => (
                       <option key={s} value={s}>{s}</option>
@@ -520,62 +567,52 @@ const AdminDashboard = () => {
               )}
 
               <div>
-                <label className="text-xs text-white/50 uppercase tracking-wider block mb-1">Title</label>
-                <input
-                  value={editTitle}
-                  onChange={(e) => setEditTitle(e.target.value)}
-                  className="w-full px-3 py-2 bg-black/40 border border-white/15 rounded-lg"
-                />
+                <label className={label}>Title</label>
+                <input value={editTitle} onChange={(e) => setEditTitle(e.target.value)} className={input} />
               </div>
 
               <div>
-                <label className="text-xs text-white/50 uppercase tracking-wider block mb-1">Description</label>
-                <textarea
-                  value={editDescription}
-                  onChange={(e) => setEditDescription(e.target.value)}
-                  rows={3}
-                  className="w-full px-3 py-2 bg-black/40 border border-white/15 rounded-lg"
-                />
+                <label className={label}>Description</label>
+                <textarea value={editDescription} onChange={(e) => setEditDescription(e.target.value)} rows={3} className={input} />
               </div>
 
               <div>
-                <label className="text-xs text-white/50 uppercase tracking-wider block mb-1">Website URL</label>
-                <input
-                  value={editWebsite}
-                  onChange={(e) => setEditWebsite(e.target.value)}
-                  className="w-full px-3 py-2 bg-black/40 border border-white/15 rounded-lg"
-                  placeholder="https://..."
-                />
+                <label className={label}>Website URL</label>
+                <input value={editWebsite} onChange={(e) => setEditWebsite(e.target.value)} className={input} placeholder="https://..." />
               </div>
 
               <div>
-                <label className="text-xs text-white/50 uppercase tracking-wider block mb-1">Priority</label>
-                <input
-                  type="number"
-                  value={editPriority}
-                  onChange={(e) => setEditPriority(Number(e.target.value) || 0)}
-                  className="w-full px-3 py-2 bg-black/40 border border-white/15 rounded-lg"
-                  min="0"
-                />
-              </div>
-
-              <div className="flex gap-2 pt-2">
-                <button
-                  onClick={saveEdit}
-                  disabled={savingEdit}
-                  className="flex-1 py-2.5 bg-white text-black rounded-lg font-medium disabled:opacity-50"
-                >
-                  {savingEdit ? 'Saving...' : 'Save Changes'}
-                </button>
-                <button
-                  onClick={() => setEditing(null)}
-                  className="flex-1 py-2.5 border border-white/20 rounded-lg"
-                >
-                  Cancel
-                </button>
+                <label className={label}>Position on site</label>
+                <PositionSelect value={editPosition} onChange={setEditPosition} />
               </div>
             </div>
+
+            <div
+              className="flex gap-2 border-t border-white/10 px-5 py-4"
+              style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}
+            >
+              <button
+                onClick={saveEdit}
+                disabled={savingEdit}
+                className="min-h-[48px] flex-1 rounded-xl bg-white font-semibold text-black disabled:opacity-50"
+              >
+                {savingEdit ? 'Saving...' : 'Save changes'}
+              </button>
+              <button onClick={() => setEditing(null)} className="min-h-[48px] flex-1 rounded-xl border border-white/20">
+                Cancel
+              </button>
+            </div>
           </div>
+        </div>
+      )}
+
+      {toast && (
+        <div
+          role="status"
+          className="fixed left-1/2 z-[60] w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 rounded-xl border border-white/20 bg-white px-4 py-3 text-center text-sm font-medium text-black shadow-lg"
+          style={{ bottom: 'max(1rem, env(safe-area-inset-bottom))' }}
+        >
+          {toast}
         </div>
       )}
     </div>

@@ -76,13 +76,21 @@ export function fetchCounts(): Promise<Record<string, number>> {
 const memory = new Map<string, PortfolioItem[]>();
 const inflight = new Map<string, Promise<PortfolioItem[]>>();
 
+/**
+ * Site order. Position 1 shows first, then 2, then 3 and so on. Items without a position
+ * (0 or empty) come after the numbered ones, newest first. The admin library uses this too,
+ * so what you see there is exactly what visitors see.
+ */
+export function comparePosition(a: PortfolioItem, b: PortfolioItem): number {
+  const pa = a.priority && a.priority > 0 ? a.priority : 0;
+  const pb = b.priority && b.priority > 0 ? b.priority : 0;
+  if (pa && pb && pa !== pb) return pa - pb;
+  if (!!pa !== !!pb) return pa ? -1 : 1;
+  return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
+}
+
 function sortItems(items: PortfolioItem[]): PortfolioItem[] {
-  return [...items].sort((a, b) => {
-    const pa = a.priority || 0;
-    const pb = b.priority || 0;
-    if (pb !== pa) return pb - pa;
-    return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
-  });
+  return [...items].sort(comparePosition);
 }
 
 /** Items already fetched this session (instant paint), if any. */
