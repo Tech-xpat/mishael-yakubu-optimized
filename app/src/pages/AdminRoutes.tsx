@@ -1,4 +1,5 @@
 import { Routes, Route } from 'react-router-dom';
+import { Toaster } from 'sonner';
 import { AuthProvider } from '../contexts/AuthContext';
 import ProtectedRoute from '../components/ProtectedRoute';
 import AdminLogin from './AdminLogin';
@@ -11,6 +12,7 @@ import AdminDashboard from './AdminDashboard';
 export default function AdminRoutes() {
   return (
     <AuthProvider>
+      <Toaster theme="dark" position="top-center" richColors />
       <Routes>
         <Route index element={<AdminLogin />} />
         <Route

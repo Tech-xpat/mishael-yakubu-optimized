@@ -19,6 +19,7 @@ import Navbar from '../sections/Navbar';
 import Footer from '../sections/Footer';
 import { GallerySkeleton } from '../components/Skeletons';
 import { useSeo, breadcrumbs } from '../lib/seo';
+import SoundVideo from '../components/SoundVideo';
 import { cachedConfig, fetchConfig, categoryName, allCategories, EMPTY_CONFIG, type CategoryConfig } from '../lib/categories';
 
 
@@ -88,9 +89,34 @@ export default function GalleryPage() {
   const [active, setActive] = useState(0);
   const [subFilter, setSubFilter] = useState<string>('all');
   const [fullscreen, setFullscreen] = useState(false);
+  // First visit only: a faint "tap to expand" guide over the preview, shown briefly.
+  const [expandHint, setExpandHint] = useState(false);
   const [arrowsVisible, setArrowsVisible] = useState(true);
   const touchStartX = useRef<number | null>(null);
   const idleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const hasCurrent = items.length > 0;
+  useEffect(() => {
+    if (!hasCurrent) return;
+    let seen = false;
+    try {
+      seen = localStorage.getItem('hint:expand') === '1';
+    } catch {
+      /* ignore */
+    }
+    if (seen) return;
+    const show = window.setTimeout(() => setExpandHint(true), 900);
+    const hide = window.setTimeout(() => setExpandHint(false), 6200);
+    try {
+      localStorage.setItem('hint:expand', '1');
+    } catch {
+      /* ignore */
+    }
+    return () => {
+      window.clearTimeout(show);
+      window.clearTimeout(hide);
+    };
+  }, [hasCurrent]);
 
   const title = category ? categoryName(category, config) : 'Gallery';
 
@@ -291,21 +317,13 @@ export default function GalleryPage() {
                 onMouseMove={showArrows}
                 onClick={() => {
                   showArrows();
+                  setExpandHint(false);
                   if (!fullscreen) setFullscreen(true);
                 }}
               >
                 {current &&
                   (isVideo(current) ? (
-                    <video
-                      key={current.id}
-                      src={current.image_url}
-                      controls
-                      className="w-full h-full object-contain"
-                      autoPlay
-                      muted
-                      loop
-                      playsInline
-                    />
+                    <SoundVideo key={current.id} src={current.image_url} />
                   ) : (
                     <PreviewImage key={current.id} src={current.image_url} alt={current.title} />
                   ))}
@@ -358,6 +376,18 @@ export default function GalleryPage() {
                 {!fullscreen && (
                   <div className="absolute top-3 right-3 p-2 rounded-full bg-black/50 text-white/70">
                     <Maximize2 size={18} />
+                  </div>
+                )}
+
+                {!fullscreen && (
+                  <div
+                    aria-hidden="true"
+                    className={`pointer-events-none absolute bottom-14 left-1/2 flex -translate-x-1/2 items-center gap-2 whitespace-nowrap rounded-full bg-black/55 px-4 py-2 text-xs text-white backdrop-blur-sm transition-all duration-700 ${
+                      expandHint ? 'translate-y-0 opacity-90' : 'translate-y-2 opacity-0'
+                    }`}
+                  >
+                    <Maximize2 size={14} className={expandHint ? 'animate-pulse' : ''} />
+                    {window.matchMedia('(pointer: coarse)').matches ? 'Tap' : 'Click'} to view full size
                   </div>
                 )}
               </div>

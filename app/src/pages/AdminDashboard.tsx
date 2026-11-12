@@ -16,11 +16,14 @@ import {
   FolderPlus,
   Globe,
   ImagePlus,
+  LayoutGrid,
+  Plus,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useSeo } from '../lib/seo';
 import AdminCategories from '../components/admin/AdminCategories';
 import Collapsible from '../components/admin/Collapsible';
+import HomeSectionsAdmin from '../components/admin/HomeSectionsAdmin';
 import { allCategories, subcategoriesFor, fetchConfig, EMPTY_CONFIG, type CategoryConfig } from '../lib/categories';
 import { comparePosition, type PortfolioItem } from '../lib/portfolioApi';
 
@@ -305,6 +308,16 @@ const AdminDashboard = () => {
     }
   };
 
+  /** "Add here" on an empty folder: open the upload form with that category already chosen. */
+  const addHere = (slug: string) => {
+    setCategory(slug);
+    window.dispatchEvent(new CustomEvent('admin-open', { detail: 'upload' }));
+    window.setTimeout(() => {
+      document.getElementById('admin-upload')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 120);
+    flash(`Upload form set to ${nameOf(slug)}`);
+  };
+
   const handleDelete = async (id: string) => {
     if (!confirm('Delete this item?')) return;
     await supabase.from('portfolio_items').delete().eq('id', id);
@@ -316,6 +329,7 @@ const AdminDashboard = () => {
     cat: c,
     list: items.filter((i) => catOf(i) === c.slug).sort(comparePosition),
   })).filter((g) => g.list.length > 0);
+  const emptyCats = CATEGORIES.filter((c) => !items.some((i) => catOf(i) === c.slug));
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -450,6 +464,11 @@ const AdminDashboard = () => {
           <AdminCategories config={config} items={items} onConfig={setConfig} />
         </Collapsible>
 
+        {/* The three sections that sit under Portfolio on the home page */}
+        <Collapsible title="Home page sections" icon={<LayoutGrid size={20} />} badge="Web · Brand · AI" storageKey="homesections">
+          <HomeSectionsAdmin />
+        </Collapsible>
+
         {/* Library: one dropdown per category, listed in the same order as the website */}
         <div className="pt-2">
           <h2 className="mb-3 flex items-center gap-2 px-1 text-lg font-semibold">
@@ -516,6 +535,31 @@ const AdminDashboard = () => {
                   </ul>
                 </Collapsible>
               ))}
+            </div>
+          )}
+
+          {emptyCats.length > 0 && !loadingItems && (
+            <div className="mt-3">
+              <Collapsible title="Empty portfolio folders" badge={emptyCats.length} storageKey="lib:empty">
+                <p className="mb-3 text-xs text-white/40">
+                  These folders are folded away at the bottom of the Portfolio section on the website until you add
+                  something. Tap Add to upload into one.
+                </p>
+                <ul className="space-y-2">
+                  {emptyCats.map((c) => (
+                    <li key={c.slug} className="flex items-center gap-3 rounded-xl border border-white/10 bg-black/30 p-3">
+                      <span className="min-w-0 flex-1 truncate text-sm font-medium">{c.name}</span>
+                      <button
+                        onClick={() => addHere(c.slug)}
+                        className="inline-flex min-h-[40px] items-center gap-1.5 rounded-lg bg-white px-3 text-sm font-semibold text-black"
+                      >
+                        <Plus size={16} />
+                        Add
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </Collapsible>
             </div>
           )}
         </div>

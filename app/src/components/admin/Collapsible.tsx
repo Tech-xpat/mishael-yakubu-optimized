@@ -9,11 +9,13 @@ interface Props {
   defaultOpen?: boolean;
   /** Remembers open/closed for the session. */
   storageKey?: string;
+  /** Render the content only once it has been opened (keeps heavy editors out until needed). */
+  lazyMount?: boolean;
   children: ReactNode;
 }
 
 /** A dropdown section: tap the header to fold long content away. Big tap target for phones. */
-export default function Collapsible({ title, icon, badge, defaultOpen = false, storageKey, children }: Props) {
+export default function Collapsible({ title, icon, badge, defaultOpen = false, storageKey, lazyMount = false, children }: Props) {
   const key = storageKey ? `admin:open:${storageKey}` : null;
   const [open, setOpen] = useState(() => {
     if (!key) return defaultOpen;
@@ -25,6 +27,20 @@ export default function Collapsible({ title, icon, badge, defaultOpen = false, s
     }
   });
   const id = useId();
+  const [seen, setSeen] = useState(open);
+  useEffect(() => {
+    if (open) setSeen(true);
+  }, [open]);
+
+  // Other parts of the page can ask a section to open: window.dispatchEvent(new CustomEvent('admin-open', { detail: key }))
+  useEffect(() => {
+    if (!storageKey) return;
+    const onOpen = (e: Event) => {
+      if ((e as CustomEvent).detail === storageKey) setOpen(true);
+    };
+    window.addEventListener('admin-open', onOpen);
+    return () => window.removeEventListener('admin-open', onOpen);
+  }, [storageKey]);
 
   useEffect(() => {
     if (!key) return;
@@ -36,7 +52,7 @@ export default function Collapsible({ title, icon, badge, defaultOpen = false, s
   }, [key, open]);
 
   return (
-    <section className="overflow-hidden rounded-2xl border border-white/10 bg-white/5">
+    <section id={storageKey ? `admin-${storageKey.replace(/[^a-z0-9]/gi, '-')}` : undefined} className="overflow-hidden rounded-2xl border border-white/10 bg-white/5">
       <button
         type="button"
         aria-expanded={open}
@@ -59,7 +75,7 @@ export default function Collapsible({ title, icon, badge, defaultOpen = false, s
         }`}
       >
         <div className="overflow-hidden">
-          <div className="border-t border-white/10 p-4 sm:p-6">{children}</div>
+          <div className="border-t border-white/10 p-4 sm:p-6">{lazyMount && !seen ? null : children}</div>
         </div>
       </div>
     </section>
