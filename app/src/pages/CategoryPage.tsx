@@ -1,11 +1,12 @@
 import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
-import { firestore } from '../lib/firebase';
-import { collection, query, onSnapshot, where } from 'firebase/firestore';
 import { ArrowLeft, ExternalLink } from 'lucide-react';
 import Navbar from '../sections/Navbar';
 import Footer from '../sections/Footer';
 import { useSeo, breadcrumbs } from '../lib/seo';
+import { fetchItems, cachedItems, type PortfolioItem } from '../lib/portfolioApi';
+import { cachedConfig, fetchConfig, subcategoriesFor, EMPTY_CONFIG, type CategoryConfig } from '../lib/categories';
+import { HOME_SECTIONS, titleToSlug, slugToTitle } from '../lib/homeSections';
 
 interface Project {
   id: string;
@@ -13,54 +14,15 @@ interface Project {
   description: string;
   imageUrl: string;
   link?: string;
-  subcategory?: string;
-  createdAt: any;
 }
 
-const categoryConfig: Record<
-  string,
-  { collection: string; title: string; subcategories?: string[] }
-> = {
-  'web-development': {
-    collection: 'webDevelopment',
-    title: 'Web Development',
-    subcategories: [
-      'Church Website',
-      'Banking & Investment',
-      'Real Estate Agent',
-      'Company Management',
-      'School Management',
-      'Broker Site',
-      'E-Commerce',
-      'Courier Service',
-      'Other Businesses',
-    ],
-  },
-  'brand-design': {
-    collection: 'brandDesign',
-    title: 'Brand Design',
-    subcategories: ['Church Branding', 'Flyers', 'Birthday Flyers', 'Logo', 'Other Visuals'],
-  },
-  'ai-automation': {
-    collection: 'aiAutomation',
-    title: 'AI Automation',
-  },
-};
-
-function slugToTitle(slug: string): string {
-  return slug
-    .split('-')
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(' ');
-}
-
-function titleToSlug(title: string): string {
-  return title
-    .toLowerCase()
-    .replace(/&/g, 'and')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)/g, '');
-}
+const toProject = (i: PortfolioItem): Project => ({
+  id: i.id,
+  title: i.title,
+  description: i.description || '',
+  imageUrl: i.image_url,
+  link: i.website_url || undefined,
+});
 
 /** Animated card skeleton frames while projects load */
 function CategorySkeleton() {
@@ -113,10 +75,13 @@ const CategoryPage = () => {
   };
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
+  const [subConfig, setSubConfig] = useState<CategoryConfig>(() => cachedConfig() ?? EMPTY_CONFIG);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const config = type ? categoryConfig[type] : null;
-  const displayTitle = subcategory ? slugToTitle(subcategory) : config?.title || 'Portfolio';
+  const config = type ? HOME_SECTIONS[type] ?? null : null;
+  const knownSubs = config ? subcategoriesFor(config.category, subConfig, (cachedItems(config.category) || []).map((i) => i.subcategory || '')) : [];
+  const subTitle = subcategory ? knownSubs.find((s) => titleToSlug(s) === subcategory) || slugToTitle(subcategory) : '';
+  const displayTitle = subcategory ? subTitle : config?.title || 'Portfolio';
 
   const seoPath = `/portfolio/${type ?? ''}${subcategory ? `/${subcategory}` : ''}`;
   useSeo({
@@ -149,37 +114,33 @@ const CategoryPage = () => {
       setLoading(false);
       return;
     }
+    let alive = true;
+    const pick = (rows: PortfolioItem[], subs: CategoryConfig) => {
+      if (!subcategory) return rows;
+      const names = subcategoriesFor(config.category, subs, rows.map((r) => r.subcategory || ''));
+      const wanted = (names.find((n) => titleToSlug(n) === subcategory) || slugToTitle(subcategory)).toLowerCase();
+      return rows.filter((r) => (r.subcategory || '').toLowerCase() === wanted);
+    };
 
-    setLoading(true);
-    setProjects([]);
+    const cached = cachedItems(config.category);
+    setLoading(!cached);
+    setProjects(cached ? pick(cached, subConfig).map(toProject) : []);
 
-    let q = query(collection(firestore, config.collection));
-
-    if (subcategory && config.subcategories) {
-      const fullTitle =
-        config.subcategories.find((s) => titleToSlug(s) === subcategory) ||
-        slugToTitle(subcategory);
-      q = query(collection(firestore, config.collection), where('subcategory', '==', fullTitle));
-    }
-
-    const unsubscribe = onSnapshot(
-      q,
-      (snapshot) => {
-        const data: Project[] = [];
-        snapshot.forEach((doc) => {
-          data.push({ id: doc.id, ...doc.data() } as Project);
-        });
-        data.sort((a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0));
-        setProjects(data);
+    Promise.all([fetchItems(config.category), fetchConfig()])
+      .then(([rows, subs]) => {
+        if (!alive) return;
+        setSubConfig(subs);
+        setProjects(pick(rows, subs).map(toProject));
         setLoading(false);
-      },
-      (error) => {
+      })
+      .catch((error) => {
         console.error('Error fetching projects:', error);
-        setLoading(false);
-      }
-    );
-
-    return unsubscribe;
+        if (alive) setLoading(false);
+      });
+    return () => {
+      alive = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [type, subcategory, config]);
 
   // Gentle auto-scroll for the carousel. Position is tracked as a float (browsers round

@@ -16,16 +16,15 @@ import {
   FolderPlus,
   Globe,
   ImagePlus,
-  LayoutGrid,
   Plus,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useSeo } from '../lib/seo';
 import AdminCategories from '../components/admin/AdminCategories';
 import Collapsible from '../components/admin/Collapsible';
-import HomeSectionsAdmin from '../components/admin/HomeSectionsAdmin';
 import { allCategories, subcategoriesFor, fetchConfig, EMPTY_CONFIG, type CategoryConfig } from '../lib/categories';
 import { comparePosition, type PortfolioItem } from '../lib/portfolioApi';
+import { HOME_SECTIONS, titleToSlug } from '../lib/homeSections';
 
 /** Highest position offered in the dropdowns. */
 const MAX_POSITION = 30;
@@ -402,6 +401,20 @@ const AdminDashboard = () => {
               </div>
             )}
 
+            {(() => {
+              const sec = Object.values(HOME_SECTIONS).find((x) => x.category === category);
+              return sec ? (
+                <p className="rounded-lg border border-white/10 bg-black/30 p-3 text-xs leading-relaxed text-white/60">
+                  Shows in the <strong className="text-white">{sec.title}</strong> section under Portfolio on the home
+                  page{subcategory ? <> (folder “{subcategory}”)</> : null}, on{' '}
+                  <span className="text-white/80">
+                    /portfolio/{sec.type}{subcategory ? `/${titleToSlug(subcategory)}` : ''}
+                  </span>
+                  , and in the Portfolio folder “{nameOf(category)}”.
+                </p>
+              ) : null;
+            })()}
+
             <div>
               <label className={label}>Position on site</label>
               <PositionSelect value={position} onChange={setPosition} />
@@ -462,11 +475,6 @@ const AdminDashboard = () => {
         {/* Categories */}
         <Collapsible title="Categories" icon={<FolderPlus size={20} />} badge={CATEGORIES.length} storageKey="categories">
           <AdminCategories config={config} items={items} onConfig={setConfig} />
-        </Collapsible>
-
-        {/* The three sections that sit under Portfolio on the home page */}
-        <Collapsible title="Home page sections" icon={<LayoutGrid size={20} />} badge="Web · Brand · AI" storageKey="homesections">
-          <HomeSectionsAdmin />
         </Collapsible>
 
         {/* Library: one dropdown per category, listed in the same order as the website */}

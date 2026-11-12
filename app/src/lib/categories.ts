@@ -31,8 +31,20 @@ export const BUILTIN_CATEGORIES: CategoryDef[] = [
 ];
 
 export const BUILTIN_SUBCATEGORIES: Record<string, string[]> = {
+  // Web Development / Brand Design: these names are also the folders (and indexed URLs) of the home-page sections.
+  web: [
+    'Church Website',
+    'Banking & Investment',
+    'Real Estate Agent',
+    'Company Management',
+    'School Management',
+    'Broker Site',
+    'E-Commerce',
+    'Courier Service',
+    'Other Businesses',
+  ],
   flyer: ['Birthday Flyers', 'Church Flyers', 'Social Media Flyers', 'Event Flyers', 'Business Flyers', 'Other Flyers'],
-  brand: ['Logo', 'Brand Identity', 'Social Media Kit', 'Other Branding'],
+  brand: ['Church Branding', 'Flyers', 'Birthday Flyers', 'Logo', 'Other Visuals', 'Brand Identity', 'Social Media Kit', 'Other Branding'],
   video: ['Promo Videos', 'Testimonials', 'Tutorials', 'Other Videos'],
   motion: ['Logo Animation', 'Explainer', 'Social Motion', 'Other Motion'],
 };
