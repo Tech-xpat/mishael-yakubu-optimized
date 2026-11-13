@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ArrowUpRight, Mail, MapPin, Phone, MessageCircle } from 'lucide-react';
-import { EMAIL, PHONE_DISPLAY, PHONE_TEL, WHATSAPP_DISPLAY, WHATSAPP_LOCAL, whatsappUrl } from '../lib/contact';
+import { CARE_DISPLAY, CARE_TEL, EMAIL, PHONE_DISPLAY, PHONE_TEL, WHATSAPP_DISPLAY, WHATSAPP_LOCAL, whatsappUrl } from '../lib/contact';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -18,6 +18,12 @@ const contactInfo = [
     label: 'Phone',
     value: PHONE_DISPLAY,
     href: PHONE_TEL,
+  },
+  {
+    icon: Phone,
+    label: 'Customer care',
+    value: CARE_DISPLAY,
+    href: CARE_TEL,
   },
   {
     icon: MessageCircle,

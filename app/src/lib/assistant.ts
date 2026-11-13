@@ -5,8 +5,7 @@
  */
 import {
   EMAIL,
-  PHONE_DISPLAY,
-  SERVICES_WHATSAPP_DISPLAY,
+  CARE_DISPLAY,
   WHATSAPP_DISPLAY,
   WHATSAPP_INTL,
 } from './contact';
@@ -186,7 +185,7 @@ const ENTRIES: Entry[] = [
     id: 'contact',
     keys: ['contact', 'phone', 'call', 'email', 'reach', 'number', 'whatsapp', 'talk to', 'speak to', 'message'],
     answer: () =>
-      `You can reach Mishael here:\nWhatsApp: ${WHATSAPP_DISPLAY}\nPackage and project enquiries on WhatsApp: ${SERVICES_WHATSAPP_DISPLAY}\nPhone calls: ${PHONE_DISPLAY}\nEmail: ${EMAIL}`,
+      `You can reach Mishael here:\nCalls, WhatsApp chats and package or project enquiries: ${WHATSAPP_DISPLAY}\nCustomer care: ${CARE_DISPLAY}\nEmail: ${EMAIL}`,
     chips: [WA_CHIP],
   },
   {
