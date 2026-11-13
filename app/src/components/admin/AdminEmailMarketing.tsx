@@ -1,16 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Mail, Send, Loader2, AlertCircle, CheckCircle, Trash2 } from 'lucide-react';
-import { getSubscribers, sendNewsletter, sendProjectAnnouncement, deleteSubscriber } from '../../lib/emailService';
+import { getSubscribers, sendNewsletter, sendProjectAnnouncement, deleteSubscriber, type Subscriber } from '../../lib/emailService';
 
-interface Subscriber {
-  id: string;
-  email: string;
-  name: string;
-  subscribedAt: any;
-  receivedWelcome: boolean;
-  lastEmailSent: any;
-  status: string;
-}
 
 export default function AdminEmailMarketing() {
   const [activeTab, setActiveTab] = useState<'subscribers' | 'newsletter' | 'announcement'>('subscribers');
@@ -40,7 +31,7 @@ export default function AdminEmailMarketing() {
     setLoading(true);
     try {
       const data = await getSubscribers();
-      setSubscribers(data as Subscriber[]);
+      setSubscribers(data);
     } catch (error) {
       setMessage('Error loading subscribers');
       setMessageType('error');
@@ -204,9 +195,9 @@ export default function AdminEmailMarketing() {
                   subscribers.map(sub => (
                     <tr key={sub.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
                       <td className="py-3 px-4 text-white">{sub.email}</td>
-                      <td className="py-3 px-4 text-white/60">{sub.name}</td>
+                      <td className="py-3 px-4 text-white/60">{sub.name || '-'}</td>
                       <td className="py-3 px-4 text-white/60 text-xs">
-                        {sub.subscribedAt?.toDate?.()?.toLocaleDateString?.() || 'N/A'}
+                        {new Date(sub.created_at).toLocaleDateString()}
                       </td>
                       <td className="py-3 px-4">
                         <span className={`inline-block px-2 py-1 rounded text-xs font-medium ${

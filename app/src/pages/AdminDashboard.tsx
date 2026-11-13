@@ -17,11 +17,15 @@ import {
   Globe,
   ImagePlus,
   Plus,
+  Mail,
+  ShieldCheck,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useSeo } from '../lib/seo';
 import AdminCategories from '../components/admin/AdminCategories';
 import Collapsible from '../components/admin/Collapsible';
+import AdminEmailMarketing from '../components/admin/AdminEmailMarketing';
+import AdminBackup from '../components/admin/AdminBackup';
 import { allCategories, subcategoriesFor, fetchConfig, EMPTY_CONFIG, type CategoryConfig } from '../lib/categories';
 import { comparePosition, type PortfolioItem } from '../lib/portfolioApi';
 import { HOME_SECTIONS, titleToSlug } from '../lib/homeSections';
@@ -475,6 +479,14 @@ const AdminDashboard = () => {
         {/* Categories */}
         <Collapsible title="Categories" icon={<FolderPlus size={20} />} badge={CATEGORIES.length} storageKey="categories">
           <AdminCategories config={config} items={items} onConfig={setConfig} />
+        </Collapsible>
+
+        <Collapsible title="Subscribers & newsletter" icon={<Mail size={20} />} storageKey="subs" lazyMount>
+          <AdminEmailMarketing />
+        </Collapsible>
+
+        <Collapsible title="Backup" icon={<ShieldCheck size={20} />} storageKey="backup">
+          <AdminBackup items={items} />
         </Collapsible>
 
         {/* Library: one dropdown per category, listed in the same order as the website */}

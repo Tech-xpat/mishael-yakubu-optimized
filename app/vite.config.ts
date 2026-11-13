@@ -21,7 +21,6 @@ export default defineConfig(({ command }) => ({
         // Keep big third-party SDKs in their own long-cacheable files.
         manualChunks(id) {
           if (!id.includes('node_modules')) return;
-          if (id.includes('firebase') || id.includes('@firebase')) return 'vendor-firebase';
           if (id.includes('@supabase')) return 'vendor-supabase';
           if (id.includes('gsap') || id.includes('@studio-freight')) return 'vendor-motion';
           if (id.includes('react-router') || id.includes('react-dom') || id.includes('/react/') || id.includes('scheduler')) {

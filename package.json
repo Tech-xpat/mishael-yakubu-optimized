@@ -1,7 +1,6 @@
 {
-	"dependencies": {
-		"react-router-dom": "^7.13.1",
-		"firebase": "^12.9.0",
-		"gsap": "^3.14.2"
-	}
+  "dependencies": {
+    "react-router-dom": "^7.13.1",
+    "gsap": "^3.14.2"
+  }
 }

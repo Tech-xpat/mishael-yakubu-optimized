@@ -2,7 +2,7 @@ import { SECTIONS } from '../lib/sections';
 import { lazy, useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Twitter, Linkedin, Instagram, Dribbble, Github, ArrowUpRight } from 'lucide-react';
+import { Facebook, Youtube, Linkedin, Github, ArrowUpRight } from 'lucide-react';
 import DeferredSection from '../components/DeferredSection';
 
 const NewsletterSignup = lazy(() => import('../components/NewsletterSignup'));
@@ -15,11 +15,10 @@ const Footer = () => {
   const fillRef = useRef<HTMLDivElement>(null);
 
   const socialLinks = [
-    { name: 'Twitter', icon: Twitter, href: 'https://twitter.com/mishael_yakubu' },
-    { name: 'LinkedIn', icon: Linkedin, href: 'https://linkedin.com/in/mishael-yakubu' },
-    { name: 'Instagram', icon: Instagram, href: 'https://instagram.com/mishael_yakubu' },
-    { name: 'Dribbble', icon: Dribbble, href: 'https://dribbble.com/mishael-yakubu' },
-    { name: 'GitHub', icon: Github, href: 'https://github.com/mishael-yakubu' },
+    { name: 'Facebook', icon: Facebook, href: 'https://www.facebook.com/share/1DsJ8w6dur/' },
+    { name: 'YouTube', icon: Youtube, href: 'https://youtube.com/@mishaelautomation' },
+    { name: 'LinkedIn', icon: Linkedin, href: 'https://www.linkedin.com/in/mishael-yakubu-a70721430' },
+    { name: 'GitHub', icon: Github, href: 'https://github.com/Mperomishael' },
   ];
 
   const navLinks = SECTIONS;
