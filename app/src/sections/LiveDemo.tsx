@@ -199,7 +199,11 @@ export default function LiveDemo() {
         <div className="mx-auto w-full max-w-[300px]">
           <div className="rounded-[2.4rem] border-[9px] border-neutral-800 bg-[#0b141a] shadow-[8px_8px_0_0_rgb(var(--key-shadow))]">
             <div className="flex items-center gap-3 rounded-t-[1.7rem] bg-[#202c33] px-4 py-3">
-              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#2a3942] text-[#e9edef]"><Bot size={18} /></span>
+              {mode === 'example' ? (
+                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#2a3942] text-[#e9edef]"><Bot size={18} /></span>
+              ) : (
+                <img src="/assistant.webp" alt="" width={36} height={36} loading="lazy" decoding="async" className="h-9 w-9 rounded-full object-cover" />
+              )}
               <span className="leading-tight">
                 <span className="block font-body text-sm font-semibold text-[#e9edef]">{mode === 'example' ? 'Example Store Bot' : "Mishael's Assistant"}</span>
                 <span className="block font-body text-[11px] text-[#8696a0]">{typing ? 'typing…' : 'online'}</span>

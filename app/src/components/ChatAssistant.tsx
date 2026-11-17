@@ -177,8 +177,8 @@ export default function ChatAssistant() {
         >
           {/* header */}
           <div className="flex items-center gap-3 border-b border-white/10 px-4 py-3">
-            <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white font-display text-lg font-bold text-black">
-              M
+            <div className="relative h-10 w-10 shrink-0">
+              <img src="/assistant.webp" alt="" width={40} height={40} decoding="async" className="h-10 w-10 rounded-full border border-white/20 object-cover" />
               <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-black bg-[#25D366]" />
             </div>
             <div className="min-w-0 flex-1">
