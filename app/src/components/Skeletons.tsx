@@ -9,19 +9,12 @@ const bar = 'skeleton rounded';
 export function FolderGridSkeleton({ count = 7 }: { count?: number }) {
   return (
     <div
-      className="grid grid-cols-2 gap-3 sm:gap-6 md:grid-cols-3 lg:grid-cols-4"
+      className="grid grid-cols-2 gap-x-4 gap-y-7 sm:gap-x-7 sm:gap-y-10 md:grid-cols-3 lg:grid-cols-4"
       aria-busy="true"
       aria-label="Loading portfolio"
     >
       {Array.from({ length: count }).map((_, i) => (
-        <div
-          key={i}
-          className="flex aspect-square flex-col items-center justify-center rounded-3xl border border-white/10 bg-white/[0.03] p-3 sm:p-8"
-        >
-          <div className="skeleton mb-3 h-[68px] w-[68px] rounded-2xl sm:mb-4 sm:h-24 sm:w-24" />
-          <div className={`h-4 w-3/4 ${bar}`} />
-          <div className={`h-3 w-1/3 mt-3 ${bar}`} />
-        </div>
+        <div key={i} className="skeleton w-full rounded-xl" style={{ aspectRatio: '1.18' }} />
       ))}
     </div>
   );

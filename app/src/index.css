@@ -672,3 +672,35 @@ html[data-theme='light'] .slide-over { box-shadow: 0 -24px 60px -16px rgba(0, 0,
 @media (prefers-reduced-motion: reduce) {
   .signal-dot, .log-line { animation: none; }
 }
+
+/* ------------------------------------------------------------------ */
+/* Yellow computer folders (portfolio)                                 */
+/* ------------------------------------------------------------------ */
+.yf { perspective: 800px; -webkit-tap-highlight-color: transparent; }
+.yf-body { filter: drop-shadow(0 10px 16px rgb(var(--key-shadow) / 0.22)); transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.yf-tab { background: #d9a000; clip-path: polygon(0 0, 82% 0, 100% 100%, 0 100%); border-radius: 10px 0 0 0; }
+.yf-back { background: #d9a000; border-radius: 0 12px 12px 12px; }
+.yf-sheet { background: #fbf8ef; border-radius: 4px; box-shadow: 0 1px 3px rgb(0 0 0 / 0.25); transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.yf-sheet-1 { left: 9%; right: 13%; top: 14%; bottom: 40%; transform: rotate(-2deg); }
+.yf-sheet-2 { left: 12%; right: 9%; top: 18%; bottom: 36%; transform: rotate(1.5deg); }
+.yf-front {
+  color: #1d1500;
+  background: linear-gradient(180deg, #ffe066 0%, #ffcf2e 55%, #f5b800 100%);
+  border-radius: 12px;
+  box-shadow: inset 0 2px 0 rgb(255 255 255 / 0.55), inset 0 -3px 0 rgb(0 0 0 / 0.08);
+  transform-origin: bottom center;
+  transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+@media (hover: hover) {
+  .yf:hover .yf-body, .yf:focus-visible .yf-body { transform: translateY(-3px); }
+  .yf:hover .yf-front, .yf:focus-visible .yf-front { transform: rotateX(-16deg); }
+  .yf:hover .yf-sheet-1, .yf:focus-visible .yf-sheet-1 { transform: translateY(-14%) rotate(-3deg); }
+  .yf:hover .yf-sheet-2, .yf:focus-visible .yf-sheet-2 { transform: translateY(-9%) rotate(2.5deg); }
+}
+.yf:focus-visible .yf-front { outline: 3px solid #fff; outline-offset: 2px; }
+/* Empty folders stay readable but quieter */
+.yf-empty .yf-body { filter: saturate(0.55) drop-shadow(0 6px 10px rgb(var(--key-shadow) / 0.12)); opacity: 0.8; }
+.yf-empty:hover .yf-body { opacity: 1; }
+@media (prefers-reduced-motion: reduce) {
+  .yf-body, .yf-front, .yf-sheet { transition: none; }
+}

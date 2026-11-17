@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Folder, Play } from 'lucide-react';
+import YellowFolder from '../components/YellowFolder';
 import { cachedCounts, fetchCounts, prefetchItems } from '../lib/portfolioApi';
 import { FolderGridSkeleton } from '../components/Skeletons';
 import EmptyFold from '../components/EmptyFold';
@@ -8,33 +7,21 @@ import { allCategories, cachedConfig, fetchConfig, EMPTY_CONFIG, type CategoryCo
 
 
 function FolderTile({ cat, count }: { cat: CategoryDef; count: number }) {
-  const Icon = cat.kind === 'play' ? Play : Folder;
   const warm = () => prefetchItems(cat.slug);
-  const empty = count === 0;
   return (
-    <Link
+    <YellowFolder
       to={`/gallery/${cat.slug}`}
+      title={cat.name}
+      count={count}
+      play={cat.kind === 'play'}
       onPointerEnter={warm}
       onPointerDown={warm}
       onFocus={warm}
-      className={`group flex aspect-square flex-col items-center justify-center rounded-3xl border p-3 transition-colors sm:p-8 ${
-        empty
-          ? 'border-white/10 bg-white/[0.02] opacity-70 hover:opacity-100'
-          : 'border-white/10 bg-white/5 hover:border-white/40 hover:bg-white/10'
-      }`}
-    >
-      <div className="mb-3 rounded-2xl bg-white/10 p-4 transition-colors group-hover:bg-white/20 sm:mb-4 sm:p-6">
-        <Icon size={36} className="text-white/80 group-hover:text-white sm:h-12 sm:w-12" />
-      </div>
-      <h3 className="text-center text-sm font-semibold leading-tight md:text-base">{cat.name}</h3>
-      <p className="mt-1 text-xs text-white/40">
-        {count} item{count === 1 ? '' : 's'}
-      </p>
-    </Link>
+    />
   );
 }
 
-const gridClass = 'grid grid-cols-2 gap-3 sm:gap-6 md:grid-cols-3 lg:grid-cols-4';
+const gridClass = 'grid grid-cols-2 gap-x-4 gap-y-7 sm:gap-x-7 sm:gap-y-10 md:grid-cols-3 lg:grid-cols-4';
 
 export default function Portfolio() {
   // Counts from the last visit paint instantly (e.g. when coming back with Back);

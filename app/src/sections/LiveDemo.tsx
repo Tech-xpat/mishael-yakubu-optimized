@@ -32,6 +32,7 @@ export default function LiveDemo() {
   const [rootRef, inView] = useInView<HTMLElement>(0.3);
   const listRef = useRef<HTMLDivElement>(null);
   const timers = useRef<number[]>([]);
+  const swipe = useRef<{ x: number; y: number } | null>(null);
 
   // example playback
   const [shown, setShown] = useState<number[]>([]);
@@ -196,7 +197,20 @@ export default function LiveDemo() {
         </div>
 
         {/* phone */}
-        <div className="mx-auto w-full max-w-[300px]">
+        <div
+          className="mx-auto w-full max-w-[300px]"
+          style={{ touchAction: 'pan-y' }}
+          onTouchStart={(e) => { swipe.current = { x: e.touches[0].clientX, y: e.touches[0].clientY }; }}
+          onTouchEnd={(e) => {
+            const s0 = swipe.current;
+            swipe.current = null;
+            if (!s0) return;
+            const dx = e.changedTouches[0].clientX - s0.x;
+            const dy = e.changedTouches[0].clientY - s0.y;
+            // a clear sideways flick switches between the two chats; anything else is a normal scroll
+            if (Math.abs(dx) > 70 && Math.abs(dx) > Math.abs(dy) * 1.8) switchTo(dx < 0 ? 'try' : 'example');
+          }}
+        >
           <div className="rounded-[2.4rem] border-[9px] border-neutral-800 bg-[#0b141a] shadow-[8px_8px_0_0_rgb(var(--key-shadow))]">
             <div className="flex items-center gap-3 rounded-t-[1.7rem] bg-[#202c33] px-4 py-3">
               {mode === 'example' ? (
@@ -213,7 +227,14 @@ export default function LiveDemo() {
               )}
             </div>
 
-            <div ref={listRef} data-lenis-prevent className="h-[380px] space-y-2 overflow-y-auto overscroll-contain px-3 py-3 sm:h-[420px]">
+            {/* Lenis' [data-lenis-prevent] rule adds overscroll-behavior: contain, which trapped swipes on the phone.
+                Override it so the chat scrolls first and then hands the swipe back to the page. */}
+            <div
+              ref={listRef}
+              {...(mode === 'try' ? { 'data-lenis-prevent': '' } : {})}
+              className={`h-[380px] space-y-2 px-3 py-3 sm:h-[420px] ${mode === 'try' ? 'overflow-y-auto' : 'overflow-hidden'}`}
+              style={{ touchAction: 'pan-y', overscrollBehavior: 'auto' }}
+            >
               {mode === 'example'
                 ? shown.map((i) => <Bubble key={i} role={SCRIPT[i].from} text={SCRIPT[i].text} />)
                 : lines.map((l) => (
@@ -254,7 +275,13 @@ export default function LiveDemo() {
               </button>
             </form>
           </div>
-          <p className="mono-label mt-5 text-center">{mode === 'example' ? 'Example flow, not a real customer' : 'Live. Answers from this site'}</p>
+          <div className="mt-5 flex items-center justify-center gap-2" aria-hidden="true">
+            {(['example', 'try'] as const).map((m) => (
+              <span key={m} className={`h-1.5 rounded-full transition-all duration-300 ${mode === m ? 'w-6 bg-white' : 'w-1.5 bg-white/30'}`} />
+            ))}
+          </div>
+          <p className="mono-label mt-3 text-center">{mode === 'example' ? 'Example flow, not a real customer' : 'Live. Answers from this site'}</p>
+          <p className="mono-label mt-1 text-center !text-white/35 md:hidden">Swipe sideways to switch</p>
         </div>
       </div>
     </section>
