@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { scrollToTarget } from '../lib/scrollTo';
 
@@ -7,7 +7,15 @@ interface HeroProps {
   ready: boolean;
 }
 
+const lagosTime = () =>
+  new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Africa/Lagos' }).format(new Date());
+
 const Hero = ({ ready }: HeroProps) => {
+  const [clock, setClock] = useState(lagosTime);
+  useEffect(() => {
+    const id = window.setInterval(() => setClock(lagosTime()), 20000);
+    return () => window.clearInterval(id);
+  }, []);
   const heroRef = useRef<HTMLDivElement>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const subheadingRef = useRef<HTMLParagraphElement>(null);
@@ -89,10 +97,13 @@ const Hero = ({ ready }: HeroProps) => {
       </div>
 
       <div className="corner-bl absolute bottom-6 left-5 z-20 opacity-0 sm:bottom-8 sm:left-8">
-        <div className="flex items-center gap-2">
-          <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-          <p className="text-xs tracking-[0.2em] text-white/60 uppercase font-body">
-            Available for freelance
+        <div className="grid grid-cols-[auto_1fr] items-center gap-x-3 gap-y-1 sm:flex sm:flex-wrap">
+          <span className="signal-dot" aria-hidden="true" />
+          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/70 sm:text-xs" style={{ fontFamily: 'ui-monospace, Menlo, Consolas, monospace' }}>
+            Taking new projects
+          </p>
+          <p className="col-start-2 font-mono text-[10px] uppercase tracking-[0.2em] text-white/45 sm:col-auto sm:text-xs" style={{ fontFamily: 'ui-monospace, Menlo, Consolas, monospace' }}>
+            Ughelli {clock} WAT
           </p>
         </div>
       </div>

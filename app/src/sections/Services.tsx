@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { Fragment, useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import {
@@ -183,7 +183,7 @@ const Services = () => {
       <div className="w-full px-5 sm:px-6 md:px-12 lg:px-20">
         {/* Section Header */}
         <div ref={headingRef} className="mb-10 md:mb-20">
-          <p className="mb-4 font-body text-xs uppercase tracking-[0.3em] text-white/50">What I Do</p>
+          <p className="mono-label mb-4">02 / Services</p>
           <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between md:gap-6">
             <h2 className="font-display text-responsive-lg font-bold text-white">DIGITAL SERVICES & PACKAGES</h2>
             <p className="max-w-md font-body text-sm text-white/50">
@@ -244,6 +244,19 @@ const Services = () => {
                       <p className="max-w-md font-body text-sm leading-relaxed text-white/65 md:text-base">
                         {service.description}
                       </p>
+                      <div className="mt-6" aria-label={`Build pipeline: ${service.features.map((x) => x.text).join(', ')}`}>
+                        <p className="mono-label mb-3">Pipeline / {service.features.length} steps</p>
+                        <ol className="flex items-center" aria-hidden="true">
+                          {service.features.map((ft, i) => (
+                            <Fragment key={ft.text}>
+                              <li className="flex h-9 w-9 items-center justify-center rounded-full border border-white/25 text-white/90">
+                                <ft.icon size={16} strokeWidth={1.5} />
+                              </li>
+                              {i < service.features.length - 1 && <span className="h-px w-3 bg-white/25 sm:w-6" />}
+                            </Fragment>
+                          ))}
+                        </ol>
+                      </div>
                     </div>
 
                     <div className="flex flex-col justify-between gap-6 md:gap-8">

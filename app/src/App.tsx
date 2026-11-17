@@ -22,6 +22,9 @@ import { SectionSkeleton, SiteSkeleton } from './components/Skeletons';
 const WebDevelopment = lazy(() => import('./sections/WebDevelopment'));
 const BrandDesign = lazy(() => import('./sections/BrandDesign'));
 const AIAutomation = lazy(() => import('./sections/AIAutomation'));
+const LiveDemo = lazy(() => import('./sections/LiveDemo'));
+const Process = lazy(() => import('./sections/Process'));
+const Faq = lazy(() => import('./sections/Faq'));
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -151,6 +154,9 @@ function App() {
           </div>
         </div>
         <div className="slide-over relative z-10">
+        <DeferredSection eager={restoring} fallback={<SectionSkeleton />} rootMargin="600px 0px">
+          <LiveDemo />
+        </DeferredSection>
         <About />
         <Portfolio />
         <DeferredSection eager={restoring} fallback={<SectionSkeleton />}>
@@ -163,6 +169,12 @@ function App() {
           <AIAutomation />
         </DeferredSection>
         <Services />
+        <DeferredSection eager={restoring} fallback={<SectionSkeleton />} rootMargin="2500px 0px">
+          <Process />
+        </DeferredSection>
+        <DeferredSection eager={restoring} fallback={<SectionSkeleton />} rootMargin="2500px 0px">
+          <Faq />
+        </DeferredSection>
         <Contact />
         <Footer />
         </div>
