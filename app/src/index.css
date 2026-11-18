@@ -704,3 +704,71 @@ html[data-theme='light'] .slide-over { box-shadow: 0 -24px 60px -16px rgba(0, 0,
 @media (prefers-reduced-motion: reduce) {
   .yf-body, .yf-front, .yf-sheet { transition: none; }
 }
+
+/* ------------------------------------------------------------------ */
+/* Tech wordmark                                                       */
+/* ------------------------------------------------------------------ */
+.tech-word {
+  position: relative;
+  font-family: 'Orbitron', ui-monospace, Menlo, monospace;
+  font-weight: 900;
+  font-size: 1.2rem;
+  letter-spacing: 0.14em;
+  line-height: 1;
+  color: rgb(var(--c-white));
+  white-space: nowrap;
+  animation: logoFlicker 0.9s steps(1, end) 1 both;
+}
+@media (min-width: 768px) { .tech-word { font-size: 1.35rem; } }
+.tech-word::before,
+.tech-word::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+}
+.tech-word::before { color: rgb(var(--key-shadow)); animation: logoGlitchA 7s infinite steps(1, end); }
+.tech-word::after { color: #00e5ff; animation: logoGlitchB 7s infinite steps(1, end); }
+:root[data-theme='light'] .tech-word::after { color: #2563eb; }
+.tech-led {
+  width: 7px;
+  height: 7px;
+  border-radius: 1px;
+  background: rgb(var(--key-shadow));
+  box-shadow: 0 0 8px rgb(var(--key-shadow) / 0.9);
+  animation: ledBlink 2.4s ease-in-out infinite;
+}
+.tech-cursor {
+  width: 0.55em;
+  height: 3px;
+  margin-top: 0.7em;
+  margin-left: -0.35rem;
+  background: rgb(var(--key-shadow));
+  animation: cursorBlink 1s steps(1, end) infinite;
+}
+.tech-logo:hover .tech-word { text-shadow: 0 0 14px rgb(var(--key-shadow) / 0.55); }
+@keyframes cursorBlink { 50% { opacity: 0; } }
+@keyframes ledBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+@keyframes logoFlicker {
+  0% { opacity: 0; } 8% { opacity: 1; } 12% { opacity: 0.2; } 18% { opacity: 1; }
+  30% { opacity: 0.5; } 34% { opacity: 1; } 100% { opacity: 1; }
+}
+/* quiet for most of the cycle, then a brief RGB-split glitch */
+@keyframes logoGlitchA {
+  0%, 90%, 100% { opacity: 0; transform: none; clip-path: none; }
+  91% { opacity: 0.9; transform: translate(-3px, 0); clip-path: inset(10% 0 55% 0); }
+  93% { opacity: 0.9; transform: translate(3px, 1px); clip-path: inset(55% 0 10% 0); }
+  95% { opacity: 0.9; transform: translate(-2px, -1px); clip-path: inset(30% 0 35% 0); }
+  97% { opacity: 0; }
+}
+@keyframes logoGlitchB {
+  0%, 90%, 100% { opacity: 0; transform: none; clip-path: none; }
+  92% { opacity: 0.9; transform: translate(3px, 0); clip-path: inset(40% 0 25% 0); }
+  94% { opacity: 0.9; transform: translate(-3px, -1px); clip-path: inset(5% 0 70% 0); }
+  96% { opacity: 0.9; transform: translate(2px, 1px); clip-path: inset(65% 0 5% 0); }
+  98% { opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tech-word, .tech-word::before, .tech-word::after, .tech-led, .tech-cursor { animation: none; }
+}

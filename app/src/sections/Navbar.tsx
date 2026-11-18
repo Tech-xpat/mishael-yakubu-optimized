@@ -1,3 +1,4 @@
+import TechLogo from '../components/TechLogo';
 import { useEffect, useState, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import gsap from 'gsap';
@@ -137,10 +138,11 @@ const Navbar = () => {
               href="#home"
               onClick={handleAdminLogoClick}
               data-no-press
-              className="font-display text-2xl font-bold text-white tracking-tight hover:opacity-80 transition-opacity cursor-pointer relative group"
+              className="text-white cursor-pointer relative group"
+              aria-label="Mishael, home"
               title={adminClicks > 0 ? `Admin: ${adminClicks}/5` : 'Mishael'}
             >
-              Mishael
+              <TechLogo />
               {adminClicks > 0 && (
                 <span className="absolute -bottom-1 -right-2 text-xs opacity-50 text-white">
                   {adminClicks}/5
