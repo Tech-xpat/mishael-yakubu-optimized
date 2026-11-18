@@ -3,7 +3,7 @@
  * It runs entirely in the browser (no API keys), never invents prices or promises, and offers to hand
  * the conversation over to Mishael on WhatsApp whenever it cannot answer.
  */
-import { clauses, compile, knownRatio, minScore, rank, tokens, type Topic } from './nlu';
+import { clauses, compile, knownRatio, minScore, rank, suggest, tokens, type Topic } from './nlu';
 import {
   EMAIL,
   CARE_DISPLAY,
@@ -23,6 +23,8 @@ export interface ChatMessage {
   chips?: Chip[];
 }
 export interface Reply {
+  /** true when no topic was clear: the reply guides the visitor instead of answering. */
+  fallback?: boolean;
   /** Which topics answered (useful for tests). */
   topics?: string[];
   text: string;
@@ -393,10 +395,62 @@ const GREETING_REPLY: Reply = {
 };
 
 const NO_MATCH: Reply = {
-  text: "I don't have that detail on the site, and I'd rather not guess. Mishael can answer it directly. Would you like to continue this chat on WhatsApp?",
-  chips: [WA_CHIP, ask('What can you answer?'), ask('What packages do you offer?')],
-  offerWhatsApp: false,
+  text: "I want to be sure I give you the right answer. Pick one of these, or I can pass your question to Mishael on WhatsApp.",
+  chips: [ask('What packages do you offer?'), ask('How do I contact Mishael?'), WA_CHIP],
+  fallback: true,
 };
+
+/** The question a visitor would tap for each topic: used for "did you mean ...?" suggestions. */
+const TOPIC_LABEL: Record<string, string> = {
+  identity: 'Who are you?', about: 'Who is Mishael?', owner: 'Who owns this website?', company: 'What is Empire Digitals?',
+  vision: 'Where is the business headed?', location: 'Where is Mishael based?', remote: 'Do you work with clients abroad?',
+  stack: 'What technologies do you use?', services: 'What services do you offer?', webdev: 'Tell me about web development',
+  brand: 'Tell me about brand design', ai: 'What is AI automation?', software: 'Tell me about software development',
+  packages: 'What packages do you offer?', starter: 'Tell me about the Starter Package', mini: 'Tell me about the Mini Package',
+  growth: 'Tell me about the Growth Package', mega: 'Tell me about the Mega Package', super: 'Tell me about the Super Package',
+  additional: 'What are the additional services?', portfolio: 'Show me the portfolio', contact: 'How do I contact Mishael?',
+  pricing: 'How much does it cost?', timeline: 'How fast is delivery?', start: 'How do I start a project?',
+  training: 'Does Mishael train people?', bots: 'Do you build WhatsApp bots?', seo: 'Tell me about SEO', video: 'Tell me about videos',
+  social: 'Where can I follow Mishael?', support: 'I need customer care', hours: 'Are you online?', trust: 'How do I pay?',
+  'site-help': 'How do I change the theme or sound?', newsletter: 'How do I join the newsletter?', help: 'What can you answer?',
+};
+
+const REQUEST_CUE = /\b(?:want|need|wanna|looking|interested|can you|could you|do you|would like|help me|assist|how do i|how can i|i dey look)\b/;
+const QUESTION_CUE = /\?|\b(?:who|what|whats|where|when|why|how|which)\b/;
+
+/**
+ * No topic was clear. Instead of a dead end, work out what the visitor probably meant:
+ * the closest topics, a request for a service, or a general question, and offer a path for each.
+ */
+function guide(raw: string): Reply {
+  const near = suggest(raw, 3).map((t) => TOPIC_LABEL[t.id]).filter(Boolean);
+  if (near.length) {
+    return {
+      text: 'I want to be sure I give you the right answer. Did you mean one of these? Tap one, or I can pass your question to Mishael on WhatsApp.',
+      chips: [...near.map(ask), WA_CHIP],
+      fallback: true,
+    };
+  }
+  if (REQUEST_CUE.test(raw)) {
+    return {
+      text: "I'm not sure which service that is, but it sounds like something Mishael may be able to help with. Pick the closest option below, or tell him directly on WhatsApp and he will confirm.",
+      chips: [ask('Tell me about web development'), ask('Tell me about brand design'), ask('What is AI automation?'), ask('What packages do you offer?'), WA_CHIP],
+      fallback: true,
+    };
+  }
+  if (QUESTION_CUE.test(raw)) {
+    return {
+      text: "I'm not sure I understood that one. Here is what I can answer right away, or I can pass your question to Mishael on WhatsApp.",
+      chips: [ask('What packages do you offer?'), ask('How do I contact Mishael?'), ask('Where is Mishael based?'), ask('How fast is delivery?'), WA_CHIP],
+      fallback: true,
+    };
+  }
+  return {
+    text: "That's a bit outside what I know. I mostly help with Mishael's work, the packages and how to get started. Try one of these:",
+    chips: [ask('What packages do you offer?'), ask('Show me the portfolio'), ask('Who is Mishael?'), WA_CHIP],
+    fallback: true,
+  };
+}
 
 /* ---------- the keyword engine: which topics each entry answers ---------- */
 
@@ -524,7 +578,7 @@ export function answer(question: string, ctx: KnowledgeContext): Reply {
 
     // "Hi, what packages do you have?": answer the question, with a greeting in front.
     const picks = resolve(body);
-    if (!picks.length) return { ...NO_MATCH, topics: [] };
+    if (!picks.length) return { ...guide(body), topics: [] };
     const text = picks.map((p) => p.answer(ctx)).join('\n\n');
     return {
       text: hadGreeting ? `Hello! ${text}` : text,

@@ -1,4 +1,5 @@
 // Run: npx tsx scripts/assistant-test.mts   (checks the assistant against messy, real-world questions)
+import { pathToFileURL } from 'node:url';
 import { answer } from '../src/lib/assistant.ts';
 
 const T0: [string, string[]][] = [
@@ -161,18 +162,25 @@ const T2: [string, string[]][] = [
  
 ];
 
-let fail = 0;
-let total = 0;
-for (const T of [T0, T1, T2]) {
-  for (const [q, exp] of T) {
-    total++;
-    const got = answer(q, { folders: [] }).topics ?? [];
+export const CASES: [string, string[]][] = [...T0, ...T1, ...T2];
+
+// Every reply must give the visitor a way forward, never a dead end.
+const deadEnd = (q: string) => {
+  const r = answer(q, { folders: [] });
+  return !r.chips.length || /I don't have that detail/i.test(r.text);
+};
+
+if (import.meta.url === pathToFileURL(process.argv[1]).href) {
+  let fail = 0;
+  for (const [q, exp] of CASES) {
+    const r = answer(q, { folders: [] });
+    const got = r.topics ?? [];
     const ok = exp.length === 0 ? got.length === 0 : exp.every((e) => got.includes(e));
-    if (!ok) {
+    if (!ok || deadEnd(q)) {
       fail++;
       console.log('FAIL', JSON.stringify(q), 'expected', exp, 'got', got);
     }
   }
+  console.log(`${CASES.length - fail}/${CASES.length} passed`);
+  process.exit(fail ? 1 : 0);
 }
-console.log(`${total - fail}/${total} passed`);
-process.exit(fail ? 1 : 0);

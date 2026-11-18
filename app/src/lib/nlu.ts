@@ -27,6 +27,8 @@ export interface Topic {
   maxTokens?: number;
 }
 
+const QUESTION_WORDS = ['who', 'what', 'where', 'when', 'why', 'how', 'which'];
+
 const STOP = new Set(
   ('a an the is are am was were be been being do does did done i me my mine we our us it its this that these those to of for in on at ' +
     'with from by as or if so then than too very just please kindly can could would should will shall may might have has had get got ' +
@@ -40,7 +42,7 @@ const SLANG: Record<string, string> = {
   biz: 'business', pkg: 'package', pckg: 'package', pkgs: 'package', tnx: 'thanks', thx: 'thanks', tanx: 'thanks', cos: 'because',
   bcos: 'because', info: 'information', msg: 'message', num: 'number', no: 'no', dem: 'them', na: 'is', dey: 'is', wey: 'that',
   built: 'build', made: 'make', paid: 'pay', sent: 'send', bought: 'buy', went: 'go', gave: 'give', ran: 'run', owns: 'own', owned: 'own',
-  prize: 'price', prise: 'price', whats: 'what', hows: 'how', wheres: 'where', whos: 'who', whatsap: 'whatsapp', watsapp: 'whatsapp', whatsap_: 'whatsapp', webste: 'website', wesite: 'website',
+  hrs: 'hour', hr: 'hour', insta: 'instagram', ig: 'instagram', fb: 'facebook', yt: 'youtube', ytube: 'youtube', prc: 'price', prce: 'price', pls_: 'please', prize: 'price', prise: 'price', whats: 'what', hows: 'how', wheres: 'where', whos: 'who', whatsap: 'whatsapp', watsapp: 'whatsapp', whatsap_: 'whatsapp', webste: 'website', wesite: 'website',
 };
 
 /** Synonym groups: every word on the right is read as the word on the left. */
@@ -101,31 +103,95 @@ const VOCAB = new Set<string>();
 /** Stems of every word the assistant understands: used to tell a real question from random text. */
 const KNOWN = new Set<string>();
 
+/** Edit distance where swapping two neighbouring letters ("pakcage") costs one edit. */
 function distance(a: string, b: string, max: number): number {
   if (Math.abs(a.length - b.length) > max) return max + 1;
-  let prev = Array.from({ length: b.length + 1 }, (_, i) => i);
-  for (let i = 1; i <= a.length; i++) {
-    const row = [i];
-    for (let j = 1; j <= b.length; j++) row[j] = Math.min(prev[j] + 1, row[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
-    prev = row;
-  }
-  return prev[b.length];
-}
-
-const fixTypo = (w: string): string => {
-  if (w.length < 6 || VOCAB.has(w) || STOP.has(w) || /\d/.test(w)) return w;
-  const max = w.length >= 9 ? 2 : 1;
-  let best = w;
-  let bestD = max + 1;
-  for (const v of VOCAB) {
-    if (v[0] !== w[0] || v.length < 4) continue;
-    const d = distance(w, v, max);
-    if (d < bestD) {
-      best = v;
-      bestD = d;
+  const rows: number[][] = [];
+  for (let i = 0; i <= a.length; i++) {
+    rows[i] = [i];
+    for (let j = 1; j <= b.length; j++) {
+      if (i === 0) {
+        rows[i][j] = j;
+        continue;
+      }
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      rows[i][j] = Math.min(rows[i - 1][j] + 1, rows[i][j - 1] + 1, rows[i - 1][j - 1] + cost);
+      if (i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) rows[i][j] = Math.min(rows[i][j], rows[i - 2][j - 2] + 1);
     }
   }
-  return bestD <= max ? best : w;
+  return rows[a.length][b.length];
+}
+
+/** First letter plus consonants only: "wbste", "wbsite" and "website" all become "wbst". */
+const skeleton = (w: string) => w[0] + w.slice(1).replace(/[aeiouy]/g, '');
+/** "pricce" -> "price", "logoo" -> "logo" */
+const squash = (w: string) => w.replace(/(.)\1+/g, '$1');
+
+/** Ordinary English words that must never be "corrected" into one of our keywords (think -> thank). */
+const COMMON = new Set(
+  ('think thing things there their these those about after again against always another around because before being below between both bring built ' +
+    'came come could does doing done down during each every find first found from give given going gone good great have having here home into just keep kind know large last later leave ' +
+    'less life light like little live long look made make many mean more most much must name need never next night other over part people place point right same seem should show since small ' +
+    'some something sound still such take tell than that them then there they thing think this three through time today together under until upon used very want water well were what when where which while white whole will with without work world would write year years young ' +
+    'phone phones sell sold shop shops food drink house home car cars love hate game games music movie movies song songs money bank school class story poem joke weather news').split(' ')
+);
+
+/** Does this word split into two words we know ("howmuch", "packageprice")? */
+const splitKnown = (w: string): string[] | null => {
+  if (w.length < 7) return null;
+  for (let i = 3; i <= w.length - 3; i++) {
+    const l = w.slice(0, i);
+    const r = w.slice(i);
+    if ((VOCAB.has(l) || QUESTION_WORDS.includes(l)) && (VOCAB.has(r) || QUESTION_WORDS.includes(r))) return [l, r];
+  }
+  return null;
+};
+
+const bigrams = (w: string) => {
+  const out = new Set<string>();
+  for (let i = 0; i < w.length - 1; i++) out.add(w.slice(i, i + 2));
+  return out;
+};
+/** How alike two words look (0 to 1), used to choose between equally distant candidates. */
+const dice = (a: string, b: string) => {
+  const x = bigrams(a);
+  const y = bigrams(b);
+  let shared = 0;
+  x.forEach((g) => y.has(g) && shared++);
+  return x.size + y.size ? (2 * shared) / (x.size + y.size) : 0;
+};
+
+/** Snap a misspelt word to the closest word the assistant knows, or leave it alone when unsure. */
+const fixTypo = (w: string): string => {
+  if (w.length < 3 || VOCAB.has(w) || STOP.has(w) || COMMON.has(w) || /\d/.test(w)) return w;
+  if (KNOWN.has(toToken(w))) return w; // a plural or ending of a word we know ("bots"), not a typo
+  const sq = squash(w);
+  if (sq !== w && VOCAB.has(sq)) return sq;
+  // two neighbouring letters swapped ("tecah", "pakcage") is the most common slip: check it first
+  for (let i = 0; w.length >= 5 && i < w.length - 1; i++) {
+    const swapped = w.slice(0, i) + w[i + 1] + w[i] + w.slice(i + 2);
+    if (VOCAB.has(swapped)) return swapped;
+  }
+  const base = w.replace(/s$/, '');
+  const max = w.length <= 5 ? 1 : w.length <= 8 ? 2 : 3;
+  const sk = skeleton(base);
+  let best = '';
+  let bestScore = Infinity;
+  for (const v of VOCAB) {
+    if (v.length < 4) continue;
+    const skeletonMatch = sk.length >= 3 && skeleton(v) === sk;
+    if (!skeletonMatch && (w.length < 4 || Math.abs(v.length - w.length) > max)) continue;
+    const d = distance(w, v, max + 1);
+    const sameStart = v[0] === w[0];
+    // normal typos keep the first letter; a spelling with the vowels missing matches by its consonants
+    if (!((sameStart && d <= max) || skeletonMatch)) continue;
+    const score = d - (skeletonMatch ? 0.5 : 0) - dice(w, v) * 0.6 + Math.abs(v.length - w.length) * 0.01;
+    if (score < bestScore) {
+      best = v;
+      bestScore = score;
+    }
+  }
+  return best || w;
 };
 
 const toToken = (w: string): string => {
@@ -138,13 +204,20 @@ export function tokens(text: string, fix = true): string[] {
   const out: string[] = [];
   for (let w of words(text)) {
     if (STOP.has(w)) continue;
-    if (fix) w = fixTypo(w);
+    if (fix) {
+      const fixed = fixTypo(w);
+      const parts = fixed === w && !VOCAB.has(w) ? splitKnown(w) : null;
+      if (parts) {
+        parts.filter((p) => !STOP.has(p)).forEach((p) => out.push(toToken(p)));
+        continue;
+      }
+      w = SLANG[fixed] ?? fixed;
+    }
     out.push(toToken(w));
   }
   return out;
 }
 
-const QUESTION_WORDS = ['who', 'what', 'where', 'when', 'why', 'how', 'which'];
 /** Phrases made only of these words ("what you") must be side by side, or they match almost any question. */
 const TIGHT = new Set([...QUESTION_WORDS, 'you', 'your']);
 
@@ -159,6 +232,7 @@ let compiled: Compiled[] | null = null;
 export function compile(topics: Topic[]) {
   VOCAB.clear();
   KNOWN.clear();
+  for (const k of ['built', 'made', 'owns', 'owned']) VOCAB.add(k);
   for (const t of topics) {
     for (const k of [...t.keys, ...(t.strong ?? []).map((x) => x.split(':')[0])]) for (const w of words(k)) if (!STOP.has(w)) VOCAB.add(w);
   }
@@ -273,3 +347,11 @@ export const clauses = (text: string): string[] => {
   // Only the parts that ask for something count; background remarks ("i saw your flyers") are ignored.
   return parts.filter((s) => tokens(s, false).length > 0 && (parts.length < 2 || ASKING.test(s)));
 };
+
+/** Topics the message only weakly points at: used to ask "did you mean ...?" instead of giving up. */
+export function suggest(text: string, n = 3): Topic[] {
+  return rank(text)
+    .filter((r) => r.score >= 1.5)
+    .slice(0, n)
+    .map((r) => r.topic);
+}
